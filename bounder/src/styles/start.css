@@ -1,0 +1,107 @@
+p{
+    margin: 0;
+
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: linear-gradient(to right, rgb(18, 148, 157), lightblue);
+    justify-content: center;
+    align-items: column;
+}
+
+.div1class{
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    font-size: 30px;       
+
+}
+.div2class{
+    padding-top: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center; 
+}
+.butt1class{
+    background-image: linear-gradient(92.88deg, #455EB5 9.16%, #5643CC 43.89%, #673FD7 64.72%);
+    border-radius: 8px;
+    border-style: none;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: "Inter UI","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    height: 4rem;
+    padding: 0 1.6rem;
+    text-align: center;
+    text-shadow: rgba(0, 0, 0, 0.25) 0 3px 8px;
+    transition: all .5s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    margin-right: 10px;
+
+}
+.butt1class:hover {
+box-shadow: rgba(80, 63, 205, 0.5) 0 1px 30px;
+transition-duration: .1s;
+}
+@media (min-width: 768px) {
+    .button-36 {
+        padding: 0 2.6rem;
+    }
+}
+h1{ 
+        font-size:15px;
+        
+}
+#title-bar {
+-webkit-app-region: drag;
+position: fixed; /* Keeps the title bar fixed at the top of the window */
+top: 0; /* Positions the title bar at the top of the window */
+left: 0; /* Positions the title bar at the left of the window */
+width: 100%; /* Makes the title bar span the entire width of the window */
+height:20px;
+display: flex;
+justify-content: space-between;
+background-color: #444;
+color: rgb(7, 7, 7);
+padding: 5px;
+background-color: rgb(48, 169, 169);
+}
+
+#title {
+    position: absolute; /* Positions the title independently of the other elements */
+    left: 50%; /* Centers the title */
+    transform: translateX(-50%); /* Ensures the title is centered */
+    top: 0px;
+}
+
+#window-controls {
+    position: absolute; /* Positions the window controls independently of the other elements */
+    left: 3px; /* Positions the window controls at the left of the title bar */
+}
+
+.window-control-button {
+    border-width: 0px;
+    margin-left: 5px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+#minimize-button{
+    background-color:rgb(244, 244, 108);
+}
+#close-button{
+    background-color:rgb(248, 84, 84);
+}
+#maximize-button{
+    background-color:rgb(27, 250, 27);
+}
