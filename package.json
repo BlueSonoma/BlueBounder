@@ -1,0 +1,23 @@
+{
+  "name": "blue-bounder",
+  "version": "0.1.0",
+  "description": "Grain Boundary Detection and Analysis",
+  "main": "./main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:bounder": "cd bounder && npm install && npm run build",
+    "build:app": " npm install && npm run build:bounder",
+    "start:electron": "electron .",
+    "start": "npm run build:app && npm run start:electron"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-reload": "^2.0.0-alpha.1"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

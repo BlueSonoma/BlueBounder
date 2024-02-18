@@ -1,0 +1,40 @@
+.bounder__mode-selector-container {
+    display: flex;
+    flex-direction: column;
+    width: 41px;
+    height: 100%;
+}
+
+.bounder__mode-selector button {
+    border: solid black 1px;
+    border-radius: 5px;
+    background: whitesmoke;
+    width: 25px;
+    height: 25px;
+    margin: 2px;
+}
+
+.bounder__mode-selector button img {
+    width: 15px;
+    height: 15px;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.bounder__mode-selector button:hover {
+    border: solid black 1px;
+    background: rgb(100, 149, 237);
+}
+
+.bounder__mode-selector button.select {
+    border: solid black 1px;
+    background: darkgray;
+}
+
+.bounder__mode-selector path {
+    fill: black;
+}
+
+.bounder__mode-selector .react-flow__controls-button:last-child {
+    border-bottom: solid black 1px;
+}

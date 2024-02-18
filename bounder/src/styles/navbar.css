@@ -1,0 +1,49 @@
+.bounder__navbar {
+    margin: unset;
+    /*padding: 0;*/
+    width: 30px;
+    height: 100%;
+    position: relative;
+    background: whitesmoke;
+    border: groove rgba(170, 170, 170, 0.4);
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    flex: auto;
+    justify-content: flex-start;
+    align-items: center;
+
+    /*box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5), 0 2px 10px 0 rgba(0, 0, 0, 0.12);*/
+}
+
+.bounder__navbar > button {
+    background: transparent;
+    width: fit-content;
+    height: fit-content;
+    margin-top: 20px;
+
+    padding: 7px 10px 7px 10px;
+
+    text-align: center;
+    font-size: medium;
+    font-weight: normal;
+
+    transform: rotate(90deg);
+    transform-origin: 35%;
+    translate: 15%;
+}
+
+.bounder__navbar > button:hover {
+    background: rgb(100, 149, 237);
+}
+
+.bounder__navbar > button.select {
+    width: fit-content;
+
+    background: darkgray;
+    color: black;
+}
+
+.bounder__navbar label {
+    pointer-events: none;
+}

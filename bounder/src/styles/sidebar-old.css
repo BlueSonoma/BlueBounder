@@ -1,0 +1,105 @@
+.bounder-old__sidebar {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    padding-top: 5px;
+    width: 380px;
+    max-width: 380px;
+    height: 100vh;
+    background-color: white;
+    z-index: 9999;
+}
+
+.bounder-old__sidebar.right {
+    left: unset;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    right: -325px;
+    transition: right .3s ease-in-out;
+}
+
+.bounder-old__sidebar.left {
+    right: unset;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    left: -325px;
+    transition: left .3s ease-in-out;
+}
+
+.bounder-old__sidebar.right.opened {
+    right: 0;
+}
+
+.bounder-old__sidebar.left.opened {
+    left: 0;
+}
+
+.bounder-old__sidebar > button {
+    width: initial;
+    position: relative;
+    height: 30px;
+    border-radius: 2px;
+}
+
+.bounder-old__sidebar > button img {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    pointer-events: none;
+}
+
+.bounder-old__sidebar.right > button img {
+    padding-right: unset;
+    padding-left: 15px;
+    left: 0;
+}
+
+.bounder-old__sidebar.left > button img {
+    padding-left: unset;
+    padding-right: 15px;
+    right: 0;
+}
+
+.bounder-old__sidebar .content-container {
+    display: grid;
+    grid-gap: 25px;
+    padding: 5px 5px 5px 5px;
+    overflow-y: auto;
+    background-color: white;
+}
+
+.content-container.right {
+    grid-template-columns: 41px calc(100% - 70px);
+}
+
+.content-container.left {
+    grid-template-columns:  calc(100% - 70px) 41px;
+}
+
+div.selector-column {
+    display: flex;
+    flex-direction: column;
+    width: 41px;
+    height: calc(100vh - 58px);
+    justify-content: space-between;
+}
+
+.selector-column.right {
+    left: 7px;
+}
+
+.selector-column.left {
+    right: 7px;
+}
+
+.selector-column .mode-selector {
+    flex-grow: 2;
+    order: 1;
+}
+
+.selector-column .canvasview-controls {
+    order: 2;
+    height: min-content;
+}
+
+.canvasview-controls .pane-controls {
+    position: relative;
+}
