@@ -5,6 +5,11 @@
     height: 100%;
 }
 
+.bounder__mode-selector label {
+    pointer-events: none;
+    white-space: nowrap;
+}
+
 .bounder__mode-selector button {
     border: solid black 1px;
     border-radius: 5px;

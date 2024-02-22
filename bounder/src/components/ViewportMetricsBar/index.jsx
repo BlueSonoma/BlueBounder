@@ -1,10 +1,10 @@
 import { getZoomPercentage } from '../Canvas/utils';
+import Button from '../additional-components/buttons/Button';
 import IconFullScreen from '../../resources/icons/full-screen.png';
 import { memo } from 'react';
 import useViewport from '../../hooks/useViewport';
-import Button from "../additional-components/buttons/Button";
 
-function ViewportStatusBar({ className, zoom, minZoom, maxZoom, onFitView, children }) {
+function ViewportMetricsBar({ className, zoom, minZoom, maxZoom, onFitView, children }) {
   const { mousePosition } = useViewport();
 
   //TODO: Implement pixel measurement as such:
@@ -24,6 +24,7 @@ function ViewportStatusBar({ className, zoom, minZoom, maxZoom, onFitView, child
           display: 'flex',
           flexDirection: 'row',
           paddingRight: '5px',
+          alignItems: 'center'
         }}
       >
         <div style={{ paddingRight: '10px' }}>
@@ -32,7 +33,7 @@ function ViewportStatusBar({ className, zoom, minZoom, maxZoom, onFitView, child
         </div>
         <Button
           onClick={onFitView}
-          style={{ marginTop: '0px', border: 'none'}}
+          style={{ marginTop: '7px', border: 'none'}}
           imageStyle={{ width: '20px', height: '20px' }}
           imageUrl={IconFullScreen}
         />
@@ -42,4 +43,4 @@ function ViewportStatusBar({ className, zoom, minZoom, maxZoom, onFitView, child
   );
 }
 
-export default memo(ViewportStatusBar);
+export default memo(ViewportMetricsBar);
