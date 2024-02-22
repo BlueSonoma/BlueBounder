@@ -4,7 +4,7 @@ import App from '../components/App';
 
 function HomePage() {
     return (<div>
-        <App/>
+        <App style={{flex: 1}}/>
     </div>);
 }
 

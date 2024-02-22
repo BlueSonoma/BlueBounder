@@ -1,11 +1,12 @@
 import React from 'react';
-import '../styles/start.css'
+import '../styles/Start.css'
 import {useNavigate} from 'react-router-dom';
 
+// /Users/oasis/Documents/bluesegment/bounder-main/src/screens/Start.js
 function Start() {
 
     const navigate = useNavigate();
-    return (<>
+    return (<div>
             {/* <div id="title-bar">
                 <h1 id="title">Blue Segment</h1>
                 <div id="window-controls">
@@ -23,7 +24,7 @@ function Start() {
                     <button className="butt1class" onClick={() => navigate('/oldSessions')}>Old session</button>
                 </div>
             </div>
-        </>);
+        </div>);
 }
 
 export default Start;

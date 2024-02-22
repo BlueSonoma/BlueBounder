@@ -1,13 +1,13 @@
 import React from 'react';
 import '../styles/new-session.css'
-import DropDownSessions from '../components/DropDownSessions'
-import {BackButton} from "../components/additional-components/buttons/BackButton";
+import DropDown from '../components/DropDownSessions'
+import BackButton from '../components/additional-components/buttons/BackButton';
 
 function OldSessions() {
-    return (<>
-            <BackButton/>
-            <DropDownSessions/>
-        </>);
+    return (<div>
+        <BackButton/>
+        <DropDown/>
+    </div>);
 }
 
 export default OldSessions;

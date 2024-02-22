@@ -1,10 +1,9 @@
 .bounder {
     width: 100vw;
-    /*height: calc(100vh - 46px);*/
     height: 100vh;
     display: grid;
-    grid-template-columns: 30px auto 1fr auto 30px;
-    grid-template-rows: 90px 1fr 30px auto 30px 25px;
+    grid-template-columns: auto auto 1fr auto auto;
+    grid-template-rows: auto 1fr auto auto auto auto;
     grid-template-areas:
     "top-navbar top-navbar top-navbar top-navbar top-navbar"
     "left-navbar left-sidebar viewport right-sidebar right-navbar"
@@ -12,15 +11,12 @@
     "left-navbar left-sidebar bottom-sidebar right-sidebar right-navbar"
     "left-navbar left-sidebar bottom-navbar right-sidebar right-navbar"
     "footer-navbar footer-navbar footer-navbar footer-navbar footer-navbar ";
-    /*flex-direction: column;*/
-    /*flex: auto;*/
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
 }
 
 .bounder .viewport {
-    /*flex: auto;*/
     position: relative;
     right: 3px;
     border: groove rgba(170, 170, 170, 0.4);
@@ -30,21 +26,29 @@
     display: flex;
     height: 30px;
     background: whitesmoke;
-    padding: 5px;
     justify-content: space-between;
+    align-items: center;
 }
 
-.top-navbar {
+.bounder__navbar.top {
     grid-area: top-navbar;
     display: flex;
     justify-content: space-between;
 }
 
-.left-navbar {
+.bounder__navbar.left {
     grid-area: left-navbar;
 }
 
-.left-sidebar {
+.bounder__navbar.right {
+    grid-area: right-navbar;
+}
+
+.bounder__navbar.bottom {
+    grid-area: bottom-navbar;
+}
+
+.bounder__sidebar.left {
     grid-area: left-sidebar;
 }
 
@@ -56,40 +60,16 @@
     grid-area: viewport-footer;
 }
 
-.right-navbar {
-    grid-area: right-navbar;
-}
-
-.right-sidebar {
+.bounder__sidebar.right {
     grid-area: right-sidebar;
 }
 
-.bottom-navbar {
-    grid-area: bottom-navbar;
-}
 
-.bottom-sidebar {
+.bounder__sidebar.bottom {
     grid-area: bottom-sidebar;
 }
 
 .footer {
     grid-area: footer-navbar;
+    height: 25px;
 }
-
-/*.bounder {*/
-/*    width: 100%;*/
-/*    height: calc(100vh - 46px);*/
-/*    display: flex;*/
-/*    !*flex-direction: column;*!*/
-/*    !*flex: auto;*!*/
-/*    box-sizing: border-box;*/
-/*    position: relative;*/
-/*    overflow: hidden;*/
-/*}*/
-
-/*.bounder .viewport .react-flow {*/
-/*    !*flex: auto;*!*/
-/*    !*display: flex;*!*/
-/*    width: 100%;*/
-/*    height: 100%;*/
-/*}*/
