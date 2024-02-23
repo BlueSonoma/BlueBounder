@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:bounder": "cd bounder && npm install && npm run build",
-    "build:app": " npm install && npm run build:bounder",
     "start:electron": "electron .",
-    "start": "npm run build:app && npm run start:electron"
+    "build": " npm install && npm run build:bounder",
+    "start": "npm run start:electron"
   },
   "author": "",
   "license": "ISC",
