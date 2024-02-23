@@ -1,20 +1,22 @@
 import { createRef, useState } from 'react';
+import BaseUploadForm from '../BaseUploadForm';
 
 function ImageUploadForm({
-  id,
-  style,
-  buttonStyle,
-  className,
-  buttonComponent: Button,
-  buttonProps,
-  buttonClassName,
-  buttonLabel,
-  onClick,
-  onChange,
-  acceptTypes,
-}) {
+                           id,
+                           style,
+                           className,
+                           buttonItem,
+                           label,
+                           onClick,
+                           onChange,
+                           acceptTypes,
+                           textForm,
+                           buttonProps,
+                         }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = createRef();
+
+  acceptTypes = acceptTypes ?? '.jpg, .jpeg, .png, .gif, .bmp, .svg, .webp';
 
   function onChangeHandler(event) {
     const imageFile = event.target.files[0];
@@ -27,36 +29,26 @@ function ImageUploadForm({
     onClick?.();
   };
 
-  return (
-    <div
-      id={id}
-      className={className}
-      style={
-        style ?? {
-          display: 'flex',
-          flexDirection: 'column',
-        }
-      }
-    >
-      <input
-        type={'file'}
-        accept={acceptTypes ?? '.jpg, .jpeg, .png, .gif, .bmp, .svg, .webp'}
-        style={{ display: 'none' }}
-        ref={fileInputRef}
-        onChange={onChangeHandler}
-      />
-      {Button ? (
-        <Button {...buttonProps} onClick={onClickHandler}/>
-      ) : (
-        <>
-          <input type={'text'} value={selectedFile ? selectedFile.name : ''} readOnly />
-          <button onClick={onClickHandler} style={buttonStyle}>
-            {buttonLabel ?? 'Choose File'}
-          </button>
-        </>
-      )}
-    </div>
-  );
+  return (<div
+    id={id}
+    className={className}
+    style={style ?? {
+      display: 'flex', flexDirection: 'column',
+    }}
+  >
+    <BaseUploadForm
+      ref={fileInputRef}
+      style={{ display: 'none' }}
+      accept={acceptTypes}
+      onChange={onChangeHandler}
+      onClick={onClickHandler}
+      textForm={textForm}
+      textValue={selectedFile}
+      buttonItem={buttonItem}
+      label={label}
+      buttonProps={buttonProps}
+    />
+  </div>);
 }
 
 export default ImageUploadForm;
