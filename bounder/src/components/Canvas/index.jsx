@@ -1,11 +1,5 @@
 import {
-  BackgroundVariant,
-  Panel,
-  Position,
-  ReactFlow,
-  ReactFlowProvider,
-  useNodesState,
-  Background,
+  BackgroundVariant, Panel, Position, ReactFlow, ReactFlowProvider, useNodesState, Background,
 } from '@xyflow/react';
 import { memo, useEffect, useState } from 'react';
 import useViewport from '../../hooks/useViewport';
@@ -28,7 +22,7 @@ import '../../styles/navbar.css';
 
 import { DockPanelPosition } from '../../types/general';
 import Navbar from '../../containers/Navbar';
-import ImageUploadForm from '../additional-components/ImageUploadForm';
+import ImageUploadForm from '../additional-components/forms/ImageUploadForm';
 import ViewportMetricsBar from '../ViewportMetricsBar';
 import BottomSidebar from '../BottomSidebar';
 import SettingsSidebar from '../SettingsSidebar';
@@ -37,15 +31,7 @@ import ProjectSidebar from '../ProjectSidebar';
 function Canvas({ children }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const {
-    screenToFlowPosition,
-    minZoom,
-    setMinZoom,
-    maxZoom,
-    setMaxZoom,
-    zoom,
-    setViewportExtent,
-    getViewportExtent,
-    fitView,
+    screenToFlowPosition, minZoom, setMinZoom, maxZoom, setMaxZoom, zoom, setViewportExtent, getViewportExtent, fitView,
   } = useViewport();
   const { selectorMode, setSelectorMode } = useSelectorMode();
   const [showLeftDrawer, setShowLeftDrawer] = useState(true);
@@ -58,8 +44,7 @@ function Canvas({ children }) {
 
   useEffect(() => {
     const padding = {
-      x: maxZoom + width * (1 / 2),
-      y: maxZoom + height * (1 / 2),
+      x: maxZoom + width * (1 / 2), y: maxZoom + height * (1 / 2),
     };
 
     const extentUpperLeft = [-padding.x, -padding.y];
@@ -87,8 +72,7 @@ function Canvas({ children }) {
       // Deselect any selected nodes
       const prevNodes = nodes.map((node) => {
         return {
-          ...node,
-          selected: false,
+          ...node, selected: false,
         };
       });
 
@@ -100,15 +84,9 @@ function Canvas({ children }) {
       const position = screenToFlowPosition(event.clientX - initialRadius * zoom, event.clientY - initialRadius * zoom);
 
       const ellipse = {
-        id: `ellipse_${nodes.length}`,
-        type: 'ellipseNode',
-        position,
-        data: {
-          initialWidth,
-          initialHeight,
-        },
-        selected: true,
-        draggable: true,
+        id: `ellipse_${nodes.length}`, type: 'ellipseNode', position, data: {
+          initialWidth, initialHeight,
+        }, selected: true, draggable: true,
       };
       setNodes([...prevNodes, ellipse]);
     }
@@ -189,8 +167,7 @@ function Canvas({ children }) {
        */
 
       node.data = {
-        url: url,
-        file: image, // bytes: bytes,
+        url: url, file: image, // bytes: bytes,
       };
       setNodes([...nodes, node]);
     };
@@ -198,189 +175,168 @@ function Canvas({ children }) {
   }
 
   function renderFileLoader() {
-    return (
-      <>
-        <ImageUploadForm
-          className={'bounder__mode-selector'}
-          buttonComponent={Button}
-          buttonProps={{
-            imageUrl: IconLiveFolder,
-            label: 'Open...',
-          }}
-          onChange={setImage}
-        />
-      </>
-    );
+    return (<>
+      <ImageUploadForm
+        className={'bounder__mode-selector'}
+        buttonProps={{
+          imageUrl: IconLiveFolder, label: 'Open...',
+        }}
+        onChange={setImage}
+        textForm={false}
+      />
+    </>);
   }
 
   function renderTopNavbarButtons() {
-    return (
-      <div
-        className={'bounder__mode-selector'}
-        style={{
-          position: 'absolute',
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: -1,
+    return (<div
+      className={'bounder__mode-selector'}
+      style={{
+        position: 'absolute',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: -1,
+      }}
+    >
+      <Button
+        id={'button__pixel-data'}
+        imageUrl={IconPixelData}
+        onClick={() => setShowBottomDrawer(!showBottomDrawer)}
+        label={'Pixel Data'}
+      />
+      <Button
+        id={'button__map'}
+        onClick={() => {
+          if (showRightDrawer) {
+            setShowRightDrawer(false);
+            return;
+          }
+          setShowRightDrawer(true);
         }}
-      >
-        <Button
-          id={'button__pixel-data'}
-          imageUrl={IconPixelData}
-          onClick={() => setShowBottomDrawer(!showBottomDrawer)}
-          label={'Pixel Data'}
-        />
-        <Button
-          id={'button__map'}
-          onClick={() => {
-            if (showRightDrawer) {
-              setShowRightDrawer(false);
-              return;
-            }
-            setShowRightDrawer(true);
-          }}
-          imageUrl={IconMaps}
-          label={'Maps'}
-        />
-        <Button
-          id={'button__clean-up'}
-          onClick={() => {
-            if (showRightDrawer) {
-              setShowRightDrawer(false);
-              return;
-            }
-            setShowRightDrawer(true);
-          }}
-          imageUrl={IconCleanUp}
-          label={'Clean Up'}
-        />
-        <Button
-          id={'button__grain-size'}
-          onClick={() => {
-            if (showLeftDrawer) {
-              setShowLeftDrawer(false);
-              return;
-            }
-            setShowLeftDrawer(true);
-          }}
-          imageUrl={IconGrainSize}
-          label={'Grain Size'}
-        />
-      </div>
-    );
+        imageUrl={IconMaps}
+        label={'Maps'}
+      />
+      <Button
+        id={'button__clean-up'}
+        onClick={() => {
+          if (showRightDrawer) {
+            setShowRightDrawer(false);
+            return;
+          }
+          setShowRightDrawer(true);
+        }}
+        imageUrl={IconCleanUp}
+        label={'Clean Up'}
+      />
+      <Button
+        id={'button__grain-size'}
+        onClick={() => {
+          if (showLeftDrawer) {
+            setShowLeftDrawer(false);
+            return;
+          }
+          setShowLeftDrawer(true);
+        }}
+        imageUrl={IconGrainSize}
+        label={'Grain Size'}
+      />
+    </div>);
   }
 
   function renderViewport() {
-    return (
-      <>
-        <ReactFlow
-          className={'viewport'} // className={'dark'}
-          onInit={onInit}
-          fitView={true}
-          nodes={nodes}
-          nodeTypes={nodeTypes}
-          nodesDraggable={false}
-          onNodesChange={onNodesChange}
-          maxZoom={maxZoom}
-          minZoom={minZoom}
-          translateExtent={getViewportExtent()}
-          onClick={onCanvasClickHandler}
-        >
-          <Panel position={Position.Top}>
-            <ModeSelector />
-          </Panel>
-          <Background variant={BackgroundVariant.Lines} lineWidth={0.5} gap={100} color={'#303030'} />
-        </ReactFlow>
-        <ViewportMetricsBar
-          className={'bounder__mode-selector'}
-          onFitView={() => fitView(nodes)}
-          zoom={zoom}
-          minZoom={minZoom}
-          maxZoom={maxZoom}
-        />
-      </>
-    );
+    return (<>
+      <ReactFlow
+        className={'viewport'} // className={'dark'}
+        onInit={onInit}
+        fitView={true}
+        nodes={nodes}
+        nodeTypes={nodeTypes}
+        nodesDraggable={false}
+        onNodesChange={onNodesChange}
+        maxZoom={maxZoom}
+        minZoom={minZoom}
+        translateExtent={getViewportExtent()}
+        onClick={onCanvasClickHandler}
+      >
+        <Panel position={Position.Top}>
+          <ModeSelector />
+        </Panel>
+        <Background variant={BackgroundVariant.Lines} lineWidth={0.5} gap={100} color={'#303030'} />
+      </ReactFlow>
+      <ViewportMetricsBar
+        className={'bounder__mode-selector'}
+        onFitView={() => fitView(nodes)}
+        zoom={zoom}
+        minZoom={minZoom}
+        maxZoom={maxZoom}
+      />
+    </>);
   }
 
   function renderTopNavbar() {
-    return (
-      <Navbar id={'navbar__top'} position={DockPanelPosition.Top}>
-        {renderFileLoader()}
-        {renderTopNavbarButtons()}
-      </Navbar>
-    );
+    return (<Navbar id={'navbar__top'} position={DockPanelPosition.Top}>
+      {renderFileLoader()}
+      {renderTopNavbarButtons()}
+    </Navbar>);
   }
 
   function renderLeftNavbar() {
-    return (
-      <Navbar
-        id={'navbar__left'}
-        position={DockPanelPosition.Left}
-        showDrawer={showLeftDrawer}
-        drawerComponent={ProjectSidebar}
-      >
-        <Button label={'Project'} onClick={() => setShowLeftDrawer(!showLeftDrawer)} />
-      </Navbar>
-    );
+    return (<Navbar
+      id={'navbar__left'}
+      position={DockPanelPosition.Left}
+      showDrawer={showLeftDrawer}
+      drawerComponent={ProjectSidebar}
+    >
+      <Button label={'Project'} onClick={() => setShowLeftDrawer(!showLeftDrawer)} />
+    </Navbar>);
   }
 
   function renderRightNavbar() {
-    return (
-      <Navbar
-        id={'navbar__right'}
-        position={DockPanelPosition.Right}
-        showDrawer={showRightDrawer}
-        drawerComponent={SettingsSidebar}
-      >
-        <Button label={'Settings'} onClick={() => setShowRightDrawer(!showRightDrawer)} />
-      </Navbar>
-    );
+    return (<Navbar
+      id={'navbar__right'}
+      position={DockPanelPosition.Right}
+      showDrawer={showRightDrawer}
+      drawerComponent={SettingsSidebar}
+    >
+      <Button label={'Settings'} onClick={() => setShowRightDrawer(!showRightDrawer)} />
+    </Navbar>);
   }
 
   function renderBottomNavbar() {
-    return (
-      <Navbar
-        id={'navbar__bottom'}
-        position={DockPanelPosition.Bottom}
-        showDrawer={showBottomDrawer}
-        drawerComponent={BottomSidebar}
-      >
-        <Button label={'Details'} onClick={() => setShowBottomDrawer(!showBottomDrawer)} />
-      </Navbar>
-    );
+    return (<Navbar
+      id={'navbar__bottom'}
+      position={DockPanelPosition.Bottom}
+      showDrawer={showBottomDrawer}
+      drawerComponent={BottomSidebar}
+    >
+      <Button label={'Details'} onClick={() => setShowBottomDrawer(!showBottomDrawer)} />
+    </Navbar>);
   }
 
   function renderFooter() {
-    return (
-      <div className={'footer'} style={{ justifyContent: 'center', textAlign: 'left', paddingLeft: '5px' }}>
-        <label style={{ fontSize: 'small' }}>Status: Ready</label>
-      </div>
-    );
+    return (<div className={'footer'} style={{ justifyContent: 'center', textAlign: 'left', paddingLeft: '5px' }}>
+      <label style={{ fontSize: 'small' }}>Status: Ready</label>
+    </div>);
   }
 
-  return (
-    <div id={'bounder__canvas'} className={'bounder'}>
-      {renderTopNavbar()}
-      {renderLeftNavbar()}
-      {renderViewport()}
-      {renderRightNavbar()}
-      {renderBottomNavbar()}
-      {renderFooter()}
-      {children}
-    </div>
-  );
+  return (<div id={'bounder__canvas'} className={'bounder'}>
+    {renderTopNavbar()}
+    {renderLeftNavbar()}
+    {renderViewport()}
+    {renderRightNavbar()}
+    {renderBottomNavbar()}
+    {renderFooter()}
+    {children}
+  </div>);
 }
 
 function CanvasView({ children }) {
-  return (
-    <ReactFlowProvider>
-      <SelectorModeProvider>
-        <Canvas>{children}</Canvas>
-      </SelectorModeProvider>
-    </ReactFlowProvider>
-  );
+  return (<ReactFlowProvider>
+    <SelectorModeProvider>
+      <Canvas>{children}</Canvas>
+    </SelectorModeProvider>
+  </ReactFlowProvider>);
 }
 
 CanvasView.displayName = 'CanvasView';
