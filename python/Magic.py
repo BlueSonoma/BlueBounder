@@ -1,14 +1,8 @@
 import numpy as np
-from PIL import Image as im
 import os
-import matplotlib.pyplot as plt
-from scipy.stats import mode
-from skimage.morphology import binary_dilation, binary_erosion, binary_closing
 import skimage
 from skimage import io
 import imageio
-from tkinter import Toplevel, Label, PhotoImage
-import threading
 from scipy.ndimage import maximum_filter
 from skimage import color
 from skimage.filters.rank import modal
@@ -16,9 +10,8 @@ from skimage.morphology import square
 import threading
 import itertools
 import time
-import json
 
-from app import clean_chemistry
+from routes import clean_chemistry
 
 
 def get_phase_color(file):
