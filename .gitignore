@@ -3,4 +3,5 @@ node_modules
 .local
 *.log
 
+sessions
 python/Sessions
