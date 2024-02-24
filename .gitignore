@@ -1,4 +1,7 @@
 node_modules
 .idea
 .local
-*.log   
+*.log
+
+sessions
+python/Sessions

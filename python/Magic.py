@@ -11,8 +11,6 @@ import threading
 import itertools
 import time
 
-from routes import clean_chemistry
-
 
 def get_phase_color(file):
     # skip the first two lines because that's just the header

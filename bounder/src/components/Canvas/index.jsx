@@ -111,7 +111,13 @@ function Canvas({ children }) {
     }
   }
 
-  function setImage(image) {
+  function setImage(event) {
+    const image = event.target.files[0];
+
+    if (!image) {
+      return;
+    }
+
     // Find the previous image (if it exists)
     const index = nodes.findIndex((node) => node.type === 'imageNode');
 
@@ -178,11 +184,11 @@ function Canvas({ children }) {
     return (<>
       <ImageUploadForm
         className={'bounder__mode-selector'}
-        buttonProps={{
+        textForm={false}
+        browseButtonProps={{
           imageUrl: IconLiveFolder, label: 'Open...',
         }}
         onChange={setImage}
-        textForm={false}
       />
     </>);
   }
