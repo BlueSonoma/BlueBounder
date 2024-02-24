@@ -1,0 +1,26 @@
+{
+  "name": "blue-bounder-app",
+  "version": "0.1.0",
+  "main": "app/electron/index.js",
+  "scripts": {
+    "start": "npm run start:electron",
+    "start:electron": "electron .",
+    "start:server": "python server/main.py",
+    "start:dev": "npm run build:react && npm start",
+    "build": "npm install && npm run build:python && npm run build:react",
+    "build:python": "pip install -r requirements.txt",
+    "build:react": "cd app/react && npm install && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "30.0.0-alpha.1",
+    "electron-reload": "^2.0.0-alpha.1"
+  },
+  "dependencies": {
+    "flask": "^0.2.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

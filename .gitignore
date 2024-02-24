@@ -3,5 +3,6 @@ node_modules
 .local
 *.log
 
-sessions
-python/Sessions
+Sessions
+__pycache__/
+*~/*
