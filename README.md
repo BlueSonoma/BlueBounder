@@ -10,5 +10,6 @@ Grain Boundary Detection and Analysis
 git clone --recursive https://github.com/BlueSonoma/BlueBounder.git
 cd BlueBounder
 npm build
+npm run start:server
 npm start
 ```
