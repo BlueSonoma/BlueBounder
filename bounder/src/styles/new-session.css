@@ -1,28 +1,28 @@
 
-body{
-   
-
+body {
     background: linear-gradient(to left, rgb(18, 148, 157), lightblue);
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    
 }
-.formClass{
+
+.formClass {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; 
-    font-size: 30px;       
+    justify-content: center;
+    font-size: 30px;
     padding-top: 100px;
 }
-.inputClass{
+
+.inputClass {
     margin-bottom: 10px;
     width: 300px;
-    height:20px;
+    height: 20px;
 }
-.butt1new{
+
+.butt1class {
     background-image: linear-gradient(92.88deg, #455EB5 9.16%, #5643CC 43.89%, #673FD7 64.72%);
     border-radius: 8px;
     border-style: none;
@@ -30,7 +30,7 @@ body{
     color: #FFFFFF;
     cursor: pointer;
     flex-shrink: 0;
-    font-family: "Inter UI","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;
+    font-family: "Inter UI", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     font-size: 16px;
     font-weight: 500;
     height: 35px;
@@ -42,38 +42,46 @@ body{
     -webkit-user-select: none;
     touch-action: manipulation;
     margin-right: 10px;
-    width:200px;
+    width: 200px;
     margin-top: 50px;
+}
 
+.butt1class text {
+    pointer-events: none;
 }
+
 .butt1class:hover {
-box-shadow: rgba(80, 63, 205, 0.5) 0 1px 30px;
-transition-duration: .1s;
+    box-shadow: rgba(80, 63, 205, 0.5) 0 1px 30px;
+    color: #FFFFFF;
+    background-image: linear-gradient(92.88deg, #455EB5 9.16%, #5643CC 43.89%, #673FD7 64.72%);
+    transition-duration: .1s;
 }
+
 @media (min-width: 768px) {
     .button-36 {
         padding: 0 2.6rem;
     }
 }
-.form_div{
-    border:2px solid;
+
+.form_div {
+    border: 2px solid;
     padding-left: 20px;
-    padding-right:20px;
-    padding-bottom:20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
     border-radius: 10px;
     box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.8);
+}
 
-    
-}
 .centered {
-display: flex;
-align-items: center;
-justify-content: center;
-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }
-.inputClass{
+
+.inputClass {
     background-color: transparent;
-    border:none;
-    border-bottom:1px solid;
-    padding-bottom:3px;
+    border: none;
+    border-bottom: 1px solid;
+    padding-bottom: 3px;
 }

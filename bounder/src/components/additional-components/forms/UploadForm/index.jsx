@@ -1,65 +1,94 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import Button from '../../buttons/Button';
 
-function BaseUploadForm({
-                          id,
-                          className,
-                          style,
-                          onChange,
-                          onClick,
-                          type,
-                          acceptTypes,
-                          label,
-                          buttonItem,
-                          textForm,
-                          textValue,
-                          buttonProps,
-                          ...rest
-                        }, ref) {
+function UploadForm({
+                      id,
+                      className,
+                      style,
+                      onChange,
+                      onClick,
+                      type,
+                      acceptTypes,
+                      label,
+                      browseButtonItem,
+                      textForm,
+                      textValue,
+                      browseButtonProps,
+                      placeholder,
+                      ...rest
+                    }, ref) {
 
-  label = label ?? 'Choose File';
-  textForm = textForm ?? true;
-  type = type ?? 'file';
-  textValue = textValue ?? '';
+  const [inputValue, setInputValue] = useState(textValue ?? '');
+  const textInputRef = useRef();
+  const fileInputRef = useRef(ref ?? null);
 
-  let buttonStyle = buttonProps?.style;
-  if (typeof buttonStyle === 'undefined') {
-    buttonStyle = {
-      width: 'fit-content', height: 'fit-content', padding: '5px 10px 5px 10px',
-    };
+
+  useEffect(() => {
+    textInputRef.current?.focus();
+  }, [inputValue]);
+
+  function onTextInputChangeHandler(event) {
+    const input = event.target.value;
+    setInputValue(input);
+    onChange?.(event, input);
   }
+
+  function onFileChosenChangeHandler(event) {
+    const file = event.target.files[0];
+    setInputValue(file.path);
+    onChange?.(event, file.path);
+  }
+
+  const onClickHandler = () => {
+    fileInputRef.current?.click();
+    onClick?.();
+  };
+
+  label = label ?? 'Browse';
+  textForm = textForm ?? true;
 
   function defaultButton() {
     return (<>
       {textForm && (<input
+        ref={textInputRef}
         type={'text'}
-        value={textValue}
-        readOnly
+        value={inputValue}
+        onChange={onTextInputChangeHandler}
+        placeholder={placeholder}
+        className={className}
       />)}
       <Button
-        onClick={onClick}
-        style={buttonStyle}
-        {...buttonProps}
+        onClick={onClickHandler}
+        {...browseButtonProps}
         label={label}
       />
     </>);
   }
 
-  let ButtonComponent = buttonItem?.component;
+  let ButtonComponent = browseButtonItem?.component;
   if (typeof ButtonComponent === 'undefined') {
     ButtonComponent = defaultButton;
   }
 
-  return (<>
+  const divClassName = textForm ? '' : className;
+
+  return (<div
+    id={id}
+    className={divClassName}
+    style={style ?? {
+      display: 'flex', flexDirection: 'column',
+    }}
+    {...rest}
+  >
     <input
-      ref={ref}
-      type={type}
+      ref={fileInputRef}
+      type={'file'}
       accept={acceptTypes}
-      style={style}
-      onChange={onChange}
+      style={{ display: 'none' }}
+      onChange={onFileChosenChangeHandler}
     />
     <ButtonComponent />
-  </>);
+  </div>);
 }
 
-export default forwardRef(BaseUploadForm);
+export default forwardRef(UploadForm);

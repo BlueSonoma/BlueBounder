@@ -1,6 +1,5 @@
 import { NodeProps } from '@xyflow/react';
 import { memo, useEffect, useState } from 'react';
-import TestImage from '../../../resources/images/test_image1.png';
 
 function ImageNode(props: NodeProps) {
   const {

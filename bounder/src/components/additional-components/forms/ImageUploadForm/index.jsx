@@ -1,54 +1,35 @@
-import { createRef, useState } from 'react';
-import BaseUploadForm from '../BaseUploadForm';
+import UploadForm from '../UploadForm';
 
 function ImageUploadForm({
                            id,
                            style,
                            className,
-                           buttonItem,
                            label,
                            onClick,
                            onChange,
                            acceptTypes,
                            textForm,
-                           buttonProps,
+                           placeholder,
+                           browseButtonProps,
+                           browseButtonItem,
                          }) {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = createRef();
 
   acceptTypes = acceptTypes ?? '.jpg, .jpeg, .png, .gif, .bmp, .svg, .webp';
 
-  function onChangeHandler(event) {
-    const imageFile = event.target.files[0];
-    setSelectedFile(imageFile);
-    onChange?.(imageFile);
-  }
-
-  const onClickHandler = () => {
-    fileInputRef.current.click();
-    onClick?.();
-  };
-
-  return (<div
-    id={id}
-    className={className}
-    style={style ?? {
-      display: 'flex', flexDirection: 'column',
-    }}
-  >
-    <BaseUploadForm
-      ref={fileInputRef}
-      style={{ display: 'none' }}
-      accept={acceptTypes}
-      onChange={onChangeHandler}
-      onClick={onClickHandler}
+  return (
+    <UploadForm
+      id={id}
+      className={className}
+      style={style}
+      acceptTypes={acceptTypes}
+      onChange={onChange}
+      onClick={onClick}
       textForm={textForm}
-      textValue={selectedFile}
-      buttonItem={buttonItem}
+      browseButtonItem={browseButtonItem}
       label={label}
-      buttonProps={buttonProps}
-    />
-  </div>);
+      browseButtonProps={browseButtonProps}
+      placeholder={placeholder}
+    />);
 }
 
 export default ImageUploadForm;
