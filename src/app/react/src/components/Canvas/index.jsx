@@ -1,7 +1,7 @@
 import {
   BackgroundVariant, Panel, Position, ReactFlow, ReactFlowProvider, useNodesState, Background,
 } from '@xyflow/react';
-import { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import useViewport from '../../hooks/useViewport';
 import { nodeTypes } from '../component-types';
 import '../../styles/bounder.css';
@@ -27,6 +27,7 @@ import ViewportMetricsBar from '../ViewportMetricsBar';
 import BottomSidebar from '../BottomSidebar';
 import SettingsSidebar from '../SettingsSidebar';
 import ProjectSidebar from '../ProjectSidebar';
+import AppTitleBar from '../AppTitleBar';
 
 function Canvas({ children }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -252,6 +253,7 @@ function Canvas({ children }) {
 
   function renderViewport() {
     return (<>
+      <AppTitleBar />
       <ReactFlow
         className={'viewport'} // className={'dark'}
         onInit={onInit}

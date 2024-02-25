@@ -3,8 +3,8 @@ import '../../styles/new-session.css';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../additional-components/buttons/BackButton';
 import UploadForm from '../additional-components/forms/UploadForm';
-import { useRef } from 'react';
 import AlertModal from '../additional-components/AlertModal';
+import AppTitleBar from '../AppTitleBar';
 
 function NewSession() {
   const [sessionName, setSessionName] = useState('');
@@ -59,9 +59,7 @@ function NewSession() {
   };
 
   return (<>
-    <head>
-      <title>Blue Segment</title>
-    </head>
+    <AppTitleBar/>
     <body className={`${showAlert ? 'disabled' : ''}`}>
     {showAlert && (<AlertModal
       buttonProps={{ className: 'butt1class' }}
