@@ -1,11 +1,13 @@
 import React from 'react';
 import '../../styles/start.css';
 import { useNavigate } from 'react-router-dom';
+import AppTitleBar from '../AppTitleBar';
 
 function Start() {
   const navigate = useNavigate();
 
   return (<div>
+    <AppTitleBar/>
     {/* <div id="title-bar">
                 <h1 id="title">Blue Segment</h1>
                 <div id="window-controls">
