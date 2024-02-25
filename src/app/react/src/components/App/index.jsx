@@ -1,31 +1,26 @@
-import React, { useState } from 'react';
+import React, { memo, useEffect } from 'react';
 
 import '../../styles/bounder.css';
 import { RoutesComponent } from '../screens/RoutesComponent';
+import useAppState from '../../hooks/useAppState';
+import AppStateProvider from '../AppStateProvider';
 
-function App() {
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+function AppMain() {
+  const { loading, saving } = useAppState();
 
-  function startLoadRequest() {
-    setLoading(true);
-  }
-
-  function endLoadRequest() {
-    setLoading(false);
-  }
-
-  function startSaveRequest() {
-    setSaving(true);
-  }
-
-  function endSaveRequest() {
-    setSaving(false);
-  }
+  useEffect(() => {
+    console.log(`Loading: ${loading}`);
+  }, [loading]);
 
   return (<div id={'app'} className='App'>
-      <RoutesComponent />
-    </div>);
+    <RoutesComponent />
+  </div>);
+}
+
+function App() {
+  return (<AppStateProvider>
+      <AppMain />
+    </AppStateProvider>);
 }
 
 export default App;

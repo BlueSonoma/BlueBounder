@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-const AppStateContext = createContext(null);
+const AppStateContext = createContext({});
 
 export const Provider = AppStateContext.Provider;
 

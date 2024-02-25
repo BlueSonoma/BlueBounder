@@ -5,6 +5,7 @@ import BackButton from '../additional-components/buttons/BackButton';
 import UploadForm from '../additional-components/forms/UploadForm';
 import AlertModal from '../additional-components/AlertModal';
 import AppTitleBar from '../AppTitleBar';
+import useAppState from '../../hooks/useAppState';
 
 function NewSession() {
   const [sessionName, setSessionName] = useState('');
@@ -15,6 +16,8 @@ function NewSession() {
   const sessionNameInputRef = createRef(null);
   const csvFilePathInputRef = createRef(null);
   const formRef = createRef(null);
+
+  const appState = useAppState();
 
   useEffect(() => {
     sessionNameInputRef.current?.focus();
@@ -40,6 +43,9 @@ function NewSession() {
       // return alert('Please enter a session name');
       return;
     }
+
+    appState.startLoadRequest();
+
     console.log(sessionName);
     console.log(csvFilePath);
 
@@ -47,19 +53,23 @@ function NewSession() {
     formData.append('csvFilePath', csvFilePath);
     formData.append('sessionName', sessionName);
 
+
     fetch('http://localhost:8000/api/sessions/create_starter_images', {
       method: 'POST', body: formData,
     })
       .then(response => response.json())
-      .then(data => console.log(data))
+      .then(data => {
+        console.log(data);
+        appState.endLoadRequest();
+        navigate('/home');
+      })
       .catch((error) => {
         console.error('Error:', error);
       });
-    navigate('/home');
   };
 
   return (<>
-    <AppTitleBar/>
+    <AppTitleBar />
     <body className={`${showAlert ? 'disabled' : ''}`}>
     {showAlert && (<AlertModal
       buttonProps={{ className: 'butt1class' }}

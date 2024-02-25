@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Provider } from '../../contexts/AppStateContext';
 
-function useAppState() {
+function AppStateProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -20,9 +21,13 @@ function useAppState() {
     setSaving(false);
   }
 
-  return {
+  const contextProps = {
     loading, saving, startLoadRequest, endLoadRequest, startSaveRequest, endSaveRequest,
   };
+
+  return (<Provider value={contextProps}>
+      {children}
+    </Provider>);
 }
 
-export default useAppState;
+export default AppStateProvider;
