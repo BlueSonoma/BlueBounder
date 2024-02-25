@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 import '../../styles/new-session.css';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../additional-components/buttons/BackButton';
 import UploadForm from '../additional-components/forms/UploadForm';
+import { useRef } from 'react';
+import AlertModal from '../additional-components/AlertModal';
 
 function NewSession() {
   const [sessionName, setSessionName] = useState('');
   const [csvFilePath, setCsvFilePath] = useState('');
   const navigate = useNavigate();
+  const [showAlert, setShowAlert] = useState(false);
+
+  const sessionNameInputRef = createRef(null);
+  const csvFilePathInputRef = createRef(null);
+  const formRef = createRef(null);
+
+  useEffect(() => {
+    sessionNameInputRef.current?.focus();
+  }, []);
 
   function handleSetSessionName(event) {
     let name = event.target.value;
@@ -21,11 +32,14 @@ function NewSession() {
   }
 
   const handleSubmission = (event) => {
+    event.preventDefault();
+
     if (sessionName === '') {
-      alert('Please enter a session name');
+      setShowAlert(true);
+      sessionNameInputRef.current?.focus();
+      // return alert('Please enter a session name');
       return;
     }
-    event.preventDefault();
     console.log(sessionName);
     console.log(csvFilePath);
 
@@ -48,12 +62,18 @@ function NewSession() {
     <head>
       <title>Blue Segment</title>
     </head>
-    <body>
+    <body className={`${showAlert ? 'disabled' : ''}`}>
+    {showAlert && (<AlertModal
+      buttonProps={{ className: 'butt1class' }}
+      message={'Please enter a session name'}
+      onClose={() => setShowAlert(false)}
+    />)}
     <BackButton />
     <div className={'centered'}>
       <div className={'form_div'}>
-        <form className={'formClass'} onSubmit={handleSubmission}>
+        <form ref={formRef} className={'formClass'} onSubmit={handleSubmission}>
           <input
+            ref={sessionNameInputRef}
             className={'inputClass'}
             type={'text'}
             name={'sessionName'}
@@ -62,6 +82,7 @@ function NewSession() {
             onChange={handleSetSessionName}
           />
           <UploadForm
+            ref={csvFilePathInputRef}
             className={'inputClass'}
             name={'CSV'}
             id={'csvFilePath'}
