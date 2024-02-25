@@ -14,4 +14,4 @@ main = create_app()
 CORS(main)
 
 if __name__ == '__main__':
-    main.run(port=8000, debug=True)
+    main.run(port=8000, debug=True, threaded=True)

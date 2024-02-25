@@ -7,6 +7,10 @@ body {
     height: 100vh;
 }
 
+body.disabled {
+    pointer-events: none;
+}
+
 .formClass {
     display: flex;
     flex-direction: column;
