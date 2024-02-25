@@ -17,6 +17,7 @@ button.tabbed {
     width: 125px;
     max-width: 125px;
     height: 35px;
+    max-height: 35px;
     justify-content: center;
     background: silver;
     border: solid gray;
