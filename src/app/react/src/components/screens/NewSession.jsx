@@ -6,13 +6,16 @@ import UploadForm from '../additional-components/forms/UploadForm';
 import AlertModal from '../additional-components/AlertModal';
 import AppTitleBar from '../AppTitleBar';
 import useAppState from '../../hooks/useAppState';
+import { SessionContext } from '../../contexts/sessionContext.js'; 
+import { useContext } from 'react';
 
 function NewSession() {
   const [sessionName, setSessionName] = useState('');
   const [csvFilePath, setCsvFilePath] = useState('');
   const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
-
+  const { SessionName, updateSessionName } = useContext(SessionContext);
+  
   const sessionNameInputRef = createRef(null);
   const csvFilePathInputRef = createRef(null);
   const formRef = createRef(null);
@@ -27,10 +30,12 @@ function NewSession() {
     let name = event.target.value;
     // Escape any whitespaces in the string
     setSessionName(name);
+    updateSessionName(name);
   }
 
   function handleSetCsvFilePath(event, inputValue) {
     // Escape any whitespaces in the string
+ 
     setCsvFilePath(inputValue);
   }
 

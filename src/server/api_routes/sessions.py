@@ -6,7 +6,7 @@ import imageio
 import numpy as np
 from flask import Blueprint, jsonify
 
-from src.imaging.Magic import find_max_of_chem, get_phase_color, get_chem
+from src.imaging.Magic import *
 from src.server.api_routes import project_root_dir
 
 api = Blueprint('sessions', __name__)
@@ -19,6 +19,7 @@ api = Blueprint('sessions', __name__)
 def api__read_and_create():
     print("Creating starter images...")
     session = flask.request.form['sessionName']
+    original_name=session
     filepath = flask.request.form['csvFilePath']
     Sessions = f'{project_root_dir}/Sessions/'
     session = Sessions + session
@@ -79,12 +80,15 @@ def api__read_and_create():
             imageio.imwrite(Chem_dir + '/SI_fromFile.png', SI_img_uint8)
             imageio.imwrite(Chem_dir + '/K_fromFile.png', K_img_uint8)
 
+            sessionInfo = create_session_JSON_and_return(original_name, filepath, ' ')
+            FolderStructure = create_folder_structure_json(original_name)
+
         return jsonify("Images created successfully", 200)
     except Exception as e:
         return jsonify(e, 500)
 
 
-@api.route('/get_Sessions', methods=['GET'])
+@api.route('/get_sessions', methods=['GET'])
 def api__getSessions():
     print("Getting sessions...")
     try:
@@ -92,5 +96,33 @@ def api__getSessions():
         session_list = os.listdir(Sessions)
         session_json = [{"label": name} for name in session_list]
         return json.dumps(session_json), 200
+    except Exception as e:
+        return str(e), 500
+
+@api.route('/get_session_Info', methods=['GET', 'POST'])
+def api__getSessionJSON():
+    try:
+        if flask.request.method == 'POST':
+            session = flask.request.form['sessionName']
+        else:  
+            session = flask.request.args.get('sessionName')
+
+        _JSON = get_session_JSON(session)
+
+        return jsonify(_JSON, 200)
+    except Exception as e:
+        return str(e), 500
+    
+@api.route('/get_session_Folder', methods=['GET', 'POST'])
+def api__getSessionFolderJSON():
+    try:
+        if flask.request.method == 'POST':
+            session = flask.request.form['sessionName']
+        else:  
+            session = flask.request.args.get('sessionName')
+
+        _JSON = create_folder_structure_json(session)
+
+        return jsonify(_JSON, 200)
     except Exception as e:
         return str(e), 500

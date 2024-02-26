@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from 'react';
-
+import { SessionContext } from '../../../contexts/sessionContext.js'; 
+import { useContext } from 'react';
 import '../../../styles/sidebar.css';
 
 type ListItem = {
@@ -8,37 +9,23 @@ type ListItem = {
 
 function ProjectStructureListView({ children, ...rest }) {
   const [items, setItems] = useState([]);
-
-  function createRandomListItem() {
-    const item = {
-      name: 'File 0', type: 'Temporary File',
-    };
-    const children = [];
-    if (Math.floor(Math.random() * 10) % 2 === 0) {
-      for (let j = 0; j < Math.floor(Math.random() * 10) % 3; j++) {
-        const child = createRandomListItem();
-        child.name = 'File ' + j;
-        children.push(child);
-      }
-    }
-    item.children = children;
-    return item;
-  }
-
+  const { sessionName, updateSessionName } = useContext(SessionContext);
 
   useEffect(() => {
-    const children = [];
-    for (let i = 0; i < 10; i++) {
-      const child = createRandomListItem();
-      child.name = 'File' + i;
-      children.push(child);
-    }
-    const root = {
-      name: 'Root File', type: 'Temporary File', children,
-    };
-
-
-    setItems([root]);
+    const formData = new FormData();
+    formData.append('sessionName', sessionName);
+  
+    fetch('http://localhost:8000/api/sessions/get_session_Folder', {
+        method: 'POST',
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+        const parsedData = JSON.parse(data[0]);
+        setItems([parsedData]); // Wrap the object in an array
+        console.log(parsedData);
+      })
+      .catch(error => console.error('Error:', error));
   }, []);
 
   let itemCounter = 0;

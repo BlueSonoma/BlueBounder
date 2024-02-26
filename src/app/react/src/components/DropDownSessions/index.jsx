@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import '../../styles/dropdown-sessions.css';
+import { SessionContext } from '../../contexts/sessionContext.js'; 
+import { useContext } from 'react';
 
 const Checkbox = ({ children, ...props }: JSX.IntrinsicElements['input']) => (<label style={{ marginRight: '1em' }}>
   <input type='checkbox' {...props} />
   {children}
 </label>);
+
 
 
 function DropSessionsDown() {
@@ -18,9 +21,10 @@ function DropSessionsDown() {
   const [isRtl, setIsRtl] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
-
+  const { sessionName, updateSessionName } = useContext(SessionContext);
+  
   useEffect(() => {
-    fetch('http://localhost:8000/get_Sessions')
+    fetch('http://localhost:8000/api/sessions/get_sessions')
       .then(response => response.json())
       .then(data => {
         console.log(data);
@@ -32,11 +36,16 @@ function DropSessionsDown() {
       });
   }, []);
 
+  const handleNavigate = () => {
+    console.log('Navigating to /home with sessionName:', selectedOption.label);
+    updateSessionName(selectedOption.label);
+    navigate('/home', { state: { sessionname: selectedOption.label } });
+    }
+
   return (<>
     <Select
       className='basic-single'
       classNamePrefix='select'
-      defaultValue={sessions[0]}
       isDisabled={isDisabled}
       isLoading={isLoading}
       isClearable={isClearable}
@@ -84,7 +93,7 @@ function DropSessionsDown() {
       </Checkbox>
     </div>
     <div className='buttonContainer'>
-      <button className='butt1class' onClick={() => navigate('/home')}>Submit</button>
+      <button className='butt1class' onClick={() => handleNavigate()}>Submit</button>
     </div>
   </>);
 }
