@@ -27,7 +27,7 @@ function ProjectStructureListView({ children, ...rest }) {
       })
       .catch(error => console.error('Error:', error));
   }, []);
-
+  
   let itemCounter = 0;
 
   function getChildComponents(item: ListItem, level) {
