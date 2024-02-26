@@ -19,7 +19,7 @@ api = Blueprint('sessions', __name__)
 def api__read_and_create():
     print("Creating starter images...")
     session = flask.request.form['sessionName']
-    original_name=session
+    original_name = session
     filepath = flask.request.form['csvFilePath']
     Sessions = f'{project_root_dir}/Sessions/'
     session = Sessions + session
@@ -80,8 +80,8 @@ def api__read_and_create():
             imageio.imwrite(Chem_dir + '/SI_fromFile.png', SI_img_uint8)
             imageio.imwrite(Chem_dir + '/K_fromFile.png', K_img_uint8)
 
-            sessionInfo = create_session_JSON_and_return(original_name, filepath, ' ')
-            FolderStructure = create_folder_structure_json(original_name)
+            # sessionInfo = create_session_JSON_and_return(original_name, filepath, ' ')
+            # FolderStructure = create_folder_structure_json(original_name)
 
         return jsonify("Images created successfully", 200)
     except Exception as e:
@@ -99,12 +99,13 @@ def api__getSessions():
     except Exception as e:
         return str(e), 500
 
+
 @api.route('/get_session_Info', methods=['GET', 'POST'])
 def api__getSessionJSON():
     try:
         if flask.request.method == 'POST':
             session = flask.request.form['sessionName']
-        else:  
+        else:
             session = flask.request.args.get('sessionName')
 
         _JSON = get_session_JSON(session)
@@ -112,13 +113,14 @@ def api__getSessionJSON():
         return jsonify(_JSON, 200)
     except Exception as e:
         return str(e), 500
-    
+
+
 @api.route('/get_session_Folder', methods=['GET', 'POST'])
 def api__getSessionFolderJSON():
     try:
         if flask.request.method == 'POST':
             session = flask.request.form['sessionName']
-        else:  
+        else:
             session = flask.request.args.get('sessionName')
 
         _JSON = create_folder_structure_json(session)

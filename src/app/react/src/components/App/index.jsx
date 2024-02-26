@@ -4,6 +4,7 @@ import '../../styles/bounder.css';
 import { RoutesComponent } from '../screens/RoutesComponent';
 import useAppState from '../../hooks/useAppState';
 import AppStateProvider from '../AppStateProvider';
+import SessionProvider from '../SessionProvider';
 
 function AppMain() {
   const { loading, saving } = useAppState();
@@ -19,8 +20,10 @@ function AppMain() {
 
 function App() {
   return (<AppStateProvider>
+    <SessionProvider>
       <AppMain />
-    </AppStateProvider>);
+    </SessionProvider>
+  </AppStateProvider>);
 }
 
 export default App;

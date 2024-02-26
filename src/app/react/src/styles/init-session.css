@@ -1,0 +1,12 @@
+.init-session {
+    margin: 0;
+    padding: 0;
+    display: block;
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background: white;
+    overflow: clip;
+    justify-content: center;
+}

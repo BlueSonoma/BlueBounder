@@ -16,6 +16,7 @@ import time
 import json
 import math
 
+
 def get_phase_color(file):
     # skip the first two lines because that's just the header
     print("reading file")
@@ -437,9 +438,10 @@ def create_XA():
     create_A()
     print("Done with creating the masks!")
 
+
 # def createBandContrast():
 #
-#Format of the data array is as follows:
+# Format of the data array is as follows:
 # JSON array of objects
 # Each object has the following properties:
 # 1. PixelXY: [x,y]
@@ -457,7 +459,7 @@ def getCTF_data(filename, page, items_per_page):
     with open(filename, 'r') as file:
         for line in file:
             data = line.split()
-            if(data[0] == "Phase"):
+            if (data[0] == "Phase"):
                 break
 
         for i, line in enumerate(file):
@@ -468,19 +470,19 @@ def getCTF_data(filename, page, items_per_page):
 
             data = line.split()
 
-            eulerAngles= [float(data[5]), float(data[6]), float(data[7])]
+            eulerAngles = [float(data[5]), float(data[6]), float(data[7])]
             pixelXY = [math.ceil(float(data[1])), math.ceil(float(data[2]))]
             MAD = [float(data[8])]
-            BC=[float(data[9])]
-            BS=[float(data[10])]
+            BC = [float(data[9])]
+            BS = [float(data[10])]
             Pixel = [pixelXY, eulerAngles, MAD, BC, BS]
 
             PixelData.append(Pixel)
 
-    return PixelData   
+    return PixelData
+
 
 def getChemical_data(fileName):
-    
     with open(fileName, 'r') as file:
         file.seek(0)
         file.readline()
@@ -490,31 +492,55 @@ def getChemical_data(fileName):
             line = line.split(",")
             XY = [int(line[1]), int(line[2])]
             chemical_values = line[6].split(' ')
-            pixel = [XY,chemical_values]
+            pixel = [XY, chemical_values]
             pixelChemicalData.append(pixel)
 
         return pixelChemicalData
-    
-def create_folder_structure_dict(path): 
-    result = {'name': os.path.basename(path), 'type': 'folder', 'children': []} 
 
-    if os.path.isdir(path): 
-        for entry in os.listdir(path): 
-            entry_path = os.path.join(path, entry) 
 
-            if os.path.isdir(entry_path): 
-                result['children'].append(create_folder_structure_dict(entry_path)) 
-            else: 
-                result['children'].append({'name': entry, 'type': 'file'}) 
+def create_folder_structure_dict(path):
+    result = {'name': os.path.basename(path), 'type': 'folder', 'children': []}
+
+    if os.path.isdir(path):
+        for entry in os.listdir(path):
+            entry_path = os.path.join(path, entry)
+
+            if os.path.isdir(entry_path):
+                result['children'].append(create_folder_structure_dict(entry_path))
+            else:
+                result['children'].append({'name': entry, 'type': 'file'})
 
     return result
 
-def create_folder_structure_json(SessionName): 
+
+def create_folder_structure_json(SessionName):
     try:
         path = 'Sessions/' + SessionName
         folder_dict = create_folder_structure_dict(path)
-        folder_json_str = json.dumps(folder_dict, indent=4) 
+        folder_json_str = json.dumps(folder_dict, indent=4)
         return folder_json_str
     except Exception as e:
         return str(e), 500
 
+
+def create_session_JSON_and_return(sessionName, csvFilePath, ctfFilePath, grainStepSize=10):
+    sessionInfo_path = 'Sessions/' + sessionName + '/session.json'
+    session = {
+        "sessionName": sessionName,
+        "csvFilePath": csvFilePath,
+        "ctfFilePath": ctfFilePath,
+        "grainStepSize": grainStepSize
+    }
+
+    with open(sessionInfo_path, 'x') as file:
+        json.dump(session, file)
+
+    sessionInfo = get_session_JSON(sessionName)
+    return sessionInfo
+
+
+def get_session_JSON(sessionName):
+    sessionInfo_path = 'Sessions/' + sessionName + '/session.json'
+    with open(sessionInfo_path, 'r') as file:
+        session = json.load(file)
+    return session

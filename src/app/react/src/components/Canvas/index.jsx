@@ -340,8 +340,7 @@ function Canvas({ children }) {
 }
 
 function CanvasView({ children }) {
-  return (
-    <ReactFlowProvider>
+  return (<ReactFlowProvider>
     <SelectorModeProvider>
       <Canvas>{children}</Canvas>
     </SelectorModeProvider>

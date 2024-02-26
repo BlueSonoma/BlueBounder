@@ -6,7 +6,7 @@ import AppTitleBar from '../AppTitleBar';
 function Start() {
   const navigate = useNavigate();
 
-  return (<div>
+  return (<div className={'start'}>
     <AppTitleBar/>
     {/* <div id="title-bar">
                 <h1 id="title">Blue Segment</h1>

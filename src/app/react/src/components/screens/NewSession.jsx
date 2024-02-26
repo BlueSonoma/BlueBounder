@@ -1,41 +1,57 @@
 import React, { createRef, useEffect, useState } from 'react';
 import '../../styles/new-session.css';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BackButton from '../additional-components/buttons/BackButton';
 import UploadForm from '../additional-components/forms/UploadForm';
 import AlertModal from '../additional-components/AlertModal';
 import AppTitleBar from '../AppTitleBar';
-import useAppState from '../../hooks/useAppState';
-import { SessionContext } from '../../contexts/sessionContext.js'; 
-import { useContext } from 'react';
+import useSession from '../../hooks/useSession';
 
 function NewSession() {
-  const [sessionName, setSessionName] = useState('');
-  const [csvFilePath, setCsvFilePath] = useState('');
-  const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
-  const { SessionName, updateSessionName } = useContext(SessionContext);
-  
-  const sessionNameInputRef = createRef(null);
-  const csvFilePathInputRef = createRef(null);
-  const formRef = createRef(null);
+  const [alertMessage, setAlertMessage] = useState('');
 
-  const appState = useAppState();
+  const sessionNameInputRef = createRef();
+  const csvFilePathInputRef = createRef();
+  const formRef = createRef();
+
+  const { sessionName, setSessionName, csvFilePath, setCsvFilePath } = useSession();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log(location);
+    const formData = location.state?.formData;
+
+    if (typeof formData !== 'undefined') {
+      if (typeof formData.name !== 'undefined') {
+        setSessionName(formData.name);
+      }
+      if (typeof formData.path !== 'undefined') {
+        setCsvFilePath(formData.path);
+        console.log(formData.path);
+      }
+    }
+    const error = location.state?.error;
+    if (typeof error !== 'undefined') {
+      setShowAlert(true);
+      setAlertMessage(error);
+    }
+
+    console.log(sessionName);
+    console.log(csvFilePath);
+
+  }, []);
 
   useEffect(() => {
     sessionNameInputRef.current?.focus();
   }, []);
 
   function handleSetSessionName(event) {
-    let name = event.target.value;
-    // Escape any whitespaces in the string
-    setSessionName(name);
-    updateSessionName(name);
+    setSessionName(event.target.value);
   }
 
   function handleSetCsvFilePath(event, inputValue) {
-    // Escape any whitespaces in the string
- 
     setCsvFilePath(inputValue);
   }
 
@@ -44,33 +60,19 @@ function NewSession() {
 
     if (sessionName === '') {
       setShowAlert(true);
+      setAlertMessage('Please enter a session name');
       sessionNameInputRef.current?.focus();
-      // return alert('Please enter a session name');
       return;
     }
 
-    appState.startLoadRequest();
+    // console.log(sessionName);
+    // console.log(csvFilePath);
 
-    console.log(sessionName);
-    console.log(csvFilePath);
+    const formData = {
+      name: sessionName, path: csvFilePath,
+    };
 
-    const formData = new FormData();
-    formData.append('csvFilePath', csvFilePath);
-    formData.append('sessionName', sessionName);
-
-
-    fetch('http://localhost:8000/api/sessions/create_starter_images', {
-      method: 'POST', body: formData,
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        appState.endLoadRequest();
-        navigate('/home');
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+    navigate('/initSession', { state: { formData: formData } });
   };
 
   return (<>
@@ -78,8 +80,11 @@ function NewSession() {
     <body className={`${showAlert ? 'disabled' : ''}`}>
     {showAlert && (<AlertModal
       buttonProps={{ className: 'butt1class' }}
-      message={'Please enter a session name'}
-      onClose={() => setShowAlert(false)}
+      message={alertMessage}
+      onClose={() => {
+        setShowAlert(false);
+        setAlertMessage('');
+      }}
     />)}
     <BackButton />
     <div className={'centered'}>
@@ -92,6 +97,7 @@ function NewSession() {
             name={'sessionName'}
             id={'sessionName'}
             placeholder={'Session Name'}
+            value={sessionName}
             onChange={handleSetSessionName}
           />
           <UploadForm
@@ -100,6 +106,7 @@ function NewSession() {
             name={'CSV'}
             id={'csvFilePath'}
             placeholder={'CSV File path (optional)'}
+            textValue={csvFilePath}
             acceptTypes={'.csv, .xlsx'}
             onChange={handleSetCsvFilePath}
             browseButtonProps={{

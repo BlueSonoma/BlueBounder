@@ -14,7 +14,7 @@ function AlertModal({ id, style, className, message, title, onClose, buttonProps
     style={{ ...style, opacity: 1 }}
     title={title}
     {...rest}>
-    <>{message}</>
+    <label>{message}</label>
     <Button
       className={buttonProps.className}
       style={{
