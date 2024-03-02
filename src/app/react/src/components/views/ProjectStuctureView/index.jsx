@@ -30,6 +30,10 @@ function ProjectStructureListView({ children, ...rest }) {
   let itemCounter = 0;
 
   function getChildComponents(item: ListItem, level) {
+    if (!item) {
+      return null;
+    }
+  
     return (<>
       <label key={itemCounter++} style={{ padding: '5px' }}>{item.name}</label>
       {item.children?.map((child) => {

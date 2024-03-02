@@ -518,13 +518,14 @@ def create_folder_structure_json(SessionName):
         path = 'Sessions/' + SessionName
         folder_dict = create_folder_structure_dict(path)
         folder_json_str = json.dumps(folder_dict, indent=4)
-        return folder_json_str
+        
     except Exception as e:
         return str(e), 500
 
 
-def create_session_JSON_and_return(sessionName, csvFilePath, ctfFilePath, grainStepSize=10):
-    sessionInfo_path = 'Sessions/' + sessionName + '/session.json'
+def create_session_JSON_and_return(cur_directory,sessionName, csvFilePath, ctfFilePath, grainStepSize=10):
+    sessionInfo_path = cur_directory+'/session.json'
+    print(sessionInfo_path)
     session = {
         "sessionName": sessionName,
         "csvFilePath": csvFilePath,
@@ -535,12 +536,17 @@ def create_session_JSON_and_return(sessionName, csvFilePath, ctfFilePath, grainS
     with open(sessionInfo_path, 'x') as file:
         json.dump(session, file)
 
-    sessionInfo = get_session_JSON(sessionName)
-    return sessionInfo
+    
 
 
-def get_session_JSON(sessionName):
-    sessionInfo_path = 'Sessions/' + sessionName + '/session.json'
-    with open(sessionInfo_path, 'r') as file:
-        session = json.load(file)
-    return session
+def get_session_JSON(sessionJSON):
+    try:
+        with open(sessionJSON, 'r') as file:
+            session = json.load(file)
+        return session
+    except FileNotFoundError:
+        print(f"File not found: {sessionJSON}")
+    except OSError:
+        print(f"File could not be read: {sessionJSON}")
+    except json.JSONDecodeError:
+        print(f"File does not contain valid JSON: {sessionJSON}")
