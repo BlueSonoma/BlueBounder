@@ -22,6 +22,7 @@ function ProjectInformationView({ children, ...rest }) {
         .then(response => response.json())
         .then(([data, status]) => {
           if (status === 200) {
+            console.log(data);
             setProjectName(data.sessionName);
             setCsvFilePath(data.csvFilePath);
             setCtfFilePath(data.ctfFilePath);

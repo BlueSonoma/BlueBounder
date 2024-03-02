@@ -80,8 +80,8 @@ def api__read_and_create():
             imageio.imwrite(Chem_dir + '/SI_fromFile.png', SI_img_uint8)
             imageio.imwrite(Chem_dir + '/K_fromFile.png', K_img_uint8)
 
-            # sessionInfo = create_session_JSON_and_return(original_name, filepath, ' ')
-            # FolderStructure = create_folder_structure_json(original_name)
+            create_session_JSON_and_return(session,original_name, filepath, ' ')
+            create_folder_structure_json(original_name)
 
         return jsonify("Images created successfully", 200)
     except Exception as e:
@@ -107,9 +107,11 @@ def api__getSessionJSON():
             session = flask.request.form['sessionName']
         else:
             session = flask.request.args.get('sessionName')
-
-        _JSON = get_session_JSON(session)
-
+        print(f"Getting session info for {session}...")
+        cur_directory =f'{project_root_dir}/Sessions/'
+        sessionJSON= cur_directory + session + '/session.json'
+        _JSON = get_session_JSON(sessionJSON)
+        
         return jsonify(_JSON, 200)
     except Exception as e:
         return str(e), 500
@@ -122,8 +124,9 @@ def api__getSessionFolderJSON():
             session = flask.request.form['sessionName']
         else:
             session = flask.request.args.get('sessionName')
-
-        _JSON = create_folder_structure_json(session)
+        cur_directory =f'{project_root_dir}/Sessions/'
+        sessionJSON= cur_directory + session + '/session.json'
+        _JSON = create_folder_structure_json(sessionJSON)
 
         return jsonify(_JSON, 200)
     except Exception as e:

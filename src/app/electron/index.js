@@ -6,7 +6,7 @@ const createWindow = () => {
     width: 800, height: 600, minWidth: 800, minHeight: 600, // titleBarStyle: "hidden",
   });
   win.loadFile('./app/react/build/index.html').then(() => console.log('File loaded'));
-  // win.webContents.openDevTools();
+  win.webContents.openDevTools();
 };
 
 app.whenReady().then(createWindow);
