@@ -1,0 +1,8 @@
+.grid-table{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+    "tab-bar"
+    "body";
+}
