@@ -9,17 +9,17 @@ function ImageNode(props: NodeProps) {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    if (data?.url) {
-      setImage(data.url);
+    if (data?.src) {
+      setImage(data.src);
     }
-  }, [data?.url]);
+  }, [data?.src]);
 
-  if (!data?.url) {
+  if (!data?.src) {
     return;
   }
 
   return (<div id={id}>
-    <img src={image} alt={`image_${id}`} />
+    <img src={image} alt={`image_${id}`} width={data.width} height={data.height} />
   </div>);
 }
 
