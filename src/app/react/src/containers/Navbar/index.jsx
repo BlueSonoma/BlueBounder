@@ -2,9 +2,9 @@ import { memo } from 'react';
 
 import '../../styles/navbar.css';
 import '../../styles/bounder.css';
-import { Panel } from '@xyflow/react';
 import { DockPanelPosition } from '../../types/general';
 import { HTMLProps } from 'react';
+import Panel from '../Panel';
 
 type NavbarProps = HTMLProps & {
   position: DockPanelPosition, drawerProps: any, showDrawer?: boolean,

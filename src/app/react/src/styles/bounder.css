@@ -3,11 +3,10 @@
     height: 100vh;
     display: grid;
     grid-template-columns: auto auto 1fr auto auto;
-    grid-template-rows: auto 1fr auto auto auto auto;
+    grid-template-rows: auto 1fr auto auto auto;
     grid-template-areas:
     "top-navbar top-navbar top-navbar top-navbar top-navbar"
     "left-navbar left-sidebar viewport right-sidebar right-navbar"
-    "left-navbar left-sidebar viewport-footer right-sidebar right-navbar"
     "left-navbar left-sidebar bottom-sidebar right-sidebar right-navbar"
     "left-navbar left-sidebar bottom-navbar right-sidebar right-navbar"
     "footer-navbar footer-navbar footer-navbar footer-navbar footer-navbar ";
@@ -17,6 +16,8 @@
 }
 
 .bounder .viewport {
+    width: 100%;
+    height:100%;
     position: relative;
     right: 3px;
     border: groove rgba(170, 170, 170, 0.4);
@@ -54,10 +55,6 @@
 
 .viewport {
     grid-area: viewport;
-}
-
-.viewport-footer {
-    grid-area: viewport-footer;
 }
 
 .bounder__sidebar.right {

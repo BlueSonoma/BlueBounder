@@ -1,21 +1,15 @@
-import {
-  BackgroundVariant, Panel, Position, ReactFlow, ReactFlowProvider, useNodesState, Background,
-} from '@xyflow/react';
 import React, { memo, useEffect, useState } from 'react';
-import useViewport from '../../hooks/useViewport';
-import { nodeTypes } from '../component-types';
 import '../../styles/bounder.css';
 import '../../resources/images/test_image1.png';
 import SelectorModeProvider from '../SelectorModeProvider';
 import useSelectorMode from '../../hooks/useSelectorMode';
-import { SelectorModes } from '../../utils/selector-modes';
-import ModeSelector from '../additional-components/ModeSelector';
 import Button from '../additional-components/buttons/Button';
 import IconLiveFolder from '../../resources/icons/live-folder.png';
 import IconMaps from '../../resources/icons/map.png';
 import IconCleanUp from '../../resources/icons/clean-up.png';
 import IconGrainSize from '../../resources/icons/polygon-grain.png';
 import IconPixelData from '../../resources/icons/table-data.png';
+import IconClassify from '../../resources/icons/classify.png';
 
 import '../../styles/sidebar.css';
 import '../../styles/navbar.css';
@@ -23,35 +17,33 @@ import '../../styles/navbar.css';
 import { DockPanelPosition } from '../../types/general';
 import Navbar from '../../containers/Navbar';
 import ImageUploadForm from '../additional-components/forms/ImageUploadForm';
-import ViewportMetricsBar from '../ViewportMetricsBar';
 import BottomSidebar from '../BottomSidebar';
 import SettingsSidebar from '../SettingsSidebar';
 import ProjectSidebar from '../ProjectSidebar';
 import AppTitleBar from '../AppTitleBar';
+import useSession from '../../hooks/useSession';
+import Viewport from '../Viewport';
+import TabbedPanel from '../TabbedPanel';
+import { ReactFlowProvider } from '@xyflow/react';
+import { getFilenameFromUrl, getNextId } from '../../utils/general';
 
 function Canvas({ children }) {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const {
-    screenToFlowPosition, minZoom, setMinZoom, maxZoom, setMaxZoom, zoom, setViewportExtent, getViewportExtent, fitView,
-  } = useViewport();
+  const [nodes, setNodes] = useState([]);
+  // const {
+  //   screenToFlowPosition, minZoom, setMinZoom, maxZoom, setMaxZoom, zoom, setViewportExtent, getViewportExtent, fitView,
+  // } = useViewport();
   const { selectorMode, setSelectorMode } = useSelectorMode();
   const [showLeftDrawer, setShowLeftDrawer] = useState(true);
   const [showRightDrawer, setShowRightDrawer] = useState(true);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
 
+  const [viewports, setViewports] = useState([]);
+
+  const session = useSession();
+
   // TODO: Must have access to ImageNode dimensions to calculate the extent and zoom
   const width = 3523;
   const height = 2028;
-
-  useEffect(() => {
-    const padding = {
-      x: maxZoom + width * (1 / 2), y: maxZoom + height * (1 / 2),
-    };
-
-    const extentUpperLeft = [-padding.x, -padding.y];
-    const extentLowerRight = [width + padding.x, height + padding.y];
-    setViewportExtent([extentUpperLeft, extentLowerRight]);
-  }, []);
 
   useEffect(() => {
     //TODO: This should be moved to a function that gets called on only two occasions:
@@ -60,90 +52,61 @@ function Canvas({ children }) {
     // fitView(nodes, { duration: 0 });
   }, [nodes]);
 
-  function onInit() {
-    // The zoom is set such that it allows a full view of the image plus some extra.
-    // Removes the unnecessary ability to zoom too far out.
-    const zoom = Math.abs(1.5 - (width + height) / Math.sqrt(width * width + height * height));
-    setMinZoom(zoom);
-    setMaxZoom(20);
-  }
 
   function onCanvasClickHandler(event) {
-    if (selectorMode === SelectorModes.AddEllipse) {
-      // Deselect any selected nodes
-      const prevNodes = nodes.map((node) => {
-        return {
-          ...node, selected: false,
-        };
-      });
-
-      // Make the new ellipse node
-      const initialWidth = 100;
-      const initialHeight = 100;
-      const initialRadius = initialWidth / 2;
-
-      const position = screenToFlowPosition(event.clientX - initialRadius * zoom, event.clientY - initialRadius * zoom);
-
-      const ellipse = {
-        id: `ellipse_${nodes.length}`, type: 'ellipseNode', position, data: {
-          initialWidth, initialHeight,
-        }, selected: true, draggable: true,
-      };
-      setNodes([...prevNodes, ellipse]);
-    }
-
-    if (nodes.length > 0 && selectorMode === SelectorModes.FreeMove) {
-      const { x, y } = screenToFlowPosition(event.clientX, event.clientY);
-      if (x < 0 || x > width - 1 || y < 0 || y > height - 1) {
-        return;
-      }
-
-      const row = Math.round(x);
-      const col = Math.round(y);
-      console.log(row, col);
-
-      /* Get grain boundary and create GrainNode */
-      // const imgNode = nodes.find((node) => node.id === 'imageNode_1');
-      // const pixelValues = [];
-      // for (let i = 0; i < 3; i++) {
-      //   pixelValues.push(imgNode.data.bytes.at(i)?.at(row)?.at(col));
-      // }
-      // console.log(pixelValues);
-    }
+    // if (selectorMode === SelectorModes.AddEllipse) {
+    //   // Deselect any selected nodes
+    //   const prevNodes = nodes.map((node) => {
+    //     return {
+    //       ...node, selected: false,
+    //     };
+    //   });
+    //
+    //   // Make the new ellipse node
+    //   const initialWidth = 100;
+    //   const initialHeight = 100;
+    //   const initialRadius = initialWidth / 2;
+    //
+    //   const position = screenToFlowPosition(event.clientX - initialRadius * zoom, event.clientY - initialRadius * zoom);
+    //
+    //   const ellipse = {
+    //     id: `ellipse_${nodes.length}`, type: 'ellipseNode', position, data: {
+    //       initialWidth, initialHeight,
+    //     }, selected: true, draggable: true,
+    //   };
+    //   setNodes([...prevNodes, ellipse]);
+    // }
+    //
+    // if (nodes.length > 0 && selectorMode === SelectorModes.FreeMove) {
+    //   const { x, y } = screenToFlowPosition(event.clientX, event.clientY);
+    //   if (x < 0 || x > width - 1 || y < 0 || y > height - 1) {
+    //     return;
+    //   }
+    //
+    //   const row = Math.round(x);
+    //   const col = Math.round(y);
+    //   console.log(row, col);
+    //
+    //   /* Get grain boundary and create GrainNode */
+    //   // const imgNode = nodes.find((node) => node.id === 'imageNode_1');
+    //   // const pixelValues = [];
+    //   // for (let i = 0; i < 3; i++) {
+    //   //   pixelValues.push(imgNode.data.bytes.at(i)?.at(row)?.at(col));
+    //   // }
+    //   // console.log(pixelValues);
+    // }
   }
 
-  function setImage(event) {
-    const image = event.target.files[0];
+  function setImageFromFile(event) {
+    const file = event.target.files[0];
 
-    if (!image) {
+    if (!file) {
       return;
-    }
-
-    // Find the previous image (if it exists)
-    const index = nodes.findIndex((node) => node.type === 'imageNode');
-
-    let node;
-    if (index === -1) {
-      // Create the new node if not found
-      node = {
-        id: 'imageNode_1',
-        type: 'imageNode',
-        position: { x: 0, y: 0 },
-        selectable: false,
-        focusable: true,
-        draggable: false,
-        deletable: false,
-      };
-    } else {
-      // Remove it from the collections. When it's added back later, React Flow will be notified to update the state
-      node = nodes.at(index);
-      nodes.splice(index, 1, node);
     }
 
     const reader = new FileReader();
     // FileReader handles this asynchronously, so we define the callback to execute once its finished loading
     reader.onload = () => {
-      const url = reader.result;
 
       //FIXME: Coordinates go beyond the width and height of the image, even in the negative direction??
       //  This is due to incorrect parsing of the image. Need to find the protocol/package to decode it.
@@ -173,25 +136,55 @@ function Canvas({ children }) {
           }
        */
 
-      node.data = {
-        url: url, file: image, // bytes: bytes,
+      const url = reader.result;
+
+
+      // Load the image to get its dimensions to be used later when rendering the viewport for the first time
+      const image = new Image();
+      image.src = url;
+
+      // Don't add the same image
+      if (typeof nodes.find((nd) => nd.data.src === image.src) !== 'undefined') {
+        return;
+      }
+
+      image.onload = () => {
+        const filename = getFilenameFromUrl(file.name);
+
+        // Create the node
+        const node = {
+          id: `imageNode_${getNextId()}`,
+          type: 'imageNode',
+          position: { x: 0, y: 0 },
+          selectable: false,
+          focusable: true,
+          draggable: false,
+          deletable: false,
+          data: {
+            width: image.width,
+            height: image.height,
+            src: image.src,
+            file: file,
+            viewport: `Viewport_${viewports.length + 1}`,
+          },
+        };
+
+        setNodes([...nodes, node]);
+        setViewports([...viewports, { id: node.data.viewport }]);
       };
-      setNodes([...nodes, node]);
     };
-    reader.readAsDataURL(image);
+    reader.readAsDataURL(file);
   }
 
   function renderFileLoader() {
-    return (<>
-      <ImageUploadForm
-        className={'bounder__mode-selector'}
-        textForm={false}
-        browseButtonProps={{
-          imageUrl: IconLiveFolder, label: 'Open...',
-        }}
-        onChange={setImage}
-      />
-    </>);
+    return (<ImageUploadForm
+      className={'bounder__mode-selector'}
+      textForm={false}
+      browseButtonProps={{
+        imageUrl: IconLiveFolder, label: 'Open...',
+      }}
+      onChange={setImageFromFile}
+    />);
   }
 
   function renderTopNavbarButtons() {
@@ -248,38 +241,43 @@ function Canvas({ children }) {
         imageUrl={IconGrainSize}
         label={'Grain Size'}
       />
+      <Button
+        id={'button__classify'}
+        onClick={() => {
+          if (showRightDrawer) {
+            setShowRightDrawer(false);
+            return;
+          }
+          setShowRightDrawer(true);
+        }}
+        imageUrl={IconClassify}
+        label={'Classify'}
+      />
     </div>);
   }
 
   function renderViewport() {
-    return (<>
-      <AppTitleBar />
-      <ReactFlow
-        className={'viewport'} // className={'dark'}
-        onInit={onInit}
-        fitView={true}
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        nodesDraggable={false}
-        onNodesChange={onNodesChange}
-        maxZoom={maxZoom}
-        minZoom={minZoom}
-        translateExtent={getViewportExtent()}
-        onClick={onCanvasClickHandler}
-      >
-        <Panel position={Position.Top}>
-          <ModeSelector />
-        </Panel>
-        <Background variant={BackgroundVariant.Lines} lineWidth={0.5} gap={100} color={'#303030'} />
-      </ReactFlow>
-      <ViewportMetricsBar
-        className={'bounder__mode-selector'}
-        onFitView={() => fitView(nodes)}
-        zoom={zoom}
-        minZoom={minZoom}
-        maxZoom={maxZoom}
-      />
-    </>);
+    const viewportComponents = viewports.map((viewport) => {
+      let label = `${viewport.id}`;
+      const vpNodes = nodes.filter((nd) => {
+        if (nd.data.viewport === viewport.id) {
+          label = nd.data.file.name;
+          return true;
+        }
+        return false;
+      });
+      return {
+        label: label, component: Viewport, props: {
+          id: viewport.id, nodes: vpNodes, onClick: onCanvasClickHandler,
+        },
+      };
+    });
+
+    return (<TabbedPanel
+      className={'viewport'}
+      position={DockPanelPosition.Center}
+      tabComponents={viewportComponents}
+    />);
   }
 
   function renderTopNavbar() {
@@ -329,6 +327,7 @@ function Canvas({ children }) {
   }
 
   return (<div id={'bounder__canvas'} className={'bounder'}>
+    <AppTitleBar />
     {renderTopNavbar()}
     {renderLeftNavbar()}
     {renderViewport()}
@@ -340,11 +339,9 @@ function Canvas({ children }) {
 }
 
 function CanvasView({ children }) {
-  return (<ReactFlowProvider>
-    <SelectorModeProvider>
-      <Canvas>{children}</Canvas>
-    </SelectorModeProvider>
-  </ReactFlowProvider>);
+  return (<SelectorModeProvider>
+    <Canvas>{children}</Canvas>
+  </SelectorModeProvider>);
 }
 
 CanvasView.displayName = 'CanvasView';

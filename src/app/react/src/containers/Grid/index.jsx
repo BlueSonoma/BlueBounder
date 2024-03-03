@@ -1,0 +1,1 @@
+export {Grid2Column} from './Grid2Column'

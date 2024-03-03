@@ -1,0 +1,39 @@
+.canvas {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: auto 30px;
+    grid-template-areas:
+    "viewport"
+    "viewport-footer";
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+.canvas .viewport {
+    grid-area: viewport;
+}
+
+.canvas .viewport-footer {
+    grid-area: viewport-footer;
+}
+
+.canvas .viewport {
+    background: white;
+    /*width: inherit;*/
+    /*height: 100vh;*/
+    position: relative;
+    right: 3px;
+    border: groove rgba(170, 170, 170, 0.4);
+}
+
+.canvas .viewport-footer {
+    display: flex;
+    width: inherit;
+    height: 30px;
+    background: whitesmoke;
+    justify-content: space-between;
+    align-items: center;
+}

@@ -3,6 +3,7 @@ export const DockPanelPosition = {
   Right: 'right',
   Top: 'top',
   Bottom: 'bottom',
+  Center: 'center',
   TopLeft: 'top-left',
   TopCenter: 'top-center',
   TopRight: 'top-right',

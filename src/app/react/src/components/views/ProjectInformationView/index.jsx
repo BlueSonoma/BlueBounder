@@ -2,12 +2,13 @@ import { memo } from 'react';
 import { useState, useEffect } from 'react';
 import useSession from '../../../hooks/useSession';
 import { HOST_URL } from '../../../index';
+import { Grid2Column } from '../../../containers/Grid';
 
 
 function ProjectInformationView({ children, ...rest }) {
   const [projectName, setProjectName] = useState('');
-  const [CTFFilePath, setCtfFilePath] = useState('');
-  const [StepSize, setStepSize] = useState(10);
+  const [ctfFilePath, setCtfFilePath] = useState('');
+  const [stepSize, setStepSize] = useState(10);
   const { sessionName, csvFilePath, setCsvFilePath } = useSession();
 
 
@@ -39,12 +40,18 @@ function ProjectInformationView({ children, ...rest }) {
 
   console.log(`This is the session name in ProjectInfo: ${sessionName}`);
 
-  return (<div style={{ padding: '5px', border: '2px inset lightgray' }}>
+  const gridData = [{
+    label: 'Project Name', content: projectName,
+  }, {
+    label: 'CSV Filepath', content: csvFilePath,
+  }, {
+    label: 'CTF Filepath', content: ctfFilePath,
+  }, {
+    label: 'Step Size', content: stepSize,
+  }];
 
-    <div>Project Name: {projectName.substring(0, 20)}</div>
-    <div>CSV-File-path: {csvFilePath.substring(0, 20)}</div>
-    <div>CTF-File-path: {CTFFilePath.substring(0, 20)}</div>
-    <div>Step Size: {StepSize}</div>
+  return (<div style={{ padding: '5px', border: '2px inset lightgray' }}>
+    <Grid2Column data={gridData} />
   </div>);
 }
 
