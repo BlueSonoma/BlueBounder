@@ -1,21 +1,42 @@
-div.tab-container {
+.bounder__tabbed {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 40px auto;
+    grid-template-areas:
+    "tab-bar"
+    "body";
+    box-sizing: border-box;
+    margin: unset;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    border: groove rgba(170, 170, 170, 0.4);
+    z-index: 1;
+    background: whitesmoke;
+}
+
+div.tab-bar {
+    grid-area: tab-bar;
     display: flex;
-    flex-flow: nowrap;
     width: auto;
-    overflow: hidden;
-    scrollbar-width: none;
-    padding-bottom: 5px;
+    overflow: clip;
+    height: 40px;
 }
 
-div.tab-container:hover {
+div.tab-bar:hover {
     overflow: auto;
-    /*scrollbar-width: thin;*/
+    scrollbar-width: none;
 }
 
-button.tabbed {
-    /*width: fit-content;*/
-    width: 125px;
-    max-width: 125px;
+.tab-bar button.tab {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    width: 150px;
+    max-width: 150px;
+    padding-left: 10px;
+    padding-right: 10px;
     height: 35px;
     max-height: 35px;
     justify-content: center;
@@ -23,10 +44,30 @@ button.tabbed {
     border: solid gray;
 }
 
-.tabbed > label {
+.tab-bar button.tab label {
     text-align: center;
+    position: absolute;
+    left: 50%;
+    /*width: 120px;*/
+    max-width: calc(100% - 10px);
     pointer-events: none;
     text-overflow: ellipsis;
+    transform: translateX(-50%);
     white-space: nowrap;
     overflow: hidden;
+}
+
+.bounder__tabbed .content-container {
+    grid-area: body;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.content-container .tab-content {
+    /*position: relative;*/
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }

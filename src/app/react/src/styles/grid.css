@@ -1,8 +1,27 @@
-.grid-table{
+.grid-container {
+    height: auto;
+    width: 100%;
+}
+
+.grid-container .row {
     display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    grid-template-areas:
-    "tab-bar"
-    "body";
+    grid-template-columns: auto 1fr;
+    gap: 5px;
+    padding: 5px;
+    align-items: start;
+}
+
+.grid-container .label {
+    grid-column: 1;
+    white-space: nowrap;
+}
+
+.grid-container .content {
+    grid-column: 2;
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 100%;
+    white-space: nowrap;
+    text-wrap: none;
+    padding: 0 5px 0 5px;
 }
