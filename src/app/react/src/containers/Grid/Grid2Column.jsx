@@ -8,7 +8,7 @@ type GridData = {
 
 const DEFAULT_LABEL_WIDTH = 110;
 
-export const Grid1x2 = memo(({ data }) => {
+export const Grid2Column = memo(({ data }) => {
   const labelWidth = useMemo(() => {
     if (!Array.isArray(data)) {
       data = [data];
