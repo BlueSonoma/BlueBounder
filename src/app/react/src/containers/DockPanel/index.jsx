@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Panel } from '@xyflow/react';
+import Panel from '../Panel';
 
 const DockPanel = ({ id, className, position, show = true, children, ...rest }) => {
   if (!show) {
