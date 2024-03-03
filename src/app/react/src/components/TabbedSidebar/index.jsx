@@ -6,7 +6,7 @@ import '../../styles/mode-selector.css';
 import Sidebar from '../../containers/Sidebar';
 import Button from '../additional-components/buttons/Button';
 
-const TabbedSidebar = ({ id, show, className, position, tabComponents, children, ...rest }) => {
+const TabbedSidebar = ({ id, style, show, className, position, tabComponents, children, ...rest }) => {
   const [selectedTabIndex, setSelectedTabIndex] = useState(null);
 
   useEffect(() => {
@@ -55,25 +55,32 @@ const TabbedSidebar = ({ id, show, className, position, tabComponents, children,
     }
   }
 
-  return (<Sidebar id={id} position={position} className={className} show={show} {...rest}>
-      <div className={'tab-container'}>
-        {labels?.map((label, idx) => {
-          return (<Button
-              key={idx}
-              className={'tabbed'}
-              title={label}
-              label={label}
-              onClick={(event) => onTabClickedHandler(event, idx)}
-            />);
-        })}
-      </div>
-      <div
-        style={{
-          borderTop: labels?.length > 0 ? 'solid gray 2px' : '',
-        }}
-      >
-        {selectedComponent}
-      </div>
-    </Sidebar>);
+  return (<Sidebar
+    id={id}
+    position={position}
+    className={className}
+    show={show}
+    style={style}
+    {...rest}
+  >
+    <div className={'tab-bar'}>
+      {labels?.map((label, idx) => {
+        return (<Button
+          key={idx}
+          className={'tab'}
+          title={label}
+          label={label}
+          onClick={(event) => onTabClickedHandler(event, idx)}
+        />);
+      })}
+    </div>
+    <div className={'content-container'}
+         style={{
+           borderTop: labels?.length > 0 ? 'solid gray 2px' : '',
+         }}
+    >
+      {selectedComponent}
+    </div>
+  </Sidebar>);
 };
 export default memo(TabbedSidebar);

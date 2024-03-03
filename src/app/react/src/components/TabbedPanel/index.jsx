@@ -1,53 +1,53 @@
 import { memo, useEffect, useState } from 'react';
 
-import '../../styles/sidebar.css';
 import '../../styles/tabbed.css';
 import '../../styles/mode-selector.css';
-import Sidebar from '../../containers/Sidebar';
 import Button from '../additional-components/buttons/Button';
+import Panel from '../../containers/Panel';
 
-const TabbedSidebar = ({ id, style, show, className, position, tabComponents, children, ...rest }) => {
-  const [selectedTabIndex, setSelectedTabIndex] = useState(null);
+function getInitialTabsLength(components) {
+  if (typeof components === 'undefined') {
+    return 0;
+  }
+  if (!Array.isArray(components)) {
+    components = [components];
+  }
+  return components.length;
+}
+
+const TabbedPanel = ({ id, style, show, className, position, tabComponents, children, ...rest }) => {
+  const [selectedTabIndex, setSelectedTabIndex] = useState(-1);
+  const [tabsLength, setTabsLength] = useState(getInitialTabsLength(tabComponents));
 
   useEffect(() => {
-    if (!selectedTabIndex && tabComponents.length > 0) {
-      setSelectedTabIndex(0);
+    if (typeof tabComponents === 'undefined') {
+      return;
     }
-  }, []);
+    if (!Array.isArray(tabComponents)) {
+      tabComponents = [tabComponents];
+    }
 
-  useEffect(() => {
-    if (selectedTabIndex && selectedTabIndex >= tabComponents.length) {
-      setSelectedTabIndex(0);
+    const length = tabComponents.length;
+
+    // A tab was deleted, make no change
+    if (tabsLength > length) {
+      return;
     }
+
+    // Set the active tab as the newly added component
+    setSelectedTabIndex(length - 1);
+    setTabsLength(length);
   }, [tabComponents]);
 
   if (!Array.isArray(tabComponents)) {
     tabComponents = [tabComponents].filter((label) => typeof label !== 'undefined');
   }
 
-  // const numChildren = Children.count(children);
-  // if (tabLabels.length < numChildren) {
-  //   if (numChildren > 0) {
-  //     for (let i = 0; i < numChildren; i++) {
-  //       if (i < tabLabels.length) {
-  //         continue;
-  //       }
-  //       let label = 'Untitled Tab';
-  //       if (i > 0) {
-  //         label += ` ${Math.abs(tabLabels.length - i + 1)}`;
-  //       }
-  //       tabLabels.push(label);
-  //     }
-  //   }
-  // }
-
   const labels = tabComponents.map((tab) => tab.label);
-  const components = tabComponents.map((tab) => tab.component);
 
-  let selectedComponent = null;
-  if ((!selectedTabIndex && components.length > 0) || (selectedTabIndex && selectedTabIndex < components.length)) {
-    selectedComponent = components[selectedTabIndex];
-  }
+  console.log(JSON.stringify(labels))
+  const components = tabComponents.map((tab) => tab.component);
+  const props = tabComponents.map((tab) => tab.props);
 
   function onTabClickedHandler(event, index) {
     if (selectedTabIndex !== index) {
@@ -55,25 +55,42 @@ const TabbedSidebar = ({ id, style, show, className, position, tabComponents, ch
     }
   }
 
-  return (<Sidebar id={id} position={position} className={className} show={show} style={style}{...rest}>
-    <div className={'tab-container'}>
+  return (<Panel
+    id={id}
+    position={position}
+    className={'bounder__tabbed ' + className}
+    show={show}
+    style={style}
+    {...rest}
+  >
+    <div className={'tab-bar'}>
       {labels?.map((label, idx) => {
         return (<Button
           key={idx}
-          className={'tabbed'}
+          className={'tab'}
           title={label}
           label={label}
           onClick={(event) => onTabClickedHandler(event, idx)}
         />);
       })}
     </div>
-    <div
-      style={{
-        borderTop: labels?.length > 0 ? 'solid gray 2px' : '',
-      }}
+    <div className={'content-container'}
+         style={{
+           borderTop: labels?.length > 0 ? 'solid gray 2px' : '',
+         }}
     >
-      {selectedComponent}
+      {components.map((Component, index) => {
+        let componentProps = props[index];
+        componentProps = {
+          ...componentProps, className: componentProps.className + ' tab-content', style: {
+            ...componentProps.style,
+            zIndex: index === selectedTabIndex ? 1 : 0,
+            position: index === selectedTabIndex ? 'relative' : 'absolute',
+          },
+        };
+        return <Component key={index} {...componentProps} />;
+      })}
     </div>
-  </Sidebar>);
+  </Panel>);
 };
-export default memo(TabbedSidebar);
+export default memo(TabbedPanel);
