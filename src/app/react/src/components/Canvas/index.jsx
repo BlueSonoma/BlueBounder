@@ -2,7 +2,6 @@ import React, { memo, useEffect, useState } from 'react';
 import '../../styles/bounder.css';
 import '../../resources/images/test_image1.png';
 import SelectorModeProvider from '../SelectorModeProvider';
-import useSelectorMode from '../../hooks/useSelectorMode';
 import Button from '../additional-components/buttons/Button';
 import IconLiveFolder from '../../resources/icons/live-folder.png';
 import IconMaps from '../../resources/icons/map.png';
@@ -24,34 +23,58 @@ import AppTitleBar from '../AppTitleBar';
 import useSession from '../../hooks/useSession';
 import Viewport from '../Viewport';
 import TabbedPanel from '../TabbedPanel';
-import { ReactFlowProvider } from '@xyflow/react';
-import { getFilenameFromUrl, getNextId } from '../../utils/general';
+import { createBlobFromText, getNextId } from '../../utils/general';
+import { createImageNode } from './utils';
+import { HOST_URL } from '../../index';
 
 function Canvas({ children }) {
+  const session = useSession();
   const [nodes, setNodes] = useState([]);
-  // const {
-  //   screenToFlowPosition, minZoom, setMinZoom, maxZoom, setMaxZoom, zoom, setViewportExtent, getViewportExtent, fitView,
-  // } = useViewport();
-  const { selectorMode, setSelectorMode } = useSelectorMode();
+  const [viewports, setViewports] = useState([]);
   const [showLeftDrawer, setShowLeftDrawer] = useState(true);
-  const [showRightDrawer, setShowRightDrawer] = useState(true);
+  const [showRightDrawer, setShowRightDrawer] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
 
-  const [viewports, setViewports] = useState([]);
-
-  const session = useSession();
-
-  // TODO: Must have access to ImageNode dimensions to calculate the extent and zoom
-  const width = 3523;
-  const height = 2028;
 
   useEffect(() => {
-    //TODO: This should be moved to a function that gets called on only two occasions:
-    //  1. A new image is added to the nodes (meaning the old image is replaced)
-    //  2. The user selects an option to center the image in the viewport.
-    // fitView(nodes, { duration: 0 });
-  }, [nodes]);
+    const formData = new FormData();
+    formData.append('sessionName', session.sessionName);
 
+    fetch(`${HOST_URL}/api/sessions/get_session_images`, {
+      method: 'POST', body: formData,
+    })
+      .then(response => response.json())
+      .then(([data, status]) => {
+        if (status === 200) {
+          if (Array.isArray(data)) {
+            data.forEach((file) => {
+              console.log(viewports.length);
+              createBlobFromText(file)
+                .then((blob) => createImageNodeFromBlob(blob, file));
+            });
+          }
+        } else {
+          console.error('Error:', status);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }, []);
+
+  function handleCreateNode(image, filepath) {
+    // Create the node
+    const node = createImageNode(image, filepath);
+    const viewport = {
+      label: node.data.file.name, component: Viewport, props: {
+        id: `Viewport_${getNextId()}`, nodes: [node], onClick: onCanvasClickHandler,
+      },
+    };
+    setViewports((prev) => [...prev, viewport]);
+    node.data.viewport = viewport.props.id;
+    setNodes([...nodes, node]);
+    return node;
+  }
 
   function onCanvasClickHandler(event) {
     // if (selectorMode === SelectorModes.AddEllipse) {
@@ -97,83 +120,29 @@ function Canvas({ children }) {
     // }
   }
 
-  function setImageFromFile(event) {
-    const file = event.target.files[0];
-
-    if (!file) {
+  function createImageNodeFromBlob(blob, filepath) {
+    if (!blob) {
       return;
     }
 
     const reader = new FileReader();
     // FileReader handles this asynchronously, so we define the callback to execute once its finished loading
     reader.onload = () => {
-
-      //FIXME: Coordinates go beyond the width and height of the image, even in the negative direction??
-      //  This is due to incorrect parsing of the image. Need to find the protocol/package to decode it.
-
-      /** This should be handled on the server with callable functions;
-       const [r,g,b,a] = image.getColorRgba(x,y);
-       const grain = image.getGrain(x,y); // perform BFS to find boundary containing coords x,y and create a grainNode
-       const bbox = boundary.getBoundingBox() // returns x,y,width, height
-       const boundary: number[][] = boundary.getBoundary();
-       ...
-
-       Grain data may include:
-       type GrainNode = Node & {
-            data: {
-              boundary: number[][],
-              boundingBox: {
-                x: number,
-                y: number,
-                width: number,
-                height: number
-              },
-              parent?: any,
-              eulerAngle?: number | string,
-              composition?: string,
-            },
-            ...
-          }
-       */
-
       const url = reader.result;
 
-
-      // Load the image to get its dimensions to be used later when rendering the viewport for the first time
-      const image = new Image();
-      image.src = url;
-
       // Don't add the same image
-      if (typeof nodes.find((nd) => nd.data.src === image.src) !== 'undefined') {
+      if (typeof nodes.find((nd) => nd.data.src === url) !== 'undefined') {
         return;
       }
 
+      // Load the image to get its dimensions to be used later when rendering the viewport for the first time
+      const image = new Image();
       image.onload = () => {
-        const filename = getFilenameFromUrl(file.name);
-
-        // Create the node
-        const node = {
-          id: `imageNode_${getNextId()}`,
-          type: 'imageNode',
-          position: { x: 0, y: 0 },
-          selectable: false,
-          focusable: true,
-          draggable: false,
-          deletable: false,
-          data: {
-            width: image.width,
-            height: image.height,
-            src: image.src,
-            file: file,
-            viewport: `Viewport_${viewports.length + 1}`,
-          },
-        };
-
-        setNodes([...nodes, node]);
-        setViewports([...viewports, { id: node.data.viewport }]);
+        handleCreateNode(image, filepath);
       };
+      image.src = url;
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(blob);
   }
 
   function renderFileLoader() {
@@ -183,7 +152,11 @@ function Canvas({ children }) {
       browseButtonProps={{
         imageUrl: IconLiveFolder, label: 'Open...',
       }}
-      onChange={setImageFromFile}
+      onChange={(event) => {
+        const file = event.target.files[0];
+        console.log(file);
+        createImageNodeFromBlob(file, file.path);
+      }}
     />);
   }
 
@@ -207,49 +180,25 @@ function Canvas({ children }) {
       />
       <Button
         id={'button__map'}
-        onClick={() => {
-          if (showRightDrawer) {
-            setShowRightDrawer(false);
-            return;
-          }
-          setShowRightDrawer(true);
-        }}
+        onClick={() => setShowRightDrawer(showRightDrawer)}
         imageUrl={IconMaps}
         label={'Maps'}
       />
       <Button
         id={'button__clean-up'}
-        onClick={() => {
-          if (showRightDrawer) {
-            setShowRightDrawer(false);
-            return;
-          }
-          setShowRightDrawer(true);
-        }}
+        onClick={() => setShowRightDrawer(showRightDrawer)}
         imageUrl={IconCleanUp}
         label={'Clean Up'}
       />
       <Button
         id={'button__grain-size'}
-        onClick={() => {
-          if (showLeftDrawer) {
-            setShowLeftDrawer(false);
-            return;
-          }
-          setShowLeftDrawer(true);
-        }}
+        onClick={() => setShowLeftDrawer(!showLeftDrawer)}
         imageUrl={IconGrainSize}
         label={'Grain Size'}
       />
       <Button
         id={'button__classify'}
-        onClick={() => {
-          if (showRightDrawer) {
-            setShowRightDrawer(false);
-            return;
-          }
-          setShowRightDrawer(true);
-        }}
+        onClick={() => setShowRightDrawer(!showRightDrawer)}
         imageUrl={IconClassify}
         label={'Classify'}
       />
@@ -257,26 +206,41 @@ function Canvas({ children }) {
   }
 
   function renderViewport() {
-    const viewportComponents = viewports.map((viewport) => {
-      let label = `${viewport.id}`;
-      const vpNodes = nodes.filter((nd) => {
-        if (nd.data.viewport === viewport.id) {
-          label = nd.data.file.name;
-          return true;
-        }
-        return false;
-      });
-      return {
-        label: label, component: Viewport, props: {
-          id: viewport.id, nodes: vpNodes, onClick: onCanvasClickHandler,
-        },
-      };
-    });
+    /////////////////////////////////////////////////////////
+    // TODO: This needs to create a viewport for each node
+    /////////////////////////////////////////////////////////
+    // const viewportComponents = viewports.map((viewport) => {
+    //   let label = `${viewport.id}`;
+    //   const vpNodes = [];
+    //   nodes.forEach((node) => {
+    //     if (node.data.viewport === viewport.id) {
+    //       vpNodes.push(node);
+    //     }
+    //   });
+    // const vpNodes = nodes.filter((nd) => {
+    //   if (nd.data.viewport === viewport.id) {
+    //     label = nd.data.file.prefix;
+    //     return true;
+    //   }
+    //   return false;
+    // });
+
+    //   return {
+    //     label: label, component: Viewport, props: {
+    //       id: viewport.id, nodes: vpNodes, onClick: onCanvasClickHandler,
+    //     },
+    //   };
+    // });
+
+    // console.log(`Size of viewportComponents: ${viewportComponents.length}`);
+    // viewportComponents.forEach((viewport) => {
+    //   console.log(`Number of nodes in Viewport: ${viewport}: ${viewport.nodes.length}`);
+    // });
 
     return (<TabbedPanel
       className={'viewport'}
       position={DockPanelPosition.Center}
-      tabComponents={viewportComponents}
+      tabComponents={viewports}
     />);
   }
 
