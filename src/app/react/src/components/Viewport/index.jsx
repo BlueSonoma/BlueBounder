@@ -9,17 +9,22 @@ import ViewportMetricsBar from '../ViewportMetricsBar';
 
 import '../../styles/canvas-viewport.css';
 import ViewportProvider from '../ViewportProvider';
+import useSelectorMode from '../../hooks/useSelectorMode';
 
 function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest }) {
   const [_nodes, setNodes, onNodesChange] = useNodesState(nodes ?? []);
   const [initialized, setInitialized] = useState(false);
   const {
-    setViewport, minZoom, setMinZoom, maxZoom, setMaxZoom, setViewportExtent, getViewportExtent, fitView,
+    setViewport, minZoom, setMinZoom, maxZoom, setViewportExtent, getViewportExtent, fitView,
   } = useViewport(id);
 
   useEffect(() => {
     fitView({ nodes: _nodes, options: { duration: 400 } });
   }, [initialized]);
+
+  useEffect(() => {
+    setNodes([...nodes]);
+  }, [nodes]);
 
   function onInit() {
     if (_nodes.length > 0) {
@@ -63,9 +68,9 @@ function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest 
       translateExtent={getViewportExtent()}
       onClick={onClick}
     >
-      <Panel position={Position.Top}>
-        <ModeSelector />
-      </Panel>
+      {/*<Panel position={Position.Top}>*/}
+      {/*<ModeSelector />*/}
+      {/*</Panel>*/}
       <Background
         id={`background__${id}`}
         variant={BackgroundVariant.Lines}

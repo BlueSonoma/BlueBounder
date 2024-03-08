@@ -80,7 +80,7 @@ def api__read_and_create():
             imageio.imwrite(Chem_dir + '/SI_fromFile.png', SI_img_uint8)
             imageio.imwrite(Chem_dir + '/K_fromFile.png', K_img_uint8)
 
-            create_session_JSON_and_return(session,original_name, filepath, ' ')
+            create_session_JSON_and_return(session, original_name, filepath, ' ')
             create_folder_structure_json(original_name)
 
         return jsonify("Images created successfully", 200)
@@ -108,10 +108,10 @@ def api__getSessionJSON():
         else:
             session = flask.request.args.get('sessionName')
         print(f"Getting session info for {session}...")
-        cur_directory =f'{project_root_dir}/Sessions/'
-        sessionJSON= cur_directory + session + '/session.json'
+        cur_directory = f'{project_root_dir}/Sessions/'
+        sessionJSON = cur_directory + session + '/session.json'
         _JSON = get_session_JSON(sessionJSON)
-        
+
         return jsonify(_JSON, 200)
     except Exception as e:
         return str(e), 500
@@ -124,10 +124,34 @@ def api__getSessionFolderJSON():
             session = flask.request.form['sessionName']
         else:
             session = flask.request.args.get('sessionName')
-        cur_directory =f'{project_root_dir}/Sessions/'
-        sessionJSON= cur_directory + session + '/session.json'
+        cur_directory = f'{project_root_dir}/Sessions/'
+        sessionJSON = cur_directory + session + '/session.json'
         _JSON = create_folder_structure_json(sessionJSON)
 
         return jsonify(_JSON, 200)
+    except Exception as e:
+        return str(e), 500
+
+
+@api.route('/get_session_images', methods=['POST'])
+def api__getSessionImages():
+    session_name = flask.request.form['sessionName']
+    curr_dir = f'{project_root_dir}/Sessions'
+    session_dir = os.path.join(curr_dir, session_name)
+
+    files = []
+
+    def collect_images_rec(dir):
+        for file in os.listdir(dir):
+            filepath = os.path.join(dir, file)
+            if file.endswith(".png") or file.endswith('.jpg'):
+                print(file)
+                files.append(filepath)
+            elif not os.path.isfile(filepath):
+                collect_images_rec(filepath)
+
+    try:
+        collect_images_rec(session_dir)
+        return jsonify(files, 200)
     except Exception as e:
         return str(e), 500

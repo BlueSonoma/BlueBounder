@@ -1,13 +1,19 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import Panel from '../Panel';
 
-const DockPanel = ({ id, className, position, show = true, children, ...rest }) => {
-  if (!show) {
-    return <></>;
-  }
+const DockPanel = ({ id, className, position, show, children, ...rest }) => {
+  const panelRef = useRef(null);
 
-  return (<Panel id={id} position={position} className={className} {...rest}>
-      {children}
-    </Panel>);
+  show = show ?? true;
+
+  return (<>{show && <Panel
+    ref={panelRef}
+    id={id}
+    className={className}
+    position={position}
+    {...rest}
+  >
+    {children}
+  </Panel>}</>);
 };
 export default memo(DockPanel);
