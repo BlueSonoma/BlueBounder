@@ -4,9 +4,11 @@ import { Provider } from '../../contexts/SessionContext';
 const SessionProvider = ({ children }) => {
   const [sessionName, setSessionName] = useState('');
   const [csvFilePath, setCsvFilePath] = useState('');
+  const [ctfFilePath, setCtfFilePath] = useState('');
+
 
   const contextProps = {
-    sessionName, setSessionName, csvFilePath, setCsvFilePath,
+    sessionName, setSessionName, csvFilePath, setCsvFilePath, ctfFilePath, setCtfFilePath,
   };
 
   return (<Provider value={contextProps}>
