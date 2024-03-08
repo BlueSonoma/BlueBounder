@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { Fragment, memo } from 'react';
 
 import '../../styles/navbar.css';
 import '../../styles/bounder.css';
@@ -7,7 +7,7 @@ import { HTMLProps } from 'react';
 import Panel from '../Panel';
 
 type NavbarProps = HTMLProps & {
-  position: DockPanelPosition, drawerProps: any, showDrawer?: boolean,
+  position: DockPanelPosition, showDrawer?: boolean,
 }
 
 function Navbar({ id, className, position, style, drawerComponent, showDrawer, children }: NavbarProps) {
@@ -28,7 +28,7 @@ function Navbar({ id, className, position, style, drawerComponent, showDrawer, c
     </Panel>);
   }
 
-  if (!drawerComponent || !showDrawer) {
+  if (!drawerComponent) {
     return <>{renderToggleBar()}</>;
   }
 
@@ -52,8 +52,8 @@ function Navbar({ id, className, position, style, drawerComponent, showDrawer, c
 
   return (<>
     {renderToggleBar()}
-    <DrawerComponent show={showDrawer} />
+    {<DrawerComponent show={showDrawer} />}
   </>);
 }
 
-export default memo(Navbar);
+export default Navbar;

@@ -25,22 +25,6 @@ const TabbedSidebar = ({ id, style, show, className, position, tabComponents, ch
     tabComponents = [tabComponents].filter((label) => typeof label !== 'undefined');
   }
 
-  // const numChildren = Children.count(children);
-  // if (tabLabels.length < numChildren) {
-  //   if (numChildren > 0) {
-  //     for (let i = 0; i < numChildren; i++) {
-  //       if (i < tabLabels.length) {
-  //         continue;
-  //       }
-  //       let label = 'Untitled Tab';
-  //       if (i > 0) {
-  //         label += ` ${Math.abs(tabLabels.length - i + 1)}`;
-  //       }
-  //       tabLabels.push(label);
-  //     }
-  //   }
-  // }
-
   const labels = tabComponents.map((tab) => tab.label);
   const components = tabComponents.map((tab) => tab.component);
 

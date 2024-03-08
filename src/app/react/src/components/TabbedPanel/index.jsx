@@ -44,8 +44,6 @@ const TabbedPanel = ({ id, style, show, className, position, tabComponents, chil
   }
 
   const labels = tabComponents.map((tab) => tab.label);
-
-  console.log(JSON.stringify(labels))
   const components = tabComponents.map((tab) => tab.component);
   const props = tabComponents.map((tab) => tab.props);
 
