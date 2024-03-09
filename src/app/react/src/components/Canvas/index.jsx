@@ -24,7 +24,9 @@ import useSession from '../../hooks/useSession';
 import Viewport from '../Viewport';
 import TabbedPanel from '../TabbedPanel';
 import { createBlobFromText, getNextId } from '../../utils/general';
-import { createImageNode } from './utils';
+import {
+  addFilepathToNode, createImageNode, createImageNodeFromBlob, createImageNodeFromFilepath, createViewport,
+} from './utils';
 import { HOST_URL } from '../../index';
 
 function Canvas({ children }) {
@@ -37,21 +39,26 @@ function Canvas({ children }) {
 
 
   useEffect(() => {
-    const formData = new FormData();
-    formData.append('sessionName', session.sessionName);
-
-    fetch(`${HOST_URL}/api/sessions/get_session_images`, {
-      method: 'POST', body: formData,
+    fetch(`${HOST_URL}/api/sessions/get_session_images?sessionName=${session.sessionName}`, {
+      method: 'GET',
     })
       .then(response => response.json())
-      .then(([data, status]) => {
+      .then(async ([data, status]) => {
         if (status === 200) {
           if (Array.isArray(data)) {
-            data.forEach((file) => {
-              console.log(viewports.length);
-              createBlobFromText(file)
-                .then((blob) => createImageNodeFromBlob(blob, file));
-            });
+            // Create a new viewport
+            const viewport = createViewport(session.sessionName);
+
+            // Create a new ImageNode with the file paths we got from the back-end
+            for (const file of data) {
+              const node = await handleCreateImageNode(file);
+              node.data.viewport = viewport.props.id;
+
+              // Add the node to the viewport
+              viewport.props.nodes.push(node);
+            }
+            // Add the new viewport
+            setViewports((prev) => [...prev, viewport]);
           }
         } else {
           console.error('Error:', status);
@@ -62,17 +69,15 @@ function Canvas({ children }) {
       });
   }, []);
 
-  function handleCreateNode(image, filepath) {
-    // Create the node
-    const node = createImageNode(image, filepath);
-    const viewport = {
-      label: node.data.file.name, component: Viewport, props: {
-        id: `Viewport_${getNextId()}`, nodes: [node], onClick: onCanvasClickHandler,
-      },
-    };
-    setViewports((prev) => [...prev, viewport]);
-    node.data.viewport = viewport.props.id;
+  async function handleCreateImageNode(pathOrFile) {
+    let filepath = pathOrFile;
+    if (typeof filepath !== 'string') {
+      filepath = pathOrFile.path;
+    }
+    const node = await createImageNodeFromFilepath(filepath);
+    addFilepathToNode(node, filepath);
     setNodes([...nodes, node]);
+
     return node;
   }
 
@@ -120,30 +125,6 @@ function Canvas({ children }) {
     // }
   }
 
-  function createImageNodeFromBlob(blob, filepath) {
-    if (!blob) {
-      return;
-    }
-
-    const reader = new FileReader();
-    // FileReader handles this asynchronously, so we define the callback to execute once its finished loading
-    reader.onload = () => {
-      const url = reader.result;
-
-      // Don't add the same image
-      if (typeof nodes.find((nd) => nd.data.src === url) !== 'undefined') {
-        return;
-      }
-
-      // Load the image to get its dimensions to be used later when rendering the viewport for the first time
-      const image = new Image();
-      image.onload = () => {
-        handleCreateNode(image, filepath);
-      };
-      image.src = url;
-    };
-    reader.readAsDataURL(blob);
-  }
 
   function renderFileLoader() {
     return (<ImageUploadForm
@@ -154,8 +135,12 @@ function Canvas({ children }) {
       }}
       onChange={(event) => {
         const file = event.target.files[0];
-        console.log(file);
-        createImageNodeFromBlob(file, file.path);
+        handleCreateImageNode(file).then((node) => {
+          const viewport = createViewport(node.data.file.name);
+          node.data.viewport = viewport.props.id;
+          viewport.props.nodes.push(node);
+          setViewports((prev) => [...prev, viewport]);
+        });
       }}
     />);
   }

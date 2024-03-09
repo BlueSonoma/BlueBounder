@@ -1,15 +1,13 @@
 import {
-  Background, BackgroundVariant, Panel, Position, ReactFlow, ReactFlowProvider, useNodesState, useReactFlow,
+  Background, BackgroundVariant, ReactFlow, ReactFlowProvider, useNodesState,
 } from '@xyflow/react';
 import { nodeTypes } from '../component-types';
-import ModeSelector from '../additional-components/ModeSelector';
 import React, { memo, useEffect, useState } from 'react';
 import useViewport from '../../hooks/useViewport';
 import ViewportMetricsBar from '../ViewportMetricsBar';
 
 import '../../styles/canvas-viewport.css';
 import ViewportProvider from '../ViewportProvider';
-import useSelectorMode from '../../hooks/useSelectorMode';
 
 function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest }) {
   const [_nodes, setNodes, onNodesChange] = useNodesState(nodes ?? []);

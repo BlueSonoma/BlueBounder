@@ -12,11 +12,8 @@ function ProjectInformationView({ children, ...rest }) {
 
   useEffect(() => {
     if (sessionName) {
-      const formData = new FormData();
-      formData.append('sessionName', sessionName);
-
-      fetch(`${HOST_URL}/api/sessions/get_session_Info`, {
-        method: 'POST', body: formData,
+      fetch(`${HOST_URL}/api/sessions/get_session_Info?sessionName=${sessionName}`, {
+        method: 'GET',
       })
         .then(response => response.json())
         .then(([data, status]) => {
