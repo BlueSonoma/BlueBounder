@@ -12,11 +12,8 @@ function ProjectStructureListView({ children, ...rest }) {
   const { sessionName, setSessionName } = useSession();
 
   useEffect(() => {
-    const formData = new FormData();
-    formData.append('sessionName', sessionName);
-
-    fetch(`${HOST_URL}/api/sessions/get_session_Folder`, {
-      method: 'POST', body: formData,
+    fetch(`${HOST_URL}/api/sessions/get_session_Folder?sessionName=${sessionName}`, {
+      method: 'GET',
     })
       .then(response => response.json())
       .then(data => {
