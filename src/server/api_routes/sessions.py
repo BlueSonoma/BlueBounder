@@ -100,13 +100,10 @@ def api__getSessions():
         return str(e), 500
 
 
-@api.route('/get_session_Info', methods=['GET', 'POST'])
+@api.route('/get_session_Info', methods=['GET'])
 def api__getSessionJSON():
     try:
-        if flask.request.method == 'POST':
-            session = flask.request.form['sessionName']
-        else:
-            session = flask.request.args.get('sessionName')
+        session = flask.request.args.get('sessionName')
         print(f"Getting session info for {session}...")
         cur_directory = f'{project_root_dir}/Sessions/'
         sessionJSON = cur_directory + session + '/session.json'
@@ -117,13 +114,10 @@ def api__getSessionJSON():
         return str(e), 500
 
 
-@api.route('/get_session_Folder', methods=['GET', 'POST'])
+@api.route('/get_session_Folder', methods=['GET'])
 def api__getSessionFolderJSON():
     try:
-        if flask.request.method == 'POST':
-            session = flask.request.form['sessionName']
-        else:
-            session = flask.request.args.get('sessionName')
+        session = flask.request.args.get('sessionName')
         cur_directory = f'{project_root_dir}/Sessions/'
         sessionJSON = cur_directory + session + '/session.json'
         _JSON = create_folder_structure_json(sessionJSON)
@@ -133,9 +127,9 @@ def api__getSessionFolderJSON():
         return str(e), 500
 
 
-@api.route('/get_session_images', methods=['POST'])
+@api.route('/get_session_images', methods=['GET'])
 def api__getSessionImages():
-    session_name = flask.request.form['sessionName']
+    session_name = flask.request.args.get('sessionName')
     curr_dir = f'{project_root_dir}/Sessions'
     session_dir = os.path.join(curr_dir, session_name)
 
