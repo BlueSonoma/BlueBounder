@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import '../../../styles/sidebar.css';
-import useSession from '../../../hooks/useSession';
+import useSessionManager from '../../../hooks/useSessionManager';
 import { HOST_URL } from '../../../index';
 
 type ListItem = {
@@ -9,7 +9,7 @@ type ListItem = {
 
 function ProjectStructureListView({ children, ...rest }) {
   const [items, setItems] = useState([]);
-  const { sessionName, setSessionName } = useSession();
+  const { sessionName, setSessionName } = useSessionManager();
 
   useEffect(() => {
     fetch(`${HOST_URL}/api/sessions/get_session_Folder?sessionName=${sessionName}`, {
