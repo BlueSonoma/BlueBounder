@@ -1,0 +1,23 @@
+.tree {
+    padding: 5px;
+    margin-right: 2px;
+    overflow-x: scroll;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+}
+
+.tree-row {
+}
+
+.tree-node {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.tree-node.selected {
+    background: rgba(100, 149, 237, 0.7);
+    border-radius: 5px;
+}

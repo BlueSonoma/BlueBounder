@@ -20,7 +20,7 @@ div.tab-bar {
     grid-area: tab-bar;
     display: flex;
     width: auto;
-    overflow: clip;
+    overflow: hidden;
     height: 40px;
 }
 
