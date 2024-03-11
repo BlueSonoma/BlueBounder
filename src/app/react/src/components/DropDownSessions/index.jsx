@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import '../../styles/dropdown-sessions.css';
-import useSession from '../../hooks/useSession';
+import useSessionManager from '../../hooks/useSessionManager';
 import { HOST_URL } from '../../index';
 
 const Checkbox = ({ children, ...props }: JSX.IntrinsicElements['input']) => (<label style={{ marginRight: '1em' }}>
@@ -19,7 +19,7 @@ function DropSessionsDown() {
   const [isRtl, setIsRtl] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
-  const { sessionName, setSessionName } = useSession();
+  const { sessionName, setSessionName } = useSessionManager();
 
   useEffect(() => {
     fetch(`${HOST_URL}/api/sessions/get_sessions`)
