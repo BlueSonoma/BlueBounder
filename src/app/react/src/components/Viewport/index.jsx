@@ -8,20 +8,47 @@ import ViewportMetricsBar from '../ViewportMetricsBar';
 
 import '../../styles/canvas-viewport.css';
 import ViewportProvider from '../ViewportProvider';
+import useSessionManager from '../../hooks/useSessionManager';
 
-function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest }) {
+function ViewportFlow({ id, className, style, onClick, children, nodes, isFocused, ...rest }) {
   const [_nodes, setNodes, onNodesChange] = useNodesState(nodes ?? []);
   const [initialized, setInitialized] = useState(false);
   const {
-    setViewport, minZoom, setMinZoom, maxZoom, setViewportExtent, getViewportExtent, fitView,
+    setViewport, minZoom, setMinZoom, maxZoom, zoom, setViewportExtent, getViewportExtent, fitView,
   } = useViewport(id);
+
+  const { setActiveViewport, viewports, setViewports } = useSessionManager();
+
+  useEffect(() => {
+    if (typeof isFocused === 'undefined') {
+      return;
+    }
+
+    if (isFocused) {
+      setActiveViewport(() => id);
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     fitView({ nodes: _nodes, options: { duration: 400 } });
   }, [initialized]);
 
   useEffect(() => {
-    setNodes([...nodes]);
+    setNodes(() => [...nodes]);
+
+    const viewport = viewports.find((vp) => vp.id === id);
+
+    if (typeof viewport === 'undefined') {
+      return;
+    }
+
+    // TODO:
+    //  Here we need to update the session nodes outside of this ReactFlow instance.
+    //  We must update nodes that need to be updated (perhaps by using a `onNodesChange` hook in `SessionManager`
+    //  and remove nodes from the viewport/session that have been deleted from the viewport or tree
+    //  ex: nodes vs. viewport.props.nodes --> These need to sync
+    //  Another approach would be to store the ID of each node, rather than copying it (it can get expensive)
+
   }, [nodes]);
 
   function onInit() {
@@ -72,7 +99,7 @@ function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest 
       <Background
         id={`background__${id}`}
         variant={BackgroundVariant.Lines}
-        lineWidth={0.5}
+        lineWidth={Math.min(0.5, 0.5 * zoom)}
         gap={50}
         color={'#303030'}
       />
