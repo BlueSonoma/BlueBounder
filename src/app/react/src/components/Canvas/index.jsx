@@ -1,7 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import '../../styles/bounder.css';
 import '../../resources/images/test_image1.png';
-import SelectorModeProvider from '../SelectorModeProvider';
 import Button from '../additional-components/buttons/Button';
 import IconLiveFolder from '../../resources/icons/live-folder.png';
 import IconMaps from '../../resources/icons/map.png';
@@ -9,6 +8,7 @@ import IconCleanUp from '../../resources/icons/clean-up.png';
 import IconGrainSize from '../../resources/icons/polygon-grain.png';
 import IconPixelData from '../../resources/icons/table-data.png';
 import IconClassify from '../../resources/icons/classify.png';
+import IconLayers from '../../resources/icons/layers.png';
 
 import '../../styles/sidebar.css';
 import '../../styles/navbar.css';
@@ -20,26 +20,30 @@ import BottomSidebar from '../BottomSidebar';
 import SettingsSidebar from '../SettingsSidebar';
 import ProjectSidebar from '../ProjectSidebar';
 import AppTitleBar from '../AppTitleBar';
-import useSession from '../../hooks/useSession';
-import Viewport from '../Viewport';
+import useSessionManager from '../../hooks/useSessionManager';
 import TabbedPanel from '../TabbedPanel';
-import { createBlobFromText, getNextId } from '../../utils/general';
 import {
-  addFilepathToNode, createImageNode, createImageNodeFromBlob, createImageNodeFromFilepath, createViewport,
+  addFilepathToNode, createImageNodeFromFilepath, createViewport, imageAlreadyLoaded,
 } from './utils';
 import { HOST_URL } from '../../index';
+import type { ImageNodeType } from '../../types/nodes';
+import useAppState from '../../hooks/useAppState';
 
 function Canvas({ children }) {
-  const session = useSession();
-  const [nodes, setNodes] = useState([]);
-  const [viewports, setViewports] = useState([]);
-  const [showLeftDrawer, setShowLeftDrawer] = useState(true);
-  const [showRightDrawer, setShowRightDrawer] = useState(false);
-  const [showBottomDrawer, setShowBottomDrawer] = useState(false);
+  const appState = useAppState();
 
+  const {
+    sessionName, nodes, setNodes, viewports, setViewports, activeViewport, setActiveViewport,
+  } = useSessionManager();
+
+  const [showLeftDrawer, setShowLeftDrawer] = useState(true);
+  const [showRightDrawer, setShowRightDrawer] = useState(true);
+  const [showBottomDrawer, setShowBottomDrawer] = useState(false);
+  const [currentViewportIndex, setCurrentViewportIndex] = useState(null);
 
   useEffect(() => {
-    fetch(`${HOST_URL}/api/sessions/get_session_images?sessionName=${session.sessionName}`, {
+    appState.startLoadRequest();
+    fetch(`${HOST_URL}/api/sessions/get_session_images?sessionName=${sessionName}`, {
       method: 'GET',
     })
       .then(response => response.json())
@@ -47,36 +51,55 @@ function Canvas({ children }) {
         if (status === 200) {
           if (Array.isArray(data)) {
             // Create a new viewport
-            const viewport = createViewport(session.sessionName);
+            const viewport = createViewport(sessionName);
 
             // Create a new ImageNode with the file paths we got from the back-end
             for (const file of data) {
               const node = await handleCreateImageNode(file);
-              node.data.viewport = viewport.props.id;
+
+              if (!node) {
+                continue;
+              }
+              node.data.viewport = viewport.id;
+              nodes.push(node);
 
               // Add the node to the viewport
               viewport.props.nodes.push(node);
             }
+
+            setNodes(() => [...nodes]);
+            viewport.props.active = true;
             // Add the new viewport
             setViewports((prev) => [...prev, viewport]);
+            setActiveViewport(viewports.id);
           }
+          appState.endLoadRequest();
         } else {
           console.error('Error:', status);
+          appState.endLoadRequest();
         }
       })
       .catch((error) => {
         console.error('Error:', error);
+        appState.endLoadRequest();
       });
   }, []);
 
-  async function handleCreateImageNode(pathOrFile) {
+  useEffect(() => {
+    setCurrentViewportIndex(() => activeViewport ? activeViewport[1] : null);
+  }, [activeViewport]);
+
+  async function handleCreateImageNode(pathOrFile): ImageNodeType {
     let filepath = pathOrFile;
     if (typeof filepath !== 'string') {
       filepath = pathOrFile.path;
     }
+    if (imageAlreadyLoaded(filepath, nodes)) {
+      return null;
+    }
+
     const node = await createImageNodeFromFilepath(filepath);
     addFilepathToNode(node, filepath);
-    setNodes([...nodes, node]);
 
     return node;
   }
@@ -125,23 +148,39 @@ function Canvas({ children }) {
     // }
   }
 
+  async function handleOnImagesSelected(event) {
+    appState.startLoadRequest();
+
+    async function createImageNodes(event) {
+      for (const file of event.target.files) {
+        const node = await handleCreateImageNode(file);
+        if (node) {
+          const viewport = createViewport(node.data.file.prefix);
+          node.data.viewport = viewport.id;
+          nodes.push(node);
+
+          viewport.props.nodes.push(node);
+          viewport.props.active = true;
+          setViewports((prev) => [...prev, viewport]);
+          setActiveViewport(viewports.id);
+        }
+      }
+    }
+
+    await createImageNodes(event);
+    appState.endLoadRequest();
+    setNodes((() => [...nodes]));
+  }
 
   function renderFileLoader() {
     return (<ImageUploadForm
       className={'bounder__mode-selector'}
+      multiple={true}
       textForm={false}
       browseButtonProps={{
         imageUrl: IconLiveFolder, label: 'Open...',
       }}
-      onChange={(event) => {
-        const file = event.target.files[0];
-        handleCreateImageNode(file).then((node) => {
-          const viewport = createViewport(node.data.file.name);
-          node.data.viewport = viewport.props.id;
-          viewport.props.nodes.push(node);
-          setViewports((prev) => [...prev, viewport]);
-        });
-      }}
+      onChange={handleOnImagesSelected}
     />);
   }
 
@@ -187,45 +226,21 @@ function Canvas({ children }) {
         imageUrl={IconClassify}
         label={'Classify'}
       />
+      <Button
+        id={'button__layers'}
+        onClick={() => setShowRightDrawer(!showRightDrawer)}
+        imageUrl={IconLayers}
+        label={'Layers'}
+      />
     </div>);
   }
 
   function renderViewport() {
-    /////////////////////////////////////////////////////////
-    // TODO: This needs to create a viewport for each node
-    /////////////////////////////////////////////////////////
-    // const viewportComponents = viewports.map((viewport) => {
-    //   let label = `${viewport.id}`;
-    //   const vpNodes = [];
-    //   nodes.forEach((node) => {
-    //     if (node.data.viewport === viewport.id) {
-    //       vpNodes.push(node);
-    //     }
-    //   });
-    // const vpNodes = nodes.filter((nd) => {
-    //   if (nd.data.viewport === viewport.id) {
-    //     label = nd.data.file.prefix;
-    //     return true;
-    //   }
-    //   return false;
-    // });
-
-    //   return {
-    //     label: label, component: Viewport, props: {
-    //       id: viewport.id, nodes: vpNodes, onClick: onCanvasClickHandler,
-    //     },
-    //   };
-    // });
-
-    // console.log(`Size of viewportComponents: ${viewportComponents.length}`);
-    // viewportComponents.forEach((viewport) => {
-    //   console.log(`Number of nodes in Viewport: ${viewport}: ${viewport.nodes.length}`);
-    // });
-
     return (<TabbedPanel
       className={'viewport'}
       position={DockPanelPosition.Center}
       tabComponents={viewports}
+      selectedIndex={currentViewportIndex}
     />);
   }
 
@@ -271,7 +286,8 @@ function Canvas({ children }) {
 
   function renderFooter() {
     return (<div className={'footer'} style={{ justifyContent: 'center', textAlign: 'left', paddingLeft: '5px' }}>
-      <label style={{ fontSize: 'small' }}>Status: Ready</label>
+      <label
+        style={{ fontSize: 'small' }}>Status: {appState.loading ? 'Loading...' : appState.saving ? 'Saving...' : 'Ready'}</label>
     </div>);
   }
 
@@ -288,9 +304,7 @@ function Canvas({ children }) {
 }
 
 function CanvasView({ children }) {
-  return (<SelectorModeProvider>
-    <Canvas>{children}</Canvas>
-  </SelectorModeProvider>);
+  return (<Canvas>{children}</Canvas>);
 }
 
 CanvasView.displayName = 'CanvasView';
