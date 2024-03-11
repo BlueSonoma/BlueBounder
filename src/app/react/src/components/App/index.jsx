@@ -1,28 +1,20 @@
-import React, { memo, useEffect } from 'react';
+import React from 'react';
 
-import '../../styles/bounder.css';
 import { RoutesComponent } from '../screens/RoutesComponent';
-import useAppState from '../../hooks/useAppState';
 import AppStateProvider from '../AppStateProvider';
-import SessionProvider from '../SessionProvider';
+import SessionManagerProvider from '../SessionManagerProvider';
 
 function AppMain() {
-  const { loading, saving } = useAppState();
-
-  useEffect(() => {
-    console.log(`Loading: ${loading}`);
-  }, [loading]);
-
-  return (<div id={'app'} className='App'>
+  return (<div id={'app'}>
     <RoutesComponent />
   </div>);
 }
 
 function App() {
   return (<AppStateProvider>
-    <SessionProvider>
+    <SessionManagerProvider>
       <AppMain />
-    </SessionProvider>
+    </SessionManagerProvider>
   </AppStateProvider>);
 }
 
