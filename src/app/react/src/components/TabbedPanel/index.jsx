@@ -15,8 +15,41 @@ function getInitialTabsLength(components) {
   return components.length;
 }
 
-const TabbedPanel = ({ id, style, show, className, position, tabComponents, children, ...rest }) => {
-  const [selectedTabIndex, setSelectedTabIndex] = useState(-1);
+function getInitialSelectedIndex(components) {
+  if (typeof components === 'undefined') {
+    return -1;
+  }
+
+  if (!Array.isArray(components)) {
+    components = [components];
+  }
+
+  if (components.length === 0) {
+    return -1;
+  }
+
+  let selected = -1;
+  for (let i = 0; i < components.length; i++) {
+    if (components[i].props?.focused) {
+      selected = i;
+      break;
+    }
+  }
+  if (selected === -1) {
+    return components.length - 1;
+  }
+
+  components.forEach((comp, index) => {
+    if (index !== selected) {
+      comp.props.focused = false;
+    }
+  });
+
+  return selected;
+}
+
+const TabbedPanel = ({ id, style, show, className, position, tabComponents, selectedIndex, children, ...rest }) => {
+  const [selectedTabIndex, setSelectedTabIndex] = useState(selectedIndex ?? getInitialSelectedIndex(tabComponents));
   const [tabsLength, setTabsLength] = useState(getInitialTabsLength(tabComponents));
 
   useEffect(() => {
@@ -38,6 +71,13 @@ const TabbedPanel = ({ id, style, show, className, position, tabComponents, chil
     setSelectedTabIndex(length - 1);
     setTabsLength(length);
   }, [tabComponents]);
+
+  useEffect(() => {
+    if (typeof selectedIndex === 'undefined' || selectedIndex === null) {
+      return;
+    }
+    setSelectedTabIndex(selectedIndex);
+  }, [selectedIndex]);
 
   if (!Array.isArray(tabComponents)) {
     tabComponents = [tabComponents].filter((label) => typeof label !== 'undefined');
@@ -79,16 +119,15 @@ const TabbedPanel = ({ id, style, show, className, position, tabComponents, chil
     >
       {components.map((Component, index) => {
         let componentProps = props[index];
+        const isSelected = index === selectedTabIndex;
         componentProps = {
           ...componentProps, className: componentProps.className + ' tab-content', style: {
-            ...componentProps.style,
-            zIndex: index === selectedTabIndex ? 1 : 0,
-            position: index === selectedTabIndex ? 'relative' : 'absolute',
-          },
+            zIndex: isSelected ? 1 : 0, ...componentProps.style, position: isSelected ? 'relative' : 'absolute',
+          }, isFocused: isSelected,
         };
         return <Component key={index} {...componentProps} />;
       })}
     </div>
   </Panel>);
 };
-export default memo(TabbedPanel);
+export default TabbedPanel;
