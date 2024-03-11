@@ -3,26 +3,30 @@ import {
 } from '../../utils/general';
 import Viewport from '../Viewport';
 import type { ImageNodeType } from '../../types/nodes';
+import type { ViewportType } from '../../types/general';
 
 export function getZoomPercentage(zoom, minZoom, maxZoom, precision?: number) {
   return (((Math.log(zoom) - Math.log(minZoom)) / (Math.log(maxZoom) - Math.log(minZoom))) * 100).toFixed(precision ? precision : 0);
 }
 
-export function createImageNode(image) {
-  const imageNode: ImageNodeType = {
-    id: `imageNode_${getNextId(4)}`,
+export function createImageNode(image): ImageNodeType {
+  const id = `imageNode_${getNextId(4)}`;
+  return {
+    id: id,
     type: 'imageNode',
     position: { x: 0, y: 0 },
-    selectable: false,
+    selectable: true,
     focusable: true,
     draggable: false,
     deletable: false,
     data: {
-      width: image.width, height: image.height, src: image.src,
+      label: image.alt ?? id, viewport: null, width: image.width, height: image.height, src: image.src,
     },
   };
+}
 
-  return imageNode;
+export function imageAlreadyLoaded(imagePath: string, nodes: ImageNodeType[]) {
+  return typeof nodes.find((node) => node.data.file?.path === imagePath) !== 'undefined';
 }
 
 export function addFilepathToNode(node, filepath) {
@@ -36,18 +40,25 @@ export function addFilepathToNode(node, filepath) {
 
 export async function createImageNodeFromFilepath(filepath) {
   const blob = await createBlobFromText(filepath);
-  return createImageNodeFromBlob(blob);
+  const altLabel = getFilenameFromPath(filepath);
+  return createImageNodeFromBlob(blob, altLabel);
 }
 
-export async function createImageNodeFromBlob(blob) {
-  const image = await createImageFromBlob(blob);
+export async function createImageNodeFromBlob(blob, altLabel) {
+  const image = await createImageFromBlob(blob, altLabel);
   return createImageNode(image);
 }
 
-export function createViewport(name, onClick) {
+export async function createImageFromPath(filepath): HTMLImageElement {
+  const blob = await createBlobFromText(filepath);
+  return await createImageFromBlob(blob);
+}
+
+export function createViewport(name, onClick): ViewportType {
+  const id = `Viewport_${getNextId()}`;
   return {
-    label: name, component: Viewport, props: {
-      id: `Viewport_${getNextId()}`, nodes: [], onClick: onClick,
+    id: id, label: name, component: Viewport, props: {
+      id: id, nodes: [], onClick: onClick, active: false,
     },
   };
 }
