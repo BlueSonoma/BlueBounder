@@ -1,6 +1,6 @@
 import {  useContext } from 'react';
-import SessionContext from '../contexts/SessionContext';
+import SessionManagerContext from '../contexts/SessionManagerContext';
 
-export default function useSession() {
-    return useContext(SessionContext)
+export default function useSessionManager() {
+    return useContext(SessionManagerContext)
 }

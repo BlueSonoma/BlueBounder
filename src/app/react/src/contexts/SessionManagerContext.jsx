@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 
-const SessionContext = createContext({});
+const SessionManagerContext = createContext({});
 
-export const Provider = SessionContext.Provider;
+export const Provider = SessionManagerContext.Provider;
 
-export default SessionContext;
+export default SessionManagerContext;
