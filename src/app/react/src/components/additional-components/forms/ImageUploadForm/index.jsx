@@ -7,6 +7,7 @@ function ImageUploadForm({
                            label,
                            onClick,
                            onChange,
+                           multiple,
                            acceptTypes,
                            textForm,
                            placeholder,
@@ -20,6 +21,7 @@ function ImageUploadForm({
     id={id}
     className={className}
     style={style}
+    multiple={multiple}
     acceptTypes={acceptTypes}
     onChange={onChange}
     onClick={onClick}
