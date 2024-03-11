@@ -11,7 +11,6 @@ export type ImageNodeType = {
   data: {
     width?: number; height?: number; src: string; file?: {
       prefix?: string; name?: string; path?: string; extension?: string;
-    };
-    viewport?: string;
+    }; viewport: string | null;
   },
 };

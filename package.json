@@ -12,9 +12,5 @@
     "build:react": "cd src && npm run build:react"
   },
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-  },
-  "dependencies": {
-  }
+  "license": "ISC"
 }

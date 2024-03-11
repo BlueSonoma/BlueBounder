@@ -154,4 +154,4 @@ function ViewportProvider({ children }) {
   </Provider>;
 }
 
-export default memo(ViewportProvider);
+export default ViewportProvider;

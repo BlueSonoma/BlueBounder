@@ -3,10 +3,10 @@ import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import Start from './Start';
 import NewSession from './NewSession';
 import OldSessions from './OldSessions';
-import Canvas from '../Canvas';
 import SessionInitializer from './SessionIntializer';
+import Canvas from '../Canvas';
 
-export const RoutesComponent = () => {
+export function RoutesComponent() {
   return (<Router>
     <Routes>
       <Route path='/' element={<Start />} />
@@ -16,4 +16,4 @@ export const RoutesComponent = () => {
       <Route path='/initSession' element={<SessionInitializer />} />
     </Routes>
   </Router>);
-};
+}

@@ -5,6 +5,7 @@ function UploadForm({
                       id,
                       className,
                       style,
+                      multiple = false,
                       onChange,
                       onClick,
                       type,
@@ -72,21 +73,22 @@ function UploadForm({
 
   const divClassName = textForm ? '' : className;
 
-  return (<div
-    id={id}
-    className={divClassName}
-    style={style ?? {
+  const divProps = {
+    id: id, className: divClassName, style: style ?? {
       display: 'flex', flexDirection: 'column',
-    }}
-    {...rest}
-  >
-    <input
-      ref={fileInputRef}
-      type={'file'}
-      accept={acceptTypes}
-      style={{ display: 'none' }}
-      onChange={onFileChosenChangeHandler}
-    />
+    }, ...rest,
+  };
+
+  const inputProps = {
+    ref: fileInputRef,
+    type: 'file',
+    accept: acceptTypes,
+    style: { display: 'none' },
+    onChange: onFileChosenChangeHandler,
+  };
+
+  return (<div {...divProps}>
+    {multiple ? <input {...inputProps} multiple /> : <input {...inputProps} />}
     <ButtonComponent />
   </div>);
 }

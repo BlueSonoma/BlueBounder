@@ -60,7 +60,7 @@ export function createFileReader(blob) {
   return new FileReader();
 }
 
-export async function createImageFromBlob(blob, onLoad) {
+export async function createImageFromBlob(blob, altLabel): Promise<HTMLImageElement> {
   let image;
   let imageLoaded = false;
 
@@ -68,17 +68,15 @@ export async function createImageFromBlob(blob, onLoad) {
   reader.onload = () => {
     const result = reader.result;
     const img = new Image();
-    img.onload = () => {
-      onLoad?.(img);
-    };
     img.src = result;
+    img.alt = altLabel;
     image = img;
     imageLoaded = true;
   };
   reader.readAsDataURL(blob);
 
   while (!imageLoaded) {
-    await sleep(100);
+    await sleep(50);
   }
   return image;
 }

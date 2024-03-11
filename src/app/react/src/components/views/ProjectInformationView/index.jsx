@@ -1,12 +1,12 @@
 import { memo } from 'react';
 import { useState, useEffect } from 'react';
-import useSession from '../../../hooks/useSession';
+import useSessionManager from '../../../hooks/useSessionManager';
 import { HOST_URL } from '../../../index';
 import Grid2Column from '../../../containers/Grid/Grid2Column';
 
 
 function ProjectInformationView({ children, ...rest }) {
-  const { sessionName, csvFilePath, setCsvFilePath, ctfFilePath, setCtfFilePath } = useSession();
+  const { sessionName, csvFilePath, setCsvFilePath, ctfFilePath, setCtfFilePath } = useSessionManager();
   const [stepSize, setStepSize] = useState(10);
 
 

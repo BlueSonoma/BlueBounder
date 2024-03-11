@@ -518,13 +518,13 @@ def create_folder_structure_json(SessionName):
         path = 'Sessions/' + SessionName
         folder_dict = create_folder_structure_dict(path)
         folder_json_str = json.dumps(folder_dict, indent=4)
-        
+
     except Exception as e:
         return str(e), 500
 
 
-def create_session_JSON_and_return(cur_directory,sessionName, csvFilePath, ctfFilePath, grainStepSize=10):
-    sessionInfo_path = cur_directory+'/session.json'
+def create_session_JSON_and_return(cur_directory, sessionName, csvFilePath, ctfFilePath, grainStepSize=10):
+    sessionInfo_path = cur_directory + '/session.json'
     print(sessionInfo_path)
     session = {
         "sessionName": sessionName,
@@ -535,8 +535,6 @@ def create_session_JSON_and_return(cur_directory,sessionName, csvFilePath, ctfFi
 
     with open(sessionInfo_path, 'x') as file:
         json.dump(session, file)
-
-    
 
 
 def get_session_JSON(sessionJSON):
