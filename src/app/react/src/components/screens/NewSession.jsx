@@ -5,7 +5,7 @@ import BackButton from '../additional-components/buttons/BackButton';
 import UploadForm from '../additional-components/forms/UploadForm';
 import AlertModal from '../additional-components/AlertModal';
 import AppTitleBar from '../AppTitleBar';
-import useSession from '../../hooks/useSession';
+import useSessionManager from '../../hooks/useSessionManager';
 
 function NewSession() {
   const [showAlert, setShowAlert] = useState(false);
@@ -15,7 +15,7 @@ function NewSession() {
   const csvFilePathInputRef = createRef();
   const formRef = createRef();
 
-  const { sessionName, setSessionName, csvFilePath, setCsvFilePath } = useSession();
+  const { sessionName, setSessionName, csvFilePath, setCsvFilePath } = useSessionManager();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -64,9 +64,6 @@ function NewSession() {
       sessionNameInputRef.current?.focus();
       return;
     }
-
-    // console.log(sessionName);
-    // console.log(csvFilePath);
 
     const formData = {
       name: sessionName, path: csvFilePath,
