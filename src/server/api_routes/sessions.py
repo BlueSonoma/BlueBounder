@@ -1,9 +1,6 @@
-import json
 import os.path
 
 import flask
-import imageio
-import numpy as np
 from flask import Blueprint, jsonify
 
 from src.imaging.Magic import *
@@ -18,13 +15,14 @@ api = Blueprint('sessions', __name__)
 @api.route('/create_starter_images', methods=['POST'])
 def api__read_and_create():
     print("Creating starter images...")
-    session = flask.request.form['sessionName']
-    original_name = session
+    session_name = flask.request.form['sessionName']
+    original_name = session_name
     filepath = flask.request.form['csvFilePath']
-    Sessions = f'{project_root_dir}/Sessions/'
-    session = Sessions + session
-    Euler_dir = session + '/Euler_Images'
-    Chem_dir = session + '/Chemical_Images'
+    Sessions = os.path.join(project_root_dir, 'Sessions')
+    session = os.path.join(Sessions, session_name)
+    Euler_dir = os.path.join(session, 'Euler_Images')
+    Chem_dir = os.path.join(session, ' Chemical_Images')
+    thumbnail_dir = os.path.join(session, 'thumbnails')
 
     if not os.path.exists(Sessions):
         os.makedirs(Sessions)
@@ -34,6 +32,8 @@ def api__read_and_create():
         os.makedirs(Euler_dir)
     if not os.path.exists(Chem_dir):
         os.makedirs(Chem_dir)
+    if not os.path.exists(thumbnail_dir):
+        os.makedirs(thumbnail_dir)
 
     print(f'File: {filepath}')
 
@@ -47,7 +47,7 @@ def api__read_and_create():
             print(euler_image.dtype)
             print(euler_image.min(), euler_image.max())
             euler_image = (euler_image * 255).astype(np.uint8)
-            imageio.imwrite(Euler_dir + '/euler_phase.png', euler_image)
+            imageio.imwrite(os.path.join(Euler_dir, 'euler_phase.png'), euler_image)
 
             print("getting AL")
             AL_img = get_chem(file, max_chemicals, chemical=0)
@@ -73,12 +73,26 @@ def api__read_and_create():
 
             print("saving images")
             # Now you can save the arrays as images
-            imageio.imwrite(Chem_dir + '/AL_fromFile.png', AL_img_uint8)
-            imageio.imwrite(Chem_dir + '/CA_fromFile.png', CA_img_uint8)
-            imageio.imwrite(Chem_dir + '/NA_fromFile.png', NA_img_uint8)
-            imageio.imwrite(Chem_dir + '/FE_fromFile.png', FE_img_uint8)
-            imageio.imwrite(Chem_dir + '/SI_fromFile.png', SI_img_uint8)
-            imageio.imwrite(Chem_dir + '/K_fromFile.png', K_img_uint8)
+            imageio.imwrite(os.path.join(Chem_dir, 'AL_fromFile.png'), AL_img_uint8)
+            imageio.imwrite(os.path.join(Chem_dir, 'CA_fromFile.png'), CA_img_uint8)
+            imageio.imwrite(os.path.join(Chem_dir, 'NA_fromFile.png'), NA_img_uint8)
+            imageio.imwrite(os.path.join(Chem_dir, 'FE_fromFile.png'), FE_img_uint8)
+            imageio.imwrite(os.path.join(Chem_dir, 'SI_fromFile.png'), SI_img_uint8)
+            imageio.imwrite(os.path.join(Chem_dir, 'K_fromFile.png'), K_img_uint8)
+
+            thumbAL = create_thumbnail(os.path.join(Chem_dir, 'AL_fromFile.png'))
+            thumbCA = create_thumbnail(os.path.join(Chem_dir, 'CA_fromFile.png'))
+            thumbNA = create_thumbnail(os.path.join(Chem_dir, 'NA_fromFile.png'))
+            thumbFE = create_thumbnail(os.path.join(Chem_dir, 'FE_fromFile.png'))
+            thumbSI = create_thumbnail(os.path.join(Chem_dir, 'SI_fromFile.png'))
+            thumbK = create_thumbnail(os.path.join(Chem_dir, 'K_fromFile.png'))
+
+            imageio.imwrite(os.path.join(thumbnail_dir, 'AL_fromFile.png'), thumbAL)
+            imageio.imwrite(os.path.join(thumbnail_dir, 'CA_fromFile.png'), thumbCA)
+            imageio.imwrite(os.path.join(thumbnail_dir, 'NA_fromFile.png'), thumbNA)
+            imageio.imwrite(os.path.join(thumbnail_dir, 'FE_fromFile.png'), thumbFE)
+            imageio.imwrite(os.path.join(thumbnail_dir, 'SI_fromFile.png'), thumbSI)
+            imageio.imwrite(os.path.join(thumbnail_dir, 'K_fromFile.png'), thumbK)
 
             create_session_JSON_and_return(session, original_name, filepath, ' ')
             create_folder_structure_json(original_name)
@@ -92,7 +106,7 @@ def api__read_and_create():
 def api__getSessions():
     print("Getting sessions...")
     try:
-        Sessions = f'{project_root_dir}/Sessions/'
+        Sessions = os.path.join(project_root_dir, 'Sessions')
         session_list = os.listdir(Sessions)
         session_json = [{"label": name} for name in session_list]
         return json.dumps(session_json), 200
@@ -105,8 +119,8 @@ def api__getSessionJSON():
     try:
         session = flask.request.args.get('sessionName')
         print(f"Getting session info for {session}...")
-        cur_directory = f'{project_root_dir}/Sessions/'
-        sessionJSON = cur_directory + session + '/session.json'
+        cur_directory = os.path.join(project_root_dir, 'Sessions')
+        sessionJSON = os.path.join(cur_directory, session, 'session.json')
         _JSON = get_session_JSON(sessionJSON)
 
         return jsonify(_JSON, 200)
@@ -118,8 +132,8 @@ def api__getSessionJSON():
 def api__getSessionFolderJSON():
     try:
         session = flask.request.args.get('sessionName')
-        cur_directory = f'{project_root_dir}/Sessions/'
-        sessionJSON = cur_directory + session + '/session.json'
+        cur_directory = os.path.join(project_root_dir, 'Sessions')
+        sessionJSON = os.path.join(cur_directory, session, 'session.json')
         _JSON = create_folder_structure_json(sessionJSON)
 
         return jsonify(_JSON, 200)
@@ -130,7 +144,7 @@ def api__getSessionFolderJSON():
 @api.route('/get_session_images', methods=['GET'])
 def api__getSessionImages():
     session_name = flask.request.args.get('sessionName')
-    curr_dir = f'{project_root_dir}/Sessions'
+    curr_dir = os.path.join(project_root_dir, 'Sessions')
     session_dir = os.path.join(curr_dir, session_name)
 
     files = []
