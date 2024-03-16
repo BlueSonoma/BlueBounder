@@ -1,12 +1,12 @@
 import React from 'react';
 import '../../styles/new-session.css';
 import DropDown from '../DropDownSessions';
-import BackButton from '../additional-components/buttons/BackButton';
-import AppTitleBar from '../AppTitleBar';
+import BackButton from '../../additional-components/buttons/BackButton';
+import WindowTitleBar from '../../additional-components/WindowTitleBar';
 
 function OldSessions() {
   return (<div>
-    <AppTitleBar/>
+    <WindowTitleBar/>
     <BackButton />
     <DropDown />
   </div>);
