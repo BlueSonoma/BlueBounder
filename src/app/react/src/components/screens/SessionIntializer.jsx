@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import useAppState from '../../hooks/useAppState';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AppTitleBar from '../../additional-components/WindowTitleBar';
+import WindowTitleBar from '../../additional-components/WindowTitleBar';
 import { HOST_URL } from '../../index';
 
 function SessionInitializer() {
@@ -61,7 +61,7 @@ function SessionInitializer() {
   }, []);
 
   return (<div className={'init-session'}>
-    <AppTitleBar text={'Loading Session'} />
+    <WindowTitleBar text={'Loading Session'} />
     <h1>Loading{ellipses}</h1>
   </div>);
 }
