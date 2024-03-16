@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Provider } from '../../contexts/AppStateContext';
+import { Provider } from '../../../contexts/AppStateContext';
 
 function AppStateProvider({ children }) {
   const [loading, setLoading] = useState(false);

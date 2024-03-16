@@ -5,10 +5,6 @@ import Viewport from '../Viewport';
 import type { ImageNodeType } from '../../types/nodes';
 import type { ViewportType } from '../../types/general';
 
-export function getZoomPercentage(zoom, minZoom, maxZoom, precision?: number) {
-  return (((Math.log(zoom) - Math.log(minZoom)) / (Math.log(maxZoom) - Math.log(minZoom))) * 100).toFixed(precision ? precision : 0);
-}
-
 export function createImageNode(image): ImageNodeType {
   const id = `imageNode_${getNextId(4)}`;
   return {

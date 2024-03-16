@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-function AppTitleBar({text}) {
+function WindowTitleBar({text}) {
 
   text = text ?? 'Grain Boundary Detection and Analysis';
 
@@ -11,4 +11,4 @@ function AppTitleBar({text}) {
   )
 }
 
-export default memo(AppTitleBar)
+export default memo(WindowTitleBar)

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import useAppState from '../../hooks/useAppState';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AppTitleBar from '../AppTitleBar';
+import WindowTitleBar from '../../additional-components/WindowTitleBar';
 import { HOST_URL } from '../../index';
 
 function SessionInitializer() {
@@ -32,7 +32,7 @@ function SessionInitializer() {
     const sessionData = location.state.formData;
 
     if (typeof sessionData === 'undefined' || sessionData.path.length === 0) {
-      navigate('/home');
+      navigate('/app');
       return;
     }
 
@@ -51,7 +51,7 @@ function SessionInitializer() {
       .then(data => {
         console.log(data);
         appState.endLoadRequest();
-        navigate('/home');
+        navigate('/app');
       })
       .catch((error) => {
         appState.endLoadRequest();
@@ -61,7 +61,7 @@ function SessionInitializer() {
   }, []);
 
   return (<div className={'init-session'}>
-    <AppTitleBar text={'Loading Session'} />
+    <WindowTitleBar text={'Loading Session'} />
     <h1>Loading{ellipses}</h1>
   </div>);
 }

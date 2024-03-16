@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import TabbedSidebar from '../TabbedSidebar';
-import { DockPanelPosition } from '../../types/general';
-import LayersView from '../views/ViewportTreeView';
+import { DockPanelPosition } from '../../../types/general';
+import LayersView from '../../views/ViewportTreeView';
 
 const components = {
   label: 'Layers', component: <LayersView />,

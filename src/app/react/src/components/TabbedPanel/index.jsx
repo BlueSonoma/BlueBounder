@@ -2,7 +2,7 @@ import { memo, useEffect, useState } from 'react';
 
 import '../../styles/tabbed.css';
 import '../../styles/mode-selector.css';
-import Button from '../additional-components/buttons/Button';
+import Button from '../../additional-components/buttons/Button';
 import Panel from '../../containers/Panel';
 
 function getInitialTabsLength(components) {
@@ -25,12 +25,12 @@ function getInitialSelectedIndex(components) {
   }
 
   if (components.length === 0) {
-    return -1;
+    return null;
   }
 
   let selected = -1;
   for (let i = 0; i < components.length; i++) {
-    if (components[i].props?.focused) {
+    if (components[i].props?.active) {
       selected = i;
       break;
     }
@@ -41,16 +41,19 @@ function getInitialSelectedIndex(components) {
 
   components.forEach((comp, index) => {
     if (index !== selected) {
-      comp.props.focused = false;
+      comp.props.active = false;
     }
   });
 
   return selected;
 }
 
-const TabbedPanel = ({ id, style, show, className, position, tabComponents, selectedIndex, children, ...rest }) => {
-  const [selectedTabIndex, setSelectedTabIndex] = useState(selectedIndex ?? getInitialSelectedIndex(tabComponents));
+const TabbedPanel = ({
+                       id, style, show, className, position, tabComponents, onTabClick, selectedIndex, children, ...rest
+                     }) => {
+  const [currentTabIndex, setCurrentTabIndex] = useState(selectedIndex ?? getInitialSelectedIndex(tabComponents));
   const [tabsLength, setTabsLength] = useState(getInitialTabsLength(tabComponents));
+  const [lastTabIndex, setLastTabIndex] = useState(null);
 
   useEffect(() => {
     if (typeof tabComponents === 'undefined') {
@@ -68,15 +71,15 @@ const TabbedPanel = ({ id, style, show, className, position, tabComponents, sele
     }
 
     // Set the active tab as the newly added component
-    setSelectedTabIndex(length - 1);
+    setCurrentTabIndex(length - 1);
     setTabsLength(length);
   }, [tabComponents]);
 
   useEffect(() => {
-    if (typeof selectedIndex === 'undefined' || selectedIndex === null) {
+    if (typeof selectedIndex === 'undefined' || selectedIndex === null || selectedIndex === currentTabIndex) {
       return;
     }
-    setSelectedTabIndex(selectedIndex);
+    setCurrentTabIndex(selectedIndex);
   }, [selectedIndex]);
 
   if (!Array.isArray(tabComponents)) {
@@ -88,10 +91,24 @@ const TabbedPanel = ({ id, style, show, className, position, tabComponents, sele
   const props = tabComponents.map((tab) => tab.props);
 
   function onTabClickedHandler(event, index) {
-    if (selectedTabIndex !== index) {
-      setSelectedTabIndex(index);
+    if (currentTabIndex !== index) {
+      setLastTabIndex(currentTabIndex);
+      setCurrentTabIndex(index);
+      onTabClick?.(event, { previous: selectedIndex, current: index });
     }
   }
+
+  // FIXME:
+  //  This is still broken -- `id` property is undefined; need to trace
+  useEffect(() => {
+    if (lastTabIndex) {
+      document.querySelector(`#button__${tabComponents[lastTabIndex]?.id}`)?.classList.toggle('select');
+    }
+
+    if (currentTabIndex) {
+      document.querySelector(`#button__${tabComponents[currentTabIndex]?.id}`)?.classList.toggle('select');
+    }
+  }, [currentTabIndex]);
 
   return (<Panel
     id={id}
@@ -104,6 +121,7 @@ const TabbedPanel = ({ id, style, show, className, position, tabComponents, sele
     <div className={'tab-bar'}>
       {labels?.map((label, idx) => {
         return (<Button
+          id={idx ? `button__${tabComponents[idx]?.id}` : `button__${idx}`}
           key={idx}
           className={'tab'}
           title={label}
@@ -119,11 +137,11 @@ const TabbedPanel = ({ id, style, show, className, position, tabComponents, sele
     >
       {components.map((Component, index) => {
         let componentProps = props[index];
-        const isSelected = index === selectedTabIndex;
+        const isSelected = index === currentTabIndex;
         componentProps = {
-          ...componentProps, className: componentProps.className + ' tab-content', style: {
-            zIndex: isSelected ? 1 : 0, ...componentProps.style, position: isSelected ? 'relative' : 'absolute',
-          }, isFocused: isSelected,
+          ...componentProps, className: componentProps?.className + ' tab-content', style: {
+            zIndex: isSelected ? 1 : 0, ...componentProps?.style, position: isSelected ? 'relative' : 'absolute',
+          },
         };
         return <Component key={index} {...componentProps} />;
       })}

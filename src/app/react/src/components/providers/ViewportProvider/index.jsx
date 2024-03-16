@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { Viewport, useReactFlow, useOnViewportChange } from '@xyflow/react';
-import { Provider } from '../../contexts/ViewportContext';
+import { Provider } from '../../../contexts/ViewportContext';
 
 const DEFAULT_MAX_ZOOM = 15;
 const DEFAULT_MIN_ZOOM = 1;

@@ -1,11 +1,11 @@
 import React, { createRef, useEffect, useState } from 'react';
 import '../../styles/new-session.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import BackButton from '../additional-components/buttons/BackButton';
-import UploadForm from '../additional-components/forms/UploadForm';
-import AlertModal from '../additional-components/AlertModal';
-import AppTitleBar from '../AppTitleBar';
+import BackButton from '../../additional-components/buttons/BackButton';
+import UploadForm from '../../additional-components/forms/UploadForm';
+import AlertModal from '../../additional-components/AlertModal';
 import useSessionManager from '../../hooks/useSessionManager';
+import WindowTitleBar from '../../additional-components/WindowTitleBar';
 
 function NewSession() {
   const [showAlert, setShowAlert] = useState(false);
@@ -73,7 +73,7 @@ function NewSession() {
   };
 
   return (<>
-    <AppTitleBar />
+    <WindowTitleBar />
     <body className={`${showAlert ? 'disabled' : ''}`}>
     {showAlert && (<AlertModal
       buttonProps={{ className: 'butt1class' }}

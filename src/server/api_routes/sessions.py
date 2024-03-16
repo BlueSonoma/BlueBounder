@@ -22,7 +22,6 @@ def api__read_and_create():
     session = os.path.join(Sessions, session_name)
     Euler_dir = os.path.join(session, 'Euler_Images')
     Chem_dir = os.path.join(session, ' Chemical_Images')
-    thumbnail_dir = os.path.join(session, 'thumbnails')
 
     if not os.path.exists(Sessions):
         os.makedirs(Sessions)
@@ -32,8 +31,6 @@ def api__read_and_create():
         os.makedirs(Euler_dir)
     if not os.path.exists(Chem_dir):
         os.makedirs(Chem_dir)
-    if not os.path.exists(thumbnail_dir):
-        os.makedirs(thumbnail_dir)
 
     print(f'File: {filepath}')
 
@@ -79,20 +76,6 @@ def api__read_and_create():
             imageio.imwrite(os.path.join(Chem_dir, 'FE_fromFile.png'), FE_img_uint8)
             imageio.imwrite(os.path.join(Chem_dir, 'SI_fromFile.png'), SI_img_uint8)
             imageio.imwrite(os.path.join(Chem_dir, 'K_fromFile.png'), K_img_uint8)
-
-            thumbAL = create_thumbnail(os.path.join(Chem_dir, 'AL_fromFile.png'))
-            thumbCA = create_thumbnail(os.path.join(Chem_dir, 'CA_fromFile.png'))
-            thumbNA = create_thumbnail(os.path.join(Chem_dir, 'NA_fromFile.png'))
-            thumbFE = create_thumbnail(os.path.join(Chem_dir, 'FE_fromFile.png'))
-            thumbSI = create_thumbnail(os.path.join(Chem_dir, 'SI_fromFile.png'))
-            thumbK = create_thumbnail(os.path.join(Chem_dir, 'K_fromFile.png'))
-
-            imageio.imwrite(os.path.join(thumbnail_dir, 'AL_fromFile.png'), thumbAL)
-            imageio.imwrite(os.path.join(thumbnail_dir, 'CA_fromFile.png'), thumbCA)
-            imageio.imwrite(os.path.join(thumbnail_dir, 'NA_fromFile.png'), thumbNA)
-            imageio.imwrite(os.path.join(thumbnail_dir, 'FE_fromFile.png'), thumbFE)
-            imageio.imwrite(os.path.join(thumbnail_dir, 'SI_fromFile.png'), thumbSI)
-            imageio.imwrite(os.path.join(thumbnail_dir, 'K_fromFile.png'), thumbK)
 
             create_session_JSON_and_return(session, original_name, filepath, ' ')
             create_folder_structure_json(original_name)

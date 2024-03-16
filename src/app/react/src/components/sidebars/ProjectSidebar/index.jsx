@@ -1,9 +1,9 @@
 import { memo } from 'react';
 import TabbedSidebar from '../TabbedSidebar';
-import { DockPanelPosition } from '../../types/general';
-import ProjectDetailsView from '../views/ProjectDetailsView';
-import GrainSizeView from '../views/GrainSizeView';
-import CleanUpView from '../views/CleanUpView';
+import { DockPanelPosition } from '../../../types/general';
+import ProjectDetailsView from '../../views/ProjectDetailsView';
+import GrainSizeView from '../../views/GrainSizeView';
+import CleanUpView from '../../views/CleanUpView';
 
 const testComponents = [{
   label: 'Grain Size', component: <GrainSizeView />,

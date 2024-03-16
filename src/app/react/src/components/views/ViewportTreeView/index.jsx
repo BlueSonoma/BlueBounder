@@ -6,15 +6,14 @@ import useTreeState from '../../../hooks/useTreeState';
 import TreeImageNode from '../../nodes/TreeImageNode';
 
 import '../../../styles/tree.css';
-import useAppState from '../../../hooks/useAppState';
+import type { ViewportType } from '../../../types/general';
 
 function ViewportTreeView({}) {
-  const appstate = useAppState();
   const [root, setRoot] = useTreeState({ name: 'Viewports' });
   const { nodes, setNodes, viewports } = useSessionManager();
 
   useEffect(() => {
-    root.children = viewports.map((viewport) => {
+    root.children = viewports.map((viewport: ViewportType) => {
       return {
         id: viewport.props.id, name: viewport.label, children: viewport.props.nodes.map((node) => {
           return {
@@ -56,10 +55,18 @@ function ViewportTreeView({}) {
 
       selectedNodes.forEach((node) => node.selected = true);
       unselectedNodes.forEach((node) => node.selected = false);
-      setNodes(() => [...selectedNodes, ...unselectedNodes]);
-
-      console.log(`Selected nodes:`, selectedNodes);
-      console.log(`Unselected nodes:`, unselectedNodes);
+      const nextNodes = [...selectedNodes, ...unselectedNodes];
+      setNodes((prevNodes) => prevNodes.map((pn) => {
+        for (let i = 0; i < nextNodes.length; i++) {
+          const nn = nextNodes[i];
+          if (pn.id === nn.id) {
+            return {
+              ...pn, selected: nn.selected,
+            };
+          }
+        }
+        return pn;
+      }));
     }
   }
 
