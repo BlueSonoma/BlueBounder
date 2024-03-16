@@ -1,7 +1,6 @@
-import { getZoomPercentage } from '../Canvas/utils';
-import Button from '../additional-components/buttons/Button';
+import { getZoomPercentage } from './utils';
+import Button from '../../additional-components/buttons/Button';
 import IconFullScreen from '../../resources/icons/full-screen.png';
-import { memo, useEffect } from 'react';
 import useViewport from '../../hooks/useViewport';
 
 function ViewportMetricsBar({ className, onFitView, children }) {
