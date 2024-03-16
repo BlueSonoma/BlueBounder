@@ -1,10 +1,10 @@
 import { memo, useEffect, useState } from 'react';
 
-import '../../styles/sidebar.css';
-import '../../styles/tabbed.css';
-import '../../styles/mode-selector.css';
-import Sidebar from '../../containers/Sidebar';
-import Button from '../additional-components/buttons/Button';
+import '../../../styles/sidebar.css';
+import '../../../styles/tabbed.css';
+import '../../../styles/mode-selector.css';
+import Sidebar from '../../../containers/Sidebar';
+import Button from '../../../additional-components/buttons/Button';
 
 const TabbedSidebar = ({ id, style, show, className, position, tabComponents, children, ...rest }) => {
   const [selectedTabIndex, setSelectedTabIndex] = useState(null);
