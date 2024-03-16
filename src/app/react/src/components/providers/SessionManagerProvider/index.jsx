@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Provider } from '../../contexts/SessionManagerContext';
+import { Provider } from '../../../contexts/SessionManagerContext';
 import SelectorModeProvider from '../SelectorModeProvider';
+import type { ViewportType } from '../../../types/general';
+import { Node, ReactFlowProvider, useNodesState } from '@xyflow/react';
 
 function SessionProvider({ children }) {
   const [sessionName, setSessionName] = useState('');
   const [csvFilePath, setCsvFilePath] = useState('');
   const [ctfFilePath, setCtfFilePath] = useState('');
-  const [nodes, setNodes] = useState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [viewports, setViewports] = useState([]);
-  const [activeViewportIndex, setActiveViewportIndex] = useState(null);
   const [activeViewport, _setActiveViewport] = useState(null);
 
   useEffect(() => {
@@ -22,6 +23,14 @@ function SessionProvider({ children }) {
     });
   }, [activeViewport]);
 
+  useEffect(() => {
+    viewports.forEach((vp) => {
+      vp.props.nodes = nodes.filter((nd) => nd.data.viewport === vp.id);
+      return vp;
+    });
+    setViewports(() => viewports);
+  }, [nodes]);
+
   function setActiveViewport(viewportId) {
     if (typeof viewportId === 'undefined') {
       return;
@@ -33,9 +42,12 @@ function SessionProvider({ children }) {
     }
 
     _setActiveViewport(() => viewports[index]);
-    setActiveViewportIndex(() => index);
     viewports.forEach((vp, i) => vp.props.active = i === index);
     setViewports(() => viewports);
+  }
+
+  function getViewportIndex(viewport: ViewportType) {
+    return viewports.findIndex((vp) => vp.id === viewport.id);
   }
 
   const contextProps = {
@@ -47,9 +59,11 @@ function SessionProvider({ children }) {
     setCtfFilePath,
     nodes,
     setNodes,
+    onNodesChange,
     viewports,
     setViewports,
-    activeViewport: [activeViewport, activeViewportIndex],
+    getViewportIndex,
+    activeViewport,
     setActiveViewport,
   };
 
@@ -59,11 +73,14 @@ function SessionProvider({ children }) {
 }
 
 function SessionManagerProvider({ children }) {
-  return (<SelectorModeProvider>
-    <SessionProvider>
-      {children}
-    </SessionProvider>
-  </SelectorModeProvider>);
+  return (
+    <ReactFlowProvider>
+      <SelectorModeProvider>
+        <SessionProvider>
+          {children}
+        </SessionProvider>
+      </SelectorModeProvider>
+    </ReactFlowProvider>);
 }
 
 export default SessionManagerProvider;
