@@ -1,10 +1,10 @@
-import IconSelect from '../../../resources/icons/cursor.png';
-import IconPlus from '../../../resources/icons/plus.png';
-import IconRotate from '../../../resources/icons/rotate.png';
+import IconSelect from '../../resources/icons/cursor.png';
+import IconPlus from '../../resources/icons/plus.png';
+import IconRotate from '../../resources/icons/rotate.png';
 import React, { memo, useEffect, useState } from 'react';
-import { SelectorModes } from '../../../utils/selector-modes';
-import '../../../styles/mode-selector.css';
-import useSelectorMode from '../../../hooks/useSelectorMode';
+import { SelectorModes } from '../../utils/selector-modes';
+import '../../styles/mode-selector.css';
+import useSelectorMode from '../../hooks/useSelectorMode';
 import Button from '../buttons/Button';
 
 function ModeSelector({ initialMode, className, style, children }) {

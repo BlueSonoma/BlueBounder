@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { ControlButton } from '@xyflow/react';
 
-import '../../../../styles/mode-selector.css';
+import '../../../styles/mode-selector.css';
 
 function Button({ id, className, style, onClick, imageUrl, imageStyle, alt, title, label, children }) {
   className = className ?? 'mode-selector';

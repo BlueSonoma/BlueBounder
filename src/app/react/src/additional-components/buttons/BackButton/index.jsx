@@ -1,4 +1,4 @@
-import '../../../../styles/back-button.css';
+import '../../../styles/back-button.css';
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 

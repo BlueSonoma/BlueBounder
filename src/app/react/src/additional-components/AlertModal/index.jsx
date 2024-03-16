@@ -1,4 +1,4 @@
-import Modal from '../../../containers/Modal';
+import Modal from '../../containers/Modal';
 import Button from '../buttons/Button';
 
 function AlertModal({ id, style, className, message, title, onClose, buttonProps, children, ...rest }) {
