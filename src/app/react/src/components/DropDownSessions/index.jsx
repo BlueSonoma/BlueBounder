@@ -35,9 +35,9 @@ function DropSessionsDown() {
   }, []);
 
   const handleNavigate = () => {
-    console.log('Navigating to /home with sessionName:', selectedOption.label);
+    console.log('Navigating to /app with sessionName:', selectedOption.label);
     setSessionName(selectedOption.label);
-    navigate('/home');
+    navigate('/app');
   };
 
   return (<>
