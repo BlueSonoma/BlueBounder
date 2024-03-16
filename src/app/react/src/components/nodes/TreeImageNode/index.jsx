@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import '../../../styles/tree.css';
 import IconFolderOpened from '../../../resources/icons/folder-opened.png';
 import IconFolderClosed from '../../../resources/icons/folder-closed.png';
@@ -6,10 +6,15 @@ import useSessionManager from '../../../hooks/useSessionManager';
 import { NodeRendererProps } from 'react-arborist';
 
 function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) {
-  const { viewports, setActiveViewport } = useSessionManager();
+  const { viewports, setActiveViewport, nodes, setNodes } = useSessionManager();
+  const [thisNode, setThisNode] = useState(null);
   const treeNodeId = `tree-node__${node.data?.id}`;
   const thumbSrc = node.data.src;
   const thumbnailName = node.data.name;
+
+  useEffect(() => {
+    setThisNode(nodes.find((nd) => nd.id === node.data.id));
+  }, [node]);
 
   useEffect(() => {
     const isSelected = node.isSelected;
@@ -25,21 +30,39 @@ function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) 
 
   function renderThumbnail() {
     if (!node.isLeaf) {
-      return (<img
-        alt={thumbnailName}
-        src={node.isOpen ? IconFolderOpened : IconFolderClosed}
-        width={'25px'}
-        height={'25px'}
-      />);
+      return (<>
+        <img
+          alt={thumbnailName}
+          src={node.isOpen ? IconFolderOpened : IconFolderClosed}
+          width={'25px'}
+          height={'25px'}
+        /></>);
     }
 
-    return <img
-      alt={thumbnailName}
-      src={thumbSrc}
-      width={'25px'}
-      height={'25px'}
-      style={{ border: 'solid black 1px', borderRadius: '5px' }}
-    />;
+    return (<>
+      <input
+        type={'checkbox'}
+        checked={!thisNode?.hidden}
+        onClick={onLeafCheckboxClickHandler}
+      />
+      <img
+        alt={thumbnailName}
+        src={thumbSrc}
+        width={'25px'}
+        height={'25px'}
+        style={{ border: 'solid black 1px', borderRadius: '5px' }}
+      /></>);
+  }
+
+  function onLeafCheckboxClickHandler() {
+    setNodes((prev) => prev.map((nd) => {
+      if (thisNode.id === nd.id) {
+        return {
+          ...nd, hidden: !nd.hidden,
+        };
+      }
+      return nd;
+    }));
   }
 
   return (<div className={'tree-node'} id={treeNodeId} style={style} ref={dragHandle}>
