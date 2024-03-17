@@ -28,7 +28,7 @@ function SessionProvider({ children }) {
       vp.props.nodes = nodes.filter((nd) => nd.data.viewport === vp.id);
       return vp;
     });
-    setViewports(() => viewports);
+    setViewports(() => [...viewports]);
   }, [nodes]);
 
   function setActiveViewport(viewportId) {

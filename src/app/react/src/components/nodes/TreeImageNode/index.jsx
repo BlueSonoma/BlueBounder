@@ -7,18 +7,14 @@ import { NodeRendererProps } from 'react-arborist';
 
 function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) {
   const { viewports, setActiveViewport, nodes, setNodes } = useSessionManager();
-  const [thisNode, setThisNode] = useState(null);
-  const treeNodeId = `tree-node__${node.data?.id}`;
+  const [hidden, setHidden] = useState(node.data.hidden ?? false);
+  const treeNodeId = `tree-node__${node.id}`;
   const thumbSrc = node.data.src;
   const thumbnailName = node.data.name;
 
   useEffect(() => {
-    setThisNode(nodes.find((nd) => nd.id === node.data.id));
-  }, [node]);
-
-  useEffect(() => {
     const isSelected = node.isSelected;
-    document.querySelector(`#${treeNodeId}`).classList.toggle('selected', isSelected);
+    document.querySelector(`#treeNode__${treeNodeId}`).classList.toggle('selected', isSelected);
 
     if (isSelected) {
       const viewport = viewports.find((vp) => vp.id === node.data.viewport);
@@ -28,21 +24,61 @@ function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) 
     }
   }, [node]);
 
+  useEffect(() => {
+    if (hidden) {
+      for (let i = 0; i < node.children?.length; i++) {
+        if (!node.children[i]?.data?.hidden) {
+          setHidden(!hidden);
+          break;
+        }
+      }
+    }
+  }, [node.children]);
+
+  function onFolderCheckboxClickedHandler(event) {
+    event.stopPropagation();
+
+    const shouldHide = !hidden;
+    setHidden(shouldHide);
+
+    node.children.forEach((child) => {
+      const index = nodes.findIndex((nd) => nd.id === child.id);
+      if (index !== -1) {
+        nodes[index].hidden = shouldHide;
+      }
+    });
+
+    setNodes(() => nodes.map((nd) => {
+      return {
+        ...nd,
+      };
+    }));
+
+  }
+
   function renderThumbnail() {
     if (!node.isLeaf) {
+      const isOpen = node.isOpen;
       return (<>
+        <input
+          type={'checkbox'}
+          checked={!hidden}
+          onClick={onFolderCheckboxClickedHandler}
+          title={`${hidden ? 'Show ' : 'Hide '} all`}
+        />
         <img
           alt={thumbnailName}
-          src={node.isOpen ? IconFolderOpened : IconFolderClosed}
+          src={isOpen ? IconFolderOpened : IconFolderClosed}
           width={'25px'}
           height={'25px'}
+          title={`${isOpen ? 'Collapse ' : 'Expand '}`}
         /></>);
     }
 
     return (<>
       <input
         type={'checkbox'}
-        checked={!thisNode?.hidden}
+        checked={!node.data.hidden}
         onClick={onLeafCheckboxClickHandler}
       />
       <img
@@ -56,7 +92,7 @@ function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) 
 
   function onLeafCheckboxClickHandler() {
     setNodes((prev) => prev.map((nd) => {
-      if (thisNode.id === nd.id) {
+      if (node.id === nd.id) {
         return {
           ...nd, hidden: !nd.hidden,
         };
@@ -65,7 +101,7 @@ function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) 
     }));
   }
 
-  return (<div className={'tree-node'} id={treeNodeId} style={style} ref={dragHandle}>
+  return (<div className={'tree-node'} id={`treeNode__${treeNodeId}`} style={style} ref={dragHandle}>
     {renderThumbnail()}
     <label style={{ paddingLeft: '5px' }}>{thumbnailName}</label>
   </div>);
