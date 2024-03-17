@@ -17,7 +17,7 @@ function ViewportTreeView({}) {
       return {
         id: viewport.props.id, name: viewport.label, children: viewport.props.nodes.map((node) => {
           return {
-            id: node.id, name: node.data.file?.prefix, ...node.data,
+            id: node.id, name: node.data.file?.prefix, hidden: node.hidden, ...node.data,
           };
         }),
       };
