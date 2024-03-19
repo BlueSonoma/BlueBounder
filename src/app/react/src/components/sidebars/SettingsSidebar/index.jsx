@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import TabbedSidebar from '../TabbedSidebar';
 import { DockPanelPosition } from '../../../types/general';
-import LayersView from '../../views/ViewportTreeView';
+import LayersView from '../../views/ViewportLayersView';
 
 function SettingsSidebar({ show, children, ...rest }) {
   return (<TabbedSidebar
