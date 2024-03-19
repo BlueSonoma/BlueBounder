@@ -8,7 +8,7 @@ import TreeImageNode from '../../nodes/TreeImageNode';
 import '../../../styles/tree.css';
 import type { ViewportType } from '../../../types/general';
 
-function ViewportTreeView({}) {
+function ViewportLayersView({}) {
   const [root, setRoot] = useTreeState({ name: 'Viewports' });
   const { nodes, setNodes, viewports } = useSessionManager();
 
@@ -72,7 +72,7 @@ function ViewportTreeView({}) {
 
   return (<div>
     <div style={{ marginTop: '5px', padding: '3px', border: '2px groove lightgray' }}>Layers</div>
-    <div style={{ overflow: 'hidden', marginTop: '5px', padding: '3px', border: '2px groove lightgray' }}>
+    <div style={{ overflow: 'hidden', padding: '3px', border: '2px groove lightgray' }}>
       <Tree
         data={[root]}
         idAccessor={'id'}
@@ -88,4 +88,4 @@ function ViewportTreeView({}) {
   </div>);
 }
 
-export default ViewportTreeView;
+export default ViewportLayersView;
