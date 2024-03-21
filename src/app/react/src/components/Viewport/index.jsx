@@ -2,7 +2,7 @@ import {
   Background, BackgroundVariant, ReactFlow, ReactFlowProvider,
 } from '@xyflow/react';
 import { nodeTypes } from '../component-types';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import useViewport from '../../hooks/useViewport';
 import ViewportMetricsBar from '../ViewportMetricsBar';
 
@@ -49,6 +49,10 @@ function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest 
     setInitialized(true);
   }
 
+  const backgroundLineWidth = useMemo(() => {
+    return Math.min(0.5, 0.5 * zoom);
+  });
+
   return (<div className={'canvas ' + className} style={style} {...rest}>
     <ReactFlow
       id={id}
@@ -67,7 +71,7 @@ function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest 
       <Background
         id={`background__${id}`}
         variant={BackgroundVariant.Lines}
-        lineWidth={Math.min(0.5, 0.5 * zoom)}
+        lineWidth={backgroundLineWidth}
         gap={50}
         color={'#303030'}
       />
