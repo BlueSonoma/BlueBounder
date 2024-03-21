@@ -1,4 +1,4 @@
-import { NodeMouseHandler } from '@xyflow/react';
+import { Node, NodeMouseHandler } from '@xyflow/react';
 
 export const DockPanelPosition = {
   Left: 'left',
@@ -14,8 +14,18 @@ export const DockPanelPosition = {
   BottomRight: 'bottom-right',
 };
 
+export type ViewportProps = {
+  id: string, nodes: [Node], onClick: (NodeMouseHandler) => void;
+}
+
 export type ViewportType = {
-  id: string, label: string, component: React.Component, props: {
-    id: string, nodes: [], onClick: (NodeMouseHandler) => void; active: boolean;
-  },
+  id: string, label: string, component: React.Component, props: ViewportProps,
+}
+
+export type FileProps = {
+  prefix?: string; name?: string; path?: string; extension?: string;
+}
+
+export type ImageProps = {
+  width?: number; height?: number; src: string
 }

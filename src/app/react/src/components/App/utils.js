@@ -16,7 +16,9 @@ export function createImageNode(image): ImageNodeType {
     draggable: false,
     deletable: false,
     data: {
-      label: image.alt ?? id, viewport: null, width: image.width, height: image.height, src: image.src,
+      label: image.alt ?? id, width: image.width, height: image.height, viewport: null, image: {
+        width: image.width, height: image.height, src: image.src,
+      },
     },
   };
 }
@@ -32,6 +34,7 @@ export function addFilepathToNode(node, filepath) {
   node.data.file = {
     prefix: filePrefix, name: filename, path: filepath, extension: fileExt,
   };
+  node.data.label = filePrefix;
 }
 
 export async function createImageNodeFromFilepath(filepath) {
@@ -54,7 +57,7 @@ export function createViewport(name, onClick): ViewportType {
   const id = `Viewport_${getNextId()}`;
   return {
     id: id, label: name, component: Viewport, props: {
-      id: id, nodes: [], onClick: onClick, active: false,
+      id: id, nodes: [], onClick: onClick,
     },
   };
 }

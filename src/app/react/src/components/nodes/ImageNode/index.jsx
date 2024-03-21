@@ -3,23 +3,23 @@ import { memo, useEffect, useState } from 'react';
 
 function ImageNode(props: NodeProps) {
   const {
-    id, data, selected, xPos, yPos, type,
+    id, data,
   } = props;
 
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    if (data?.src) {
-      setImage(data.src);
+    if (data?.image.src) {
+      setImage(data.image.src);
     }
-  }, [data?.src]);
+  }, [data?.image.src]);
 
-  if (!data?.src) {
+  if (!data?.image.src) {
     return;
   }
 
   return (<div id={id}>
-    <img src={image} alt={data.label} width={data.width} height={data.height} />
+    <img src={image} alt={data.label} width={data.image.width} height={data.image.height} />
   </div>);
 }
 

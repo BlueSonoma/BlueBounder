@@ -1,16 +1,14 @@
-import { XYPosition } from '@xyflow/react';
+import type { FileProps, ImageProps } from './general';
+import type NodeBase from '@xyflow/react';
 
-export type ImageNodeType = {
-  id: string;
-  type: string;
-  position: XYPosition,
-  selectable?: boolean,
-  focusable?: boolean,
-  draggable?: boolean,
-  deletable?: boolean,
-  data: {
-    width?: number; height?: number; src: string; file?: {
-      prefix?: string; name?: string; path?: string; extension?: string;
-    }; viewport: string | null;
-  },
+export type ImageNodeData = {
+  label?: string;
+  width?: number;
+  height?: number;
+  image: ImageProps; file?: FileProps; viewport: string | null; reload?: () => void;
 };
+
+export type ImageNodeType = NodeBase & {
+  data: ImageNodeData,
+};
+
