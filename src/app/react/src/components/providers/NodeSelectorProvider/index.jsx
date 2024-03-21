@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Provider } from '../../../contexts/NodeSelectorContext';
 import useSessionManager from '../../../hooks/useSessionManager';
 
 function NodeSelectorProvider({ children }) {
-  const { setNodes } = useSessionManager();
+  const { nodes, setNodes } = useSessionManager();
   const [_selectedNodes, _setSelectedNodes] = useState([]);
+
+  useEffect(() => {
+    const updated = _selectedNodes.map((node) => nodes.find((nd) => nd.id === node.id));
+    _setSelectedNodes(() => updated.filter((n) => n));
+  }, [nodes]);
 
   function setSelectedNodes(selected: Node[] | string[]) {
     const isArray = Array.isArray(selected);
