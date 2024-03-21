@@ -19,7 +19,7 @@ function ViewportLayersView({}) {
       return {
         id: viewport.props.id, name: viewport.label, children: viewport.props.nodes.map((node) => {
           return {
-            id: node.id, name: node.data.file?.prefix, hidden: node.hidden, ...node.data,
+            id: node.id, name: node.data.label, hidden: node.hidden, ...node.data,
           };
         }),
       };
