@@ -27,10 +27,22 @@ function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) 
   useEffect(() => {
     if (hidden) {
       for (let i = 0; i < node.children?.length; i++) {
-        if (!node.children[i]?.data?.hidden) {
-          setHidden(!hidden);
+        const nodeVisible = !node.children[i]?.data?.hidden;
+        if (nodeVisible) {
+          setHidden(false);
           break;
         }
+      }
+    } else {
+      let numHidden = 0;
+      for (let i = 0; i < node.children?.length; i++) {
+        const nodeHidden = node.children[i]?.data?.hidden;
+        if (nodeHidden) {
+          numHidden++;
+        }
+      }
+      if (numHidden === node.children?.length) {
+        setHidden(true);
       }
     }
   }, [node.children]);
@@ -53,7 +65,6 @@ function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) 
         ...nd,
       };
     }));
-
   }
 
   function renderThumbnail() {
@@ -80,12 +91,14 @@ function TreeImageNode({ style, node, dragHandle, preview }: NodeRendererProps) 
         type={'checkbox'}
         checked={!node.data.hidden}
         onClick={onLeafCheckboxClickHandler}
+        title={`${node.data.hidden ? 'Show' : 'Hide'}`}
       />
       <img
         alt={thumbnailName}
         src={thumbSrc}
         width={'25px'}
         height={'25px'}
+        title={thumbnailName}
         style={{ border: 'solid black 1px', borderRadius: '5px' }}
       /></>);
   }

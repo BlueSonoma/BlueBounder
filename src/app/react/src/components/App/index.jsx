@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import useSessionManager from '../../hooks/useSessionManager';
 import { HOST_URL } from '../../index';
-import { addFilepathToNode, createImageNodeFromFilepath, createViewport, imageAlreadyLoaded } from './utils';
+import {
+  addFilepathToNode, createImageNodeFromFilepath, createViewport, imageAlreadyLoaded, toggleShowSidebar,
+} from './utils';
 import ImageUploadForm from '../../additional-components/forms/ImageUploadForm';
 import IconLiveFolder from '../../resources/icons/live-folder.png';
 import Button from '../../additional-components/buttons/Button';
@@ -14,13 +16,11 @@ import IconClassify from '../../resources/icons/classify.png';
 import IconLayers from '../../resources/icons/layers.png';
 import { DockPanelPosition } from '../../types/general';
 import Navbar from '../../containers/Navbar';
-import ProjectSidebar from '../sidebars/ProjectSidebar';
-import SettingsSidebar from '../sidebars/SettingsSidebar';
-import BottomSidebar from '../sidebars/BottomSidebar';
 import WindowTitleBar from '../../additional-components/WindowTitleBar';
 import Canvas from '../Canvas';
 import useAppState from '../../hooks/useAppState';
 import type { ImageNodeType } from '../../types/nodes';
+import { initialBottomSidebar, initialProjectSidebar, initialSettingsSidebar } from '../sidebars/initialSidebars';
 
 import '../../styles/bounder.css';
 import '../../styles/sidebar.css';
@@ -33,9 +33,9 @@ function App() {
     sessionName, nodes, setNodes, viewports, setViewports, setActiveViewport,
   } = useSessionManager();
 
-  const [showLeftDrawer, setShowLeftDrawer] = useState(true);
-  const [showRightDrawer, setShowRightDrawer] = useState(true);
-  const [showBottomDrawer, setShowBottomDrawer] = useState(false);
+  const [leftSidebar, setLeftSidebar] = useState(initialProjectSidebar);
+  const [rightSidebar, setRightSidebar] = useState(initialSettingsSidebar);
+  const [bottomSidebar, setBottomSidebar] = useState(initialBottomSidebar);
 
   useEffect(() => {
     if (!sessionName) {
@@ -146,36 +146,36 @@ function App() {
       <Button
         id={'button__pixel-data'}
         imageUrl={IconPixelData}
-        onClick={() => setShowBottomDrawer(!showBottomDrawer)}
+        onClick={() => toggleShowSidebar(bottomSidebar, setBottomSidebar)}
         label={'Pixel Data'}
       />
       <Button
         id={'button__map'}
-        onClick={() => setShowRightDrawer(showRightDrawer)}
+        onClick={() => toggleShowSidebar(rightSidebar, setRightSidebar)}
         imageUrl={IconMaps}
         label={'Maps'}
       />
       <Button
         id={'button__clean-up'}
-        onClick={() => setShowRightDrawer(showRightDrawer)}
+        onClick={() => toggleShowSidebar(rightSidebar, setRightSidebar)}
         imageUrl={IconCleanUp}
         label={'Clean Up'}
       />
       <Button
         id={'button__grain-size'}
-        onClick={() => setShowLeftDrawer(!showLeftDrawer)}
+        onClick={() => toggleShowSidebar(leftSidebar, setLeftSidebar)}
         imageUrl={IconGrainSize}
         label={'Grain Size'}
       />
       <Button
         id={'button__classify'}
-        onClick={() => setShowRightDrawer(!showRightDrawer)}
+        onClick={() => toggleShowSidebar(rightSidebar, setRightSidebar)}
         imageUrl={IconClassify}
         label={'Classify'}
       />
       <Button
         id={'button__layers'}
-        onClick={() => setShowRightDrawer(!showRightDrawer)}
+        onClick={() => toggleShowSidebar(rightSidebar, setRightSidebar)}
         imageUrl={IconLayers}
         label={'Layers'}
       />
@@ -194,10 +194,9 @@ function App() {
     return (<Navbar
       id={'navbar__left'}
       position={DockPanelPosition.Left}
-      showDrawer={showLeftDrawer}
-      drawerComponent={ProjectSidebar}
+      drawerComponent={leftSidebar}
     >
-      <Button label={'Project'} onClick={() => setShowLeftDrawer(!showLeftDrawer)} />
+      <Button label={'Project'} onClick={() => toggleShowSidebar(leftSidebar, setLeftSidebar)} />
     </Navbar>);
   }
 
@@ -205,10 +204,9 @@ function App() {
     return (<Navbar
       id={'navbar__right'}
       position={DockPanelPosition.Right}
-      showDrawer={showRightDrawer}
-      drawerComponent={SettingsSidebar}
+      drawerComponent={rightSidebar}
     >
-      <Button label={'Settings'} onClick={() => setShowRightDrawer(!showRightDrawer)} />
+      <Button label={'Settings'} onClick={() => toggleShowSidebar(rightSidebar, setRightSidebar)} />
     </Navbar>);
   }
 
@@ -216,10 +214,9 @@ function App() {
     return (<Navbar
       id={'navbar__bottom'}
       position={DockPanelPosition.Bottom}
-      showDrawer={showBottomDrawer}
-      drawerComponent={BottomSidebar}
+      drawerComponent={bottomSidebar}
     >
-      <Button label={'Details'} onClick={() => setShowBottomDrawer(!showBottomDrawer)} />
+      <Button label={'Details'} onClick={() => toggleShowSidebar(bottomSidebar, setBottomSidebar)} />
     </Navbar>);
   }
 

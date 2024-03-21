@@ -58,3 +58,9 @@ export function createViewport(name, onClick): ViewportType {
     },
   };
 }
+
+export function toggleShowSidebar(sidebarType, setterFunc) {
+  setterFunc({
+    ...sidebarType, show: !sidebarType.show,
+  });
+}
