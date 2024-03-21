@@ -3,6 +3,7 @@ import { Provider } from '../../../contexts/SessionManagerContext';
 import SelectorModeProvider from '../SelectorModeProvider';
 import type { ViewportType } from '../../../types/general';
 import { Node, ReactFlowProvider, useNodesState } from '@xyflow/react';
+import NodeSelectorProvider from '../NodeSelectorProvider';
 
 function SessionProvider({ children }) {
   const [sessionName, setSessionName] = useState('');
@@ -73,14 +74,15 @@ function SessionProvider({ children }) {
 }
 
 function SessionManagerProvider({ children }) {
-  return (
-    <ReactFlowProvider>
-      <SelectorModeProvider>
-        <SessionProvider>
+  return (<ReactFlowProvider>
+    <SelectorModeProvider>
+      <SessionProvider>
+        <NodeSelectorProvider>
           {children}
-        </SessionProvider>
-      </SelectorModeProvider>
-    </ReactFlowProvider>);
+        </NodeSelectorProvider>
+      </SessionProvider>
+    </SelectorModeProvider>
+  </ReactFlowProvider>);
 }
 
 export default SessionManagerProvider;
