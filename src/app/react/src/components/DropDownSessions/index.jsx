@@ -91,7 +91,7 @@ function DropSessionsDown() {
       </Checkbox>
     </div>
     <div className='buttonContainer'>
-      <button className='butt1class' onClick={() => handleNavigate()}>Submit</button>
+      <button className='butt1class' disabled={!selectedOption} onClick={() => handleNavigate()}>Submit</button>
     </div>
   </>);
 }
