@@ -114,6 +114,20 @@ function App() {
     }
 
     const node = await createImageNodeFromFilepath(filepath);
+    node.data.reload = async () => {
+      const reNode = await createImageNodeFromFilepath(node.data.file.path);
+      node.data.image = reNode.data.image;
+      node.width = reNode.width;
+      node.height = reNode.height;
+      setNodes((prev) => prev.map((nd) => {
+        if (nd.id === node.id) {
+          return {
+            ...node,
+          };
+        }
+        return nd;
+      }));
+    };
     addFilepathToNode(node, filepath);
 
     return node;
