@@ -72,13 +72,14 @@ function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps)
   function renderThumbnail() {
     if (!treeNode.isLeaf) {
       const isOpen = treeNode.isOpen;
+      const isRoot = treeNode.id === 'root__viewports';
       return (<>
-        <input
+        {!isRoot && <input
           type={'checkbox'}
           checked={!hidden}
           onClick={onFolderCheckboxClickedHandler}
           title={`${hidden ? 'Show ' : 'Hide '} all`}
-        />
+        />}
         <img
           alt={tnName}
           src={isOpen ? IconFolderOpened : IconFolderClosed}

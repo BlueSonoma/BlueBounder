@@ -10,7 +10,7 @@ import type { ViewportType } from '../../../types/general';
 import useNodeSelector from '../../../hooks/useNodeSelector';
 
 function ViewportLayersView({}) {
-  const [root, setRoot] = useTreeState({ name: 'Viewports' });
+  const [root, setRoot] = useTreeState({ id: 'root__viewports', name: 'Viewports' });
   const { nodes, viewports } = useSessionManager();
   const { setSelectedNodes } = useNodeSelector();
 
