@@ -368,7 +368,7 @@ def create_X():
 
     # now the final image will be the result of XOR'ing all the binary images together
 
-    def xor_image_withSI(SI, img):
+    def xor_image_with_SI(SI, img):
         for x in range(img.shape[0]):
             for y in range(img.shape[1]):
                 if (SI[x, y] == 1) and (img[x, y] == 1):
@@ -376,11 +376,11 @@ def create_X():
 
         return SI
 
-    xor_SI = xor_image_withSI(SI_img, AL_img)
-    xor_SI = xor_image_withSI(xor_SI, CA_img)
-    xor_SI = xor_image_withSI(xor_SI, NA_img)
-    xor_SI = xor_image_withSI(xor_SI, FE_img)
-    xor_SI = xor_image_withSI(xor_SI, K_img)
+    xor_SI = xor_image_with_SI(SI_img, AL_img)
+    xor_SI = xor_image_with_SI(xor_SI, CA_img)
+    xor_SI = xor_image_with_SI(xor_SI, NA_img)
+    xor_SI = xor_image_with_SI(xor_SI, FE_img)
+    xor_SI = xor_image_with_SI(xor_SI, K_img)
 
     # now save he xor_SI image
 
@@ -450,8 +450,8 @@ def create_XA():
 # 4. BC: [BC]
 # 5. BS: [BS]
 # each object represents a pixel in the image created by the csv File
-# Temporary pagination implementaition
-def getCTF_data(filename, page, items_per_page):
+# Temporary pagination implementation
+def get_ctf_data(filename, page, items_per_page):
     PixelData = []
     start_index = (page - 1) * items_per_page
     end_index = start_index + items_per_page
@@ -459,7 +459,7 @@ def getCTF_data(filename, page, items_per_page):
     with open(filename, 'r') as file:
         for line in file:
             data = line.split()
-            if (data[0] == "Phase"):
+            if data[0] == "Phase":
                 break
 
         for i, line in enumerate(file):
@@ -482,7 +482,7 @@ def getCTF_data(filename, page, items_per_page):
     return PixelData
 
 
-def getChemical_data(fileName):
+def get_chemical_data(fileName):
     with open(fileName, 'r') as file:
         file.seek(0)
         file.readline()
