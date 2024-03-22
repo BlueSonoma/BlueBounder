@@ -182,24 +182,19 @@ def my_modal_filter(image):
     return result
 
 
-def clean_images():
-    def spinner():
-        for c in itertools.cycle(['-', '/', '|', '\\']):
-            if done:
-                break
-            print(c, end='\r')
-            time.sleep(0.1)
+def clean_Euler(image, quantization=16,red_area=100):
 
-    done = False
-    spinner_thread = threading.Thread(target=spinner)
-    spinner_thread.start()
+    Cleaned_Euler_directory= 'Euler_images/cleaned/'
+    # Create the directory if it does not exist
+    if not os.path.exists(Cleaned_Euler_directory):
+        os.makedirs(Cleaned_Euler_directory)
 
-    euler_img = io.imread('Euler_Images/euler_phase.png')
+    euler_img = image
 
     if euler_img.shape[2] == 4:
         euler_img = euler_img[:, :, :3]
 
-    euler_img = quantization(euler_img, 16)
+    euler_img = quantization(euler_img, quantization)
 
     red_channel = my_max_neighbor_fast(euler_img, 0)
     green_channel = my_max_neighbor_fast(euler_img, 1)
@@ -208,129 +203,133 @@ def clean_images():
 
     grayscale = color.rgb2gray(euler_img)
     binary = grayscale > 0
-    reduced_Binary = reduce_area(binary, 100)
+    reduced_Binary = reduce_area(binary, red_area)
 
     for i in range(len(reduced_Binary)):
         for j in range(len(reduced_Binary[0])):
             if reduced_Binary[i][j] == 0:
                 euler_img[i][j] = 0
 
-    imageio.imsave('Euler_Images/clean_Euler_fast.png', euler_img.astype('uint8'))
-    clean_chemistry()
-    print("Done with clean images")
-
-    done = True
-    spinner_thread.join()
+    # imageio.imsave('Euler_Images/clean_Euler_fast.png', euler_img.astype('uint8'))
+    return euler_img
 
 
-def clean_chemistry():
-    print("Cleaning chemical images...")
+    
+    
+
+
+def clean_chemistry(current_session,image,imageLabel, Threshold=0.5,red_area=100):
+
 
     Chemistry_directory_reduced = 'Chemical_images/reduced/'
     # Create the directory if it does not exist
     if not os.path.exists(Chemistry_directory_reduced):
         os.makedirs(Chemistry_directory_reduced)
 
-        # SI_img = SI_img*255
-        # AL_img = AL_img*255
-        # CA_img = CA_img*255
-        # FE_img = FE_img*255
-        # K_img = K_img*255
-        # NA_img = NA_img*255
+    image = image / 255
+    image[image < Threshold] = 0
+    image[image > Threshold] = 1
 
-        def SI():
-            SI_img = io.imread('Chemical_Images/SI_fromFile.png')
+    max_image = my_modal_filter(image)
+    max_image= reduce_area(max_image, red_area)
+    image= im.fromarray(image.astype(np.uint8), mode="L")
+    # image.save(Chemistry_directory_reduced + imageLabel + ".png")
+    return image
 
-            SI_img = SI_img / 255
-            SI_img[SI_img < 0.5] = 0
-            SI_img[SI_img > 0.5] = 1
 
-            SI_img = io.imread('Chemical_Images/SI_fromFile.png')
-            SI_img = SI_img / 255
-            SI_img[SI_img < 0.5] = 0
-            max_SI_img = my_modal_filter(SI_img)
-            max_SI_img = reduce_area(max_SI_img, 100)
-            SI_img = im.fromarray(max_SI_img.astype(np.uint8), mode="L")
-            SI_img.save(Chemistry_directory_reduced + "SI_img.png")
-            print("Done with SI")
-            return "SI"
+        # def SI():
+        #     SI_img = io.imread('Chemical_Images/SI_fromFile.png')
 
-        def AL():
-            AL_img = io.imread('Chemical_Images/AL_fromFile.png')
+        #     SI_img = SI_img / 255
+        #     SI_img[SI_img < 0.5] = 0
+        #     SI_img[SI_img > 0.5] = 1
 
-            AL_img = AL_img / 255
-            AL_img[AL_img < 0.2] = 0
-            AL_img[AL_img > 0.2] = 1
+        #     SI_img = io.imread('Chemical_Images/SI_fromFile.png')
+        #     SI_img = SI_img / 255
+        #     SI_img[SI_img < 0.5] = 0
+        #     max_SI_img = my_modal_filter(SI_img)
+        #     max_SI_img = reduce_area(max_SI_img, 100)
+        #     SI_img = im.fromarray(max_SI_img.astype(np.uint8), mode="L")
+        #     SI_img.save(Chemistry_directory_reduced + "SI_img.png")
+        #     print("Done with SI")
+        #     return "SI"
 
-            max_AL_img = my_modal_filter(AL_img)
-            max_AL_img = reduce_area(max_AL_img, 100)
-            AL_img = im.fromarray(max_AL_img.astype(np.uint8), mode="L")
-            AL_img.save(Chemistry_directory_reduced + "AL_img.png")
-            print("Done with AL")
-            return "SI"
+        # def AL():
+        #     AL_img = io.imread('Chemical_Images/AL_fromFile.png')
 
-        def CA():
-            CA_img = io.imread('Chemical_Images/CA_fromFile.png')
-            CA_img = CA_img / 255
-            CA_img[CA_img < 0.2] = 0
-            CA_img[CA_img > 0.2] = 1
+        #     AL_img = AL_img / 255
+        #     AL_img[AL_img < 0.2] = 0
+        #     AL_img[AL_img > 0.2] = 1
 
-            max_CA_img = my_modal_filter(CA_img)
-            max_CA_img = reduce_area(max_CA_img, 100)
-            CA_img = im.fromarray(max_CA_img.astype(np.uint8), mode="L")
-            CA_img.save(Chemistry_directory_reduced + "CA_img.png")
-            print("Done with CA")
-            return "SI"
+        #     max_AL_img = my_modal_filter(AL_img)
+        #     max_AL_img = reduce_area(max_AL_img, 100)
+        #     AL_img = im.fromarray(max_AL_img.astype(np.uint8), mode="L")
+        #     AL_img.save(Chemistry_directory_reduced + "AL_img.png")
+        #     print("Done with AL")
+        #     return "SI"
 
-        def FE():
-            FE_img = io.imread('Chemical_Images/FE_fromFile.png')
-            FE_img = FE_img / 255
-            FE_img[FE_img < 0.2] = 0
-            FE_img[FE_img > 0.2] = 1
+        # def CA():
+        #     CA_img = io.imread('Chemical_Images/CA_fromFile.png')
+        #     CA_img = CA_img / 255
+        #     CA_img[CA_img < 0.2] = 0
+        #     CA_img[CA_img > 0.2] = 1
 
-            max_FE_img = my_modal_filter(FE_img)
-            max_FE_img = reduce_area(max_FE_img, 100)
-            FE_img = im.fromarray(max_FE_img.astype(np.uint8), mode="L")
-            FE_img.save(Chemistry_directory_reduced + "FE_img.png")
-            print("Done with FE")
-            return "FE"
+        #     max_CA_img = my_modal_filter(CA_img)
+        #     max_CA_img = reduce_area(max_CA_img, 100)
+        #     CA_img = im.fromarray(max_CA_img.astype(np.uint8), mode="L")
+        #     CA_img.save(Chemistry_directory_reduced + "CA_img.png")
+        #     print("Done with CA")
+        #     return "SI"
 
-        def K():
-            K_img = io.imread('Chemical_Images/K_fromFile.png')
-            K_img = K_img / 255
+        # def FE():
+        #     FE_img = io.imread('Chemical_Images/FE_fromFile.png')
+        #     FE_img = FE_img / 255
+        #     FE_img[FE_img < 0.2] = 0
+        #     FE_img[FE_img > 0.2] = 1
 
-            K_img[K_img < 0.2] = 0
-            K_img[K_img > 0.2] = 1
+        #     max_FE_img = my_modal_filter(FE_img)
+        #     max_FE_img = reduce_area(max_FE_img, 100)
+        #     FE_img = im.fromarray(max_FE_img.astype(np.uint8), mode="L")
+        #     FE_img.save(Chemistry_directory_reduced + "FE_img.png")
+        #     print("Done with FE")
+        #     return "FE"
 
-            max_K_img = my_modal_filter(K_img)
-            max_K_img = reduce_area(max_K_img, 100)
-            K_img = im.fromarray(max_K_img.astype(np.uint8), mode="L")
-            K_img.save(Chemistry_directory_reduced + "K_img.png")
-            print("Done with K")
-            return "K"
+        # def K():
+        #     K_img = io.imread('Chemical_Images/K_fromFile.png')
+        #     K_img = K_img / 255
 
-        def NA():
-            NA_img = io.imread('Chemical_Images/NA_fromFile.png')
-            NA_img = NA_img / 255
+        #     K_img[K_img < 0.2] = 0
+        #     K_img[K_img > 0.2] = 1
 
-            NA_img[NA_img < 0.2] = 0
-            NA_img[NA_img > 0.2] = 1
+        #     max_K_img = my_modal_filter(K_img)
+        #     max_K_img = reduce_area(max_K_img, 100)
+        #     K_img = im.fromarray(max_K_img.astype(np.uint8), mode="L")
+        #     K_img.save(Chemistry_directory_reduced + "K_img.png")
+        #     print("Done with K")
+        #     return "K"
 
-            max_NA_img = my_modal_filter(NA_img)
-            max_NA_img = reduce_area(max_NA_img, 100)
-            NA_img = im.fromarray(max_NA_img.astype(np.uint8), mode="L")
-            NA_img.save(Chemistry_directory_reduced + "NA_img.png")
-            print("Done with NA")
-            return "NA"
+        # def NA():
+        #     NA_img = io.imread('Chemical_Images/NA_fromFile.png')
+        #     NA_img = NA_img / 255
 
-        switch = {
-            0: SI,
-            1: AL,
-            2: CA,
-            3: FE,
-            4: K,
-            5: NA
-        }
+        #     NA_img[NA_img < 0.2] = 0
+        #     NA_img[NA_img > 0.2] = 1
+
+        #     max_NA_img = my_modal_filter(NA_img)
+        #     max_NA_img = reduce_area(max_NA_img, 100)
+        #     NA_img = im.fromarray(max_NA_img.astype(np.uint8), mode="L")
+        #     NA_img.save(Chemistry_directory_reduced + "NA_img.png")
+        #     print("Done with NA")
+        #     return "NA"
+
+        # switch = {
+        #     0: SI,
+        #     1: AL,
+        #     2: CA,
+        #     3: FE,
+        #     4: K,
+        #     5: NA
+        # }
 
 
 def make_binary(img):

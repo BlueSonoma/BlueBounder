@@ -146,3 +146,13 @@ def api__getSessionImages():
         return jsonify(files, 200)
     except Exception as e:
         return str(e), 500
+
+@api.route('/clean_Euler', methods=['GET'])
+def api__cleanEuler():
+    print("Cleaning Euler image...")
+
+
+
+@api.route('/clean_Chemical_img', methods=['GET'])
+def api__cleanChemImg():
+    print("Cleaning chemical image...")
