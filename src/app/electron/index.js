@@ -17,6 +17,7 @@ const createWindow = () => {
     autoHideMenuBar: true,
   });
   win.loadFile('./app/react/build/index.html').then(() => console.log('File loaded'));
+  win.webContents.openDevTools();
 };
 
 app.whenReady().then(createWindow);

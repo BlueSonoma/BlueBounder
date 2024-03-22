@@ -116,7 +116,7 @@ function NewSession() {
               },
             }}
           />
-          <button className={'butt1class'}>Enter< /button>
+          <button className={'butt1class'} >Enter</button>
         </form>
       </div>
     </div>
