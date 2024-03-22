@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import useAppState from '../../hooks/useAppState';
 import { useLocation, useNavigate } from 'react-router-dom';
 import WindowTitleBar from '../../additional-components/WindowTitleBar';
-import { HOST_URL } from '../../index';
+import Routes from '../../routes';
 
 function SessionInitializer() {
   const appState = useAppState();
@@ -32,7 +32,7 @@ function SessionInitializer() {
     const sessionData = location.state.formData;
 
     if (typeof sessionData === 'undefined' || sessionData.path.length === 0) {
-      navigate('/app');
+      navigate(Routes.App);
       return;
     }
 
@@ -42,7 +42,7 @@ function SessionInitializer() {
     formData.append('sessionName', sessionData.name);
     formData.append('csvFilePath', sessionData.path);
 
-    const fetchAddr = `${HOST_URL}/api/sessions/create_starter_images`;
+    const fetchAddr = `${Routes.API.Sessions}/create_starter_images`;
 
     fetch(fetchAddr, {
       method: 'POST', body: formData,
@@ -51,12 +51,12 @@ function SessionInitializer() {
       .then(data => {
         console.log(data);
         appState.endLoadRequest();
-        navigate('/app');
+        navigate(Routes.App);
       })
       .catch((error) => {
         appState.endLoadRequest();
         error = `${error.message} ${fetchAddr}`;
-        navigate('/newSession', { state: { formData: sessionData, error } });
+        navigate(Routes.NewSession, { state: { formData: sessionData, error } });
       });
   }, []);
 

@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from 'react';
 import '../../../styles/sidebar.css';
 import useSessionManager from '../../../hooks/useSessionManager';
-import { HOST_URL } from '../../../index';
+import { API } from '../../../routes';
 
 type ListItem = {
   name: string; type: string; children?: ListItem[];
@@ -12,7 +12,7 @@ function ProjectStructureListView({ children, ...rest }) {
   const { sessionName, setSessionName } = useSessionManager();
 
   useEffect(() => {
-    fetch(`${HOST_URL}/api/sessions/get_session_Folder?sessionName=${sessionName}`, {
+    fetch(`${API.Sessions}/get_session_Folder?sessionName=${sessionName}`, {
       method: 'GET',
     })
       .then(response => response.json())
@@ -30,7 +30,7 @@ function ProjectStructureListView({ children, ...rest }) {
     if (!item) {
       return null;
     }
-  
+
     return (<>
       <label key={itemCounter++} style={{ padding: '5px' }}>{item.name}</label>
       {item.children?.map((child) => {

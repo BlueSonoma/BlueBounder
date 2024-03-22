@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import '../../styles/dropdown-sessions.css';
 import useSessionManager from '../../hooks/useSessionManager';
-import { HOST_URL } from '../../index';
+import Routes, { API } from '../../routes';
 
 const Checkbox = ({ children, ...props }: JSX.IntrinsicElements['input']) => (<label style={{ marginRight: '1em' }}>
   <input type='checkbox' {...props} />
@@ -22,7 +22,7 @@ function DropSessionsDown() {
   const { sessionName, setSessionName } = useSessionManager();
 
   useEffect(() => {
-    fetch(`${HOST_URL}/api/sessions/get_sessions`)
+    fetch(`${API.Sessions}/get_sessions`)
       .then(response => response.json())
       .then(data => {
         console.log(data);
@@ -37,7 +37,7 @@ function DropSessionsDown() {
   const handleNavigate = () => {
     console.log('Navigating to /app with sessionName:', selectedOption.label);
     setSessionName(selectedOption.label);
-    navigate('/app');
+    navigate(Routes.App);
   };
 
   return (<>

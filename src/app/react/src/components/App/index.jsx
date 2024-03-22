@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import useSessionManager from '../../hooks/useSessionManager';
-import { HOST_URL } from '../../index';
 import {
   addFilepathToNode, createImageNodeFromFilepath, createViewport, imageAlreadyLoaded, toggleShowSidebar,
 } from './utils';
@@ -25,6 +24,7 @@ import { initialBottomSidebar, initialProjectSidebar, initialSettingsSidebar } f
 import '../../styles/bounder.css';
 import '../../styles/sidebar.css';
 import '../../styles/navbar.css';
+import { API } from '../../routes';
 
 function App() {
   const appState = useAppState();
@@ -42,7 +42,7 @@ function App() {
       return;
     }
     appState.startLoadRequest();
-    fetch(`${HOST_URL}/api/sessions/get_session_images?sessionName=${sessionName}`, {
+    fetch(`${API.Sessions}/get_session_images?sessionName=${sessionName}`, {
       method: 'GET',
     })
       .then(response => response.json())
