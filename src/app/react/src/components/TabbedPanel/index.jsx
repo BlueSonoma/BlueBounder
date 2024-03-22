@@ -73,13 +73,16 @@ const TabbedPanel = ({
     // Set the active tab as the newly added component
     setCurrentTabIndex(length - 1);
     setTabsLength(length);
-  }, [tabComponents]);
+  }, []);
+
+  useEffect(() => {
+  }, [currentTabIndex]);
 
   useEffect(() => {
     if (typeof selectedIndex === 'undefined' || selectedIndex === null || selectedIndex === currentTabIndex) {
       return;
     }
-    setCurrentTabIndex(selectedIndex);
+    setCurrentTabIndex(() => selectedIndex);
   }, [selectedIndex]);
 
   if (!Array.isArray(tabComponents)) {
@@ -92,9 +95,9 @@ const TabbedPanel = ({
 
   function onTabClickedHandler(event, index) {
     if (currentTabIndex !== index) {
-      setLastTabIndex(currentTabIndex);
-      setCurrentTabIndex(index);
-      onTabClick?.(event, { previous: selectedIndex, current: index });
+      setLastTabIndex(() => currentTabIndex);
+      setCurrentTabIndex(() => index);
+      onTabClick?.(event, { previous: currentTabIndex, current: index });
     }
   }
 
@@ -102,11 +105,11 @@ const TabbedPanel = ({
   //  This is still broken -- `id` property is undefined; need to trace
   useEffect(() => {
     if (lastTabIndex) {
-      document.querySelector(`#button__${tabComponents[lastTabIndex]?.id}`)?.classList.toggle('select');
+      document.querySelector(`#button__${tabComponents[lastTabIndex]?.id}`)?.classList.toggle('select', false);
     }
 
     if (currentTabIndex) {
-      document.querySelector(`#button__${tabComponents[currentTabIndex]?.id}`)?.classList.toggle('select');
+      document.querySelector(`#button__${tabComponents[currentTabIndex]?.id}`)?.classList.toggle('select', true);
     }
   }, [currentTabIndex]);
 

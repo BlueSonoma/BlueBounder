@@ -1,26 +1,27 @@
 import React, { memo, useEffect, useState } from 'react';
 import '../../styles/bounder.css';
-import '../../resources/images/test_image1.png';
 
-import { DockPanelPosition } from '../../types/general';
+import { DockPanelPosition } from '../../types';
 import TabbedPanel from '../TabbedPanel';
-import useAppState from '../../hooks/useAppState';
 import useSessionManager from '../../hooks/useSessionManager';
 
 function Canvas({ className, ...rest }) {
-  const { viewports, getViewportIndex } = useSessionManager();
-  const { activeViewport, setActiveViewport } = useSessionManager();
   const [currentIndex, setCurrentIndex] = useState(null);
+  const { viewports, getViewportIndex, activeViewport, setActiveViewport } = useSessionManager();
 
   useEffect(() => {
     if (activeViewport) {
-      setCurrentIndex(() => getViewportIndex(activeViewport));
+      const index = getViewportIndex(activeViewport);
+      setCurrentIndex(() => index);
     }
   }, [activeViewport]);
 
-  function onTabClickHandler(event, tabs) {
-    if (tabs) {
-      setActiveViewport(() => tabs.current);
+  function onTabClickHandler(event, tab) {
+    if (tab) {
+      const index = tab.current;
+      if (viewports.length < index) {
+        setActiveViewport(viewports[index]);
+      }
     }
   }
 
