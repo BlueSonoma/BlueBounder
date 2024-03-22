@@ -14,8 +14,13 @@ export const DockPanelPosition = {
   BottomRight: 'bottom-right',
 };
 
+export type SelectorModeProviderProps = {
+  selectorMode: string;
+  setSelectorMode(mode: string): void;
+}
+
 export type ViewportProps = {
-  id: string, nodes: [Node], onClick: (NodeMouseHandler) => void;
+  id: string, nodes: [Node], onClick: (NodeMouseHandler) => void; active?: boolean;
 }
 
 export type ViewportType = {
