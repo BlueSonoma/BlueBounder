@@ -15,102 +15,161 @@ import itertools
 import time
 import json
 import math
+from datetime import datetime
+import shutil
 
+def get_band_con(file,bandsPath):
+    with open(file, 'r') as file:
+        # skip the first two lines because that's just the header
+        file.seek(0)
+        file.readline()
+        file.readline()
 
-def get_phase_color(file):
-    # skip the first two lines because that's just the header
-    print("reading file")
-    file.seek(0)
-    file.readline()
-    file.readline()
+        # find the max x and y values to determine the size of the image
+        max_x = 0
+        max_y = 0
+        for line in file:
+            line = line.split(",")
+            x = int(line[1]) // 10
+            y = int(line[2]) // 10
 
-    # find the max x and y values to determine the size of the image
-    max_x = 0
-    max_y = 0
-    for line in file:
-        line = line.split(",")
-        x = int(line[1]) // 10
-        y = int(line[2]) // 10
+            if x > max_x:
+                max_x = x
+            if y > max_y:
+                max_y = y
 
-        if x > max_x:
-            max_x = x
-        if y > max_y:
-            max_y = y
+        print(max_x, max_y)
+        width = max_x + 1
+        height = max_y + 1
+        file.seek(0)
+        file.readline()
+        file.readline()
 
-    print(max_x, max_y)
-    width = max_x + 1
-    height = max_y + 1
-    file.seek(0)
-    file.readline()
-    file.readline()
+        # create a 3d array of zeros with the size of the image
+        band = np.zeros((height, width))
+        # read through each line of the data file and assign the correspond x,y values pixel its rgba value
+        for line in file:
+            line = line.split(",")
+            y = int(line[1]) // 10  # line[1] is the x value
+            x = int(line[2]) // 10  # line[2] is the y value
+            band[x, y] = int(line[5])
+    imageio.imsave(bandsPath+'band_contrast.png', band.astype('uint8'))
+    
+    return band
 
-    # create a 3d array of zeros with the size of the image
-    euler_phase = np.zeros((height, width, 4))
-    # read through each line of the data file and assign the correspond x,y values pixel its rgba value
-    for line in file:
-        line = line.split(",")
-        rgb = line[4].split()  # line[4] is the rgb value
-        y = int(line[1]) // 10  # line[1] is the x value
-        x = int(line[2]) // 10  # line[2] is the y value
+def get_phase_color(file,Euler_dir):
+    with open(file, 'r') as file:
+        # skip the first two lines because that's just the header
 
-        rgb = np.array(rgb, "int")
-        # if line[3] is 1 then the pixel is a grain and we assign it the rgb value
-        if int(line[3]) == 1:
-            rgb = rgb / 255.0
-            # add 0.5 alpha value to rgb
-            rgba = np.append(rgb, 0.5)
-            euler_phase[x, y, :] = rgba
+        file.seek(0)
+        file.readline()
+        file.readline()
 
-        else:
-            euler_phase[x, y, :] = [1.0, 1.0, 1.0, 0.0]
+        # find the max x and y values to determine the size of the image
+        max_x = 0
+        max_y = 0
+        for line in file:
+            line = line.split(",")
+            x = int(line[1]) // 10
+            y = int(line[2]) // 10
 
-    return euler_phase
+            if x > max_x:
+                max_x = x
+            if y > max_y:
+                max_y = y
 
+        print(max_x, max_y)
+        width = max_x + 1
+        height = max_y + 1
+        file.seek(0)
+        file.readline()
+        file.readline()
 
-def get_chem(file, max_chemicals, save_image=True, chemical=1):
-    # skip the first two lines because thats just the header
-    file.seek(0)
-    file.readline()
-    file.readline()
+        # create a 3d array of zeros with the size of the image
+        euler_phase = np.zeros((height, width, 4))
+        # read through each line of the data file and assign the correspond x,y values pixel its rgba value
+        for line in file:
+            line = line.split(",")
+            rgb = line[4].split()  # line[4] is the rgb value
+            y = int(line[1]) // 10  # line[1] is the x value
+            x = int(line[2]) // 10  # line[2] is the y value
 
-    # find the max x and y values to determine the size of the image
-    max_x = 0
-    max_y = 0
+            rgb = np.array(rgb, "int")
+            # if line[3] is 1 then the pixel is a grain and we assign it the rgb value
+            if int(line[3]) == 1:
+                rgb = rgb / 255.0
+                # add 0.5 alpha value to rgb
+                rgba = np.append(rgb, 0.5)
+                euler_phase[x, y, :] = rgba
 
-    for line in file:
-        line = line.split(",")
-        x = int(line[1]) // 10
-        y = int(line[2]) // 10
+            else:
+                euler_phase[x, y, :] = [1.0, 1.0, 1.0, 0.0]
 
-        if x > max_x:
-            max_x = x
-        if y > max_y:
-            max_y = y
+    
+        imageio.imwrite(Euler_dir + '/euler_phase.png', (euler_phase * 255).astype(np.uint8))
+        
+def get_chem(file,Chem_dir, max_chemicals,chemical):
+    with open(file, 'r') as file:
+        # skip the first two lines because thats just the header
+        file.seek(0)
+        file.readline()
+        file.readline()
 
-    width = max_x + 1
-    height = max_y + 1
-    file.seek(0)
-    file.readline()
-    file.readline()
+        # find the max x and y values to determine the size of the image
+        max_x = 0
+        max_y = 0
 
-    chemical_img = np.zeros((height, width))
+        for line in file:
+            line = line.split(",")
+            x = int(line[1]) // 10
+            y = int(line[2]) // 10
 
-    # read through each line of the data file and assign to correspond x,y values pixel its chemical value
-    for line in file:
-        line = line.split(",")
-        y = int(line[1]) // 10
-        x = int(line[2]) // 10
+            if x > max_x:
+                max_x = x
+            if y > max_y:
+                max_y = y
 
-        # if (int(line[3]) == 1):
-        chemical_values = line[6].split(' ')
-        # normalize the chemical values
-        chemical_values = np.array(chemical_values, "float")
-        chemical_values = chemical_values / max_chemicals[chemical]
+        width = max_x + 1
+        height = max_y + 1
+        file.seek(0)
+        file.readline()
+        file.readline()
 
-        chemical_img[x, y] = chemical_values[chemical]
+        chemical_img = np.zeros((height, width))
 
-    print("Done with Chemical: ", chemical)
-    return chemical_img * 255
+        # read through each line of the data file and assign to correspond x,y values pixel its chemical value
+        for line in file:
+            line = line.split(",")
+            y = int(line[1]) // 10
+            x = int(line[2]) // 10
+
+            # if (int(line[3]) == 1):
+            chemical_values = line[6].split(' ')
+            # normalize the chemical values
+            chemical_values = np.array(chemical_values, "float")
+            chemical_values = chemical_values / max_chemicals[chemical]
+
+            chemical_img[x, y] = chemical_values[chemical]
+
+        chemical_img=chemical_img * 255
+        chemical_img=chemical_img.astype(np.uint8)
+        
+
+        if chemical==0:
+            imageio.imwrite(Chem_dir + '/AL_fromFile.png', chemical_img)
+        if chemical==1:
+            imageio.imwrite(Chem_dir + '/CA_fromFile.png', chemical_img)
+        if chemical==2:
+            imageio.imwrite(Chem_dir + '/NA_fromFile.png', chemical_img)
+        if chemical==3:
+            imageio.imwrite(Chem_dir + '/FE_fromFile.png', chemical_img)
+        if chemical==4:
+            imageio.imwrite(Chem_dir + '/SI_fromFile.png', chemical_img)
+        if chemical==5:
+            imageio.imwrite(Chem_dir + '/K_fromFile.png', chemical_img)
+
+        
+    return 
 
 
 def find_max_of_chem(file):
@@ -218,7 +277,7 @@ def clean_Euler(image, quantization=16,red_area=100):
     
 
 
-def clean_chemistry(current_session,image,imageLabel, Threshold=0.5,red_area=100):
+def clean_chemistry(current_session,imageLabel, Threshold=0.5,red_area=100):
 
 
     Chemistry_directory_reduced = 'Chemical_images/reduced/'
@@ -547,3 +606,29 @@ def get_session_JSON(sessionJSON):
         print(f"File could not be read: {sessionJSON}")
     except json.JSONDecodeError:
         print(f"File does not contain valid JSON: {sessionJSON}")
+
+def add_to_ChemCache(image,Cache_path):
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    image_extension = os.path.splitext(image)[1]
+    image_name = f'{timestamp}{image_extension}'
+    image_path = os.path.join(Cache_path, image_name)
+
+    shutil.copy(image, image_path)
+
+    
+
+    return
+
+def add_to_EulerCache(image,Cache_path):
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    image_extension = os.path.splitext(image)[1]
+    image_name = f'{timestamp}{image_extension}'
+    image_path = os.path.join(Cache_path, image_name)
+
+    shutil.copy(image, image_path)
+
+    
+
+
+
+    return

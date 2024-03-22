@@ -12,6 +12,9 @@ function SessionProvider({ children }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [viewports, setViewports] = useState([]);
   const [activeViewport, _setActiveViewport] = useState(null);
+  const [chem_cache_pntr, setChemCachePntr] = useState(null);
+  const [euler_cache_pntr, setEulerCachePntr] = useState(null);
+  
 
   useEffect(() => {
     if (!activeViewport) {
@@ -70,6 +73,10 @@ function SessionProvider({ children }) {
     getViewportIndex,
     activeViewport,
     setActiveViewport,
+    setChemCachePntr,
+    setEulerCachePntr,
+    chem_cache_pntr,
+    euler_cache_pntr,
   };
 
   return (<Provider value={contextProps}>

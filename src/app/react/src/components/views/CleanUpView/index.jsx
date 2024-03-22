@@ -1,4 +1,7 @@
 import { memo,useState } from 'react';
+import useSessionManager from '../../../hooks/useSessionManager';
+import Routes, { API } from '../../../routes';
+
 
 function CleanUpView({ children, ...rest }) {
   const [Area, setArea] = useState(0);

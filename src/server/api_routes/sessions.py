@@ -2,6 +2,7 @@ import os.path
 
 import flask
 from flask import Blueprint, jsonify
+from concurrent.futures import ThreadPoolExecutor
 
 from src.imaging.Magic import *
 from src.server.api_routes import project_root_dir
@@ -15,13 +16,14 @@ api = Blueprint('sessions', __name__)
 @api.route('/create_starter_images', methods=['POST'])
 def api__read_and_create():
     print("Creating starter images...")
-    session_name = flask.request.form['sessionName']
-    original_name = session_name
-    filepath = flask.request.form['csvFilePath']
-    Sessions = os.path.join(project_root_dir, 'Sessions')
-    session = os.path.join(Sessions, session_name)
-    Euler_dir = os.path.join(session, 'Euler_Images')
-    Chem_dir = os.path.join(session, ' Chemical_Images')
+    session = flask.request.form['sessionName']
+    original_name = session
+    file = flask.request.form['csvFilePath']
+    Sessions = f'{project_root_dir}/Sessions/'
+    session = Sessions + session
+    Euler_dir = session + '/Euler_Images'
+    Chem_dir = session + '/Chemical_Images'
+    bandsPath = session + '/Bands/'
 
     if not os.path.exists(Sessions):
         os.makedirs(Sessions)
@@ -31,54 +33,27 @@ def api__read_and_create():
         os.makedirs(Euler_dir)
     if not os.path.exists(Chem_dir):
         os.makedirs(Chem_dir)
-
-    print(f'File: {filepath}')
+    if not os.path.exists(bandsPath):
+        os.makedirs(bandsPath)
+    print(f'File: {file}')
 
     try:
-        with open(filepath, 'r') as file:
-            max_chemicals = find_max_of_chem(file)
+        
+        max_chemicals = find_max_of_chem(file)
+        
+        with ThreadPoolExecutor() as executor:
+            euler = executor.submit(get_phase_color, file,Euler_dir)
+            band = executor.submit(get_band_con, file,bandsPath)
+            AL = executor.submit(get_chem, file,Chem_dir, max_chemicals, 0)
+            CA = executor.submit(get_chem, file,Chem_dir, max_chemicals, 1)
+            NA = executor.submit(get_chem, file,Chem_dir, max_chemicals, 2)
+            FE = executor.submit(get_chem, file,Chem_dir, max_chemicals, 3)
+            SI = executor.submit(get_chem, file,Chem_dir, max_chemicals, 4)
+            K = executor.submit(get_chem, file,Chem_dir, max_chemicals, 5)
+      
 
-            print("getting chemicals")
-            euler_image = get_phase_color(file)
-            print("saving euler image")
-            print(euler_image.dtype)
-            print(euler_image.min(), euler_image.max())
-            euler_image = (euler_image * 255).astype(np.uint8)
-            imageio.imwrite(os.path.join(Euler_dir, 'euler_phase.png'), euler_image)
-
-            print("getting AL")
-            AL_img = get_chem(file, max_chemicals, chemical=0)
-            print("getting CA")
-            CA_img = get_chem(file, max_chemicals, chemical=1)
-            print("getting NA")
-            NA_img = get_chem(file, max_chemicals, chemical=2)
-            print("getting FE")
-            FE_img = get_chem(file, max_chemicals, chemical=3)
-            print("getting SI")
-            SI_img = get_chem(file, max_chemicals, chemical=4)
-            print("getting K")
-            K_img = get_chem(file, max_chemicals, chemical=5)
-
-            print("converting images")
-            # Convert the arrays to uint8 arrays with values in the range 0-255
-            AL_img_uint8 = AL_img.astype(np.uint8)
-            CA_img_uint8 = CA_img.astype(np.uint8)
-            NA_img_uint8 = NA_img.astype(np.uint8)
-            FE_img_uint8 = FE_img.astype(np.uint8)
-            SI_img_uint8 = SI_img.astype(np.uint8)
-            K_img_uint8 = K_img.astype(np.uint8)
-
-            print("saving images")
-            # Now you can save the arrays as images
-            imageio.imwrite(os.path.join(Chem_dir, 'AL_fromFile.png'), AL_img_uint8)
-            imageio.imwrite(os.path.join(Chem_dir, 'CA_fromFile.png'), CA_img_uint8)
-            imageio.imwrite(os.path.join(Chem_dir, 'NA_fromFile.png'), NA_img_uint8)
-            imageio.imwrite(os.path.join(Chem_dir, 'FE_fromFile.png'), FE_img_uint8)
-            imageio.imwrite(os.path.join(Chem_dir, 'SI_fromFile.png'), SI_img_uint8)
-            imageio.imwrite(os.path.join(Chem_dir, 'K_fromFile.png'), K_img_uint8)
-
-            create_session_JSON_and_return(session, original_name, filepath, ' ')
-            create_folder_structure_json(original_name)
+        create_session_JSON_and_return(session,original_name, file, ' ')
+        create_folder_structure_json(original_name)
 
         return jsonify("Images created successfully", 200)
     except Exception as e:
@@ -149,10 +124,62 @@ def api__getSessionImages():
 
 @api.route('/clean_Euler', methods=['GET'])
 def api__cleanEuler():
-    print("Cleaning Euler image...")
+    session_name = flask.request.args.get('sessionName')
+    curr_dir = os.path.join(project_root_dir, 'Sessions')
+    session_dir = os.path.join(curr_dir, session_name)
+
+    session_Cache = os.path.join(session_dir, 'Cache')
+    if not os.path.exists(session_Cache):
+        os.makedirs(session_Cache)
+    session_EulerCache = os.path.join(session_Cache, 'Euler_Images')
+    if not os.path.exists(session_EulerCache):
+        os.makedirs(session_EulerCache)
+    image_name = flask.request.args.get('imageName')
+
+    image_Cache = os.path.join(session_EulerCache, image_name)
+
+    if not os.path.exists(image_Cache):
+        os.makedirs(image_Cache)
+
+    area = flask.request.args.get('area')
+    quant= flask.request.args.get('quant')
+    try:
+        image = clean_Euler(red_area=area, quantization=quant)
+        add_to_EulerCache(image=image, Cache_path=image_Cache)
+        return jsonify("Image cleaned successfully", 200)
+    except Exception as e:
+        return jsonify(e, 500)
+
+    
+
+
+    
 
 
 
 @api.route('/clean_Chemical_img', methods=['GET'])
 def api__cleanChemImg():
-    print("Cleaning chemical image...")
+    session_name = flask.request.args.get('sessionName')
+    curr_dir = os.path.join(project_root_dir, 'Sessions')
+    session_dir = os.path.join(curr_dir, session_name)
+    session_Cache = os.path.join(session_dir, 'Cache')
+    if not os.path.exists(session_Cache):
+        os.makedirs(session_Cache)
+    Session_ChemCache = os.path.join(session_Cache, 'Chemical_Images')
+    if not os.path.exists(Session_ChemCache):
+        os.makedirs(Session_ChemCache)
+    image_name = flask.request.args.get('imageName')
+
+    image_Cache= os.path.join(Session_ChemCache, image_name)
+    if not os.path.exists(image_Cache):
+        os.makedirs(image_Cache)
+    
+    area= flask.request.args.get('area')
+    thresh = flask.request.args.get('thresh')
+
+    try:
+        image = clean_chemistry( red_area=area, Threshold=thresh)
+        add_to_ChemCache(image=image,Cache_path=image_Cache)
+        return jsonify("Image cleaned successfully", 200)
+    except Exception as e:
+        return jsonify(e, 500)
