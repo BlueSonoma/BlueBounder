@@ -1,14 +1,33 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { ControlButton } from '@xyflow/react';
 
-import '../../../styles/mode-selector.css';
+import '../../../styles/bounder.css';
+import { HTMLProps } from 'react';
+import { getNextId } from '../../../utils/general';
 
-function Button({ id, className, style, onClick, imageUrl, imageStyle, alt, title, label, children }) {
-  className = className ?? 'mode-selector';
+function Button({ id, imageUrl, imageStyle, alt, title, label, children, ...rest }: HTMLProps) {
+  const [buttonId] = useState(id ?? `button__${getNextId(2)}`);
 
-  return (<ControlButton id={id} style={style} onClick={onClick} className={className} title={title}>
-    {imageUrl ? <img style={imageStyle} src={imageUrl} alt={alt} /> : null}
-    {label ? <label>{label}</label> : null}
+  function onMouseUpHandler(event) {
+    document.querySelector(`#${buttonId}`)?.classList.toggle('select', false);
+    rest.onMouseUp?.(event);
+  }
+
+  function onMouseDownHandler(event) {
+    document.querySelector(`#${buttonId}`)?.classList.toggle('select', true);
+    rest.onMouseDown?.(event);
+  }
+
+  return (<ControlButton
+    id={buttonId}
+    title={title}
+    onClick={rest.onClick}
+    onMouseDown={onMouseDownHandler}
+    onMouseUp={onMouseUpHandler}
+    {...rest}
+  >
+    {imageUrl && <img style={imageStyle} src={imageUrl} alt={alt} />}
+    {label && <label>{label}</label>}
     {children}
   </ControlButton>);
 }

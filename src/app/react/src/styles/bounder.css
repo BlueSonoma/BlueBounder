@@ -15,9 +15,50 @@
     overflow: hidden;
 }
 
+.bounder button {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    width: fit-content;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 35px;
+    max-height: 35px;
+    justify-content: center;
+    background: silver;
+    border: solid gray;
+    border-radius: 5px;
+}
+
+.bounder button text,
+.bounder button label {
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.bounder button:hover {
+    background: rgb(100, 149, 237);
+}
+
+.bounder button:disabled,
+.bounder button:disabled:hover {
+    background: lightgrey;
+    color: darkgrey;
+    border: solid darkgrey;
+}
+
+.bounder button:last-child {
+    border-bottom: solid gray;
+}
+
+.bounder button.select {
+    background: darkgray;
+    border: solid gray;
+}
+
 .bounder .viewport {
     width: 100%;
-    height:100%;
+    height: 100%;
     position: relative;
     right: 3px;
     border: groove rgba(170, 170, 170, 0.4);

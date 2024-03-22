@@ -6,7 +6,7 @@ import useSessionManager from '../../../hooks/useSessionManager';
 import { NodeRendererProps } from 'react-arborist';
 
 function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps) {
-  const { viewports, setActiveViewport, nodes, setNodes } = useSessionManager();
+  const { nodes, setNodes } = useSessionManager();
   const [hidden, setHidden] = useState(treeNode.isLeaf ? null : false);
   const id = `tree-node__${treeNode.id}`;
   const tnSrc = treeNode.data.image?.src;
@@ -17,13 +17,6 @@ function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps)
   useEffect(() => {
     const isSelected = treeNode.isSelected;
     document.querySelector(`#treeNode__${id}`).classList.toggle('selected', isSelected);
-
-    if (isSelected) {
-      const viewport = viewports.find((vp) => vp.id === treeNode.data.viewport);
-      if (typeof viewport !== 'undefined') {
-        setActiveViewport(viewport.id);
-      }
-    }
   }, [treeNode]);
 
   useEffect(() => {

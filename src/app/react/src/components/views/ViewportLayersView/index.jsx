@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import useSessionManager from '../../../hooks/useSessionManager';
 import { NodeApi, Tree } from 'react-arborist';
@@ -6,13 +6,14 @@ import useTreeState from '../../../hooks/useTreeState';
 import TreeImageNode from '../../nodes/TreeImageNode';
 
 import '../../../styles/tree.css';
-import type { ViewportType } from '../../../types/general';
+import type { ViewportType } from '../../../types';
 import useNodeSelector from '../../../hooks/useNodeSelector';
 
 function ViewportLayersView({}) {
   const [root, setRoot] = useTreeState({ id: 'root__viewports', name: 'Viewports' });
   const { nodes, viewports } = useSessionManager();
-  const { setSelectedNodes } = useNodeSelector();
+  const { selectedNodes, setSelectedNodes } = useNodeSelector();
+  const treeRef = useRef();
 
   useEffect(() => {
     root.children = viewports.map((viewport: ViewportType) => {
@@ -29,6 +30,22 @@ function ViewportLayersView({}) {
     setRoot({ ...root });
   }, [viewports]);
 
+  useEffect(() => {
+    let numSelected = 0;
+    const selectedIds = treeRef.current?.selectedIds;
+    Array.from(selectedIds).forEach((id) => {
+      if (selectedNodes.find((nd) => nd.id === id) !== 'undefined') {
+        numSelected++;
+      }
+    });
+    // Only update the tree if there has been a selection outside of this component
+    if (numSelected !== selectedNodes.length) {
+      treeRef.current?.setSelection({
+        ids: selectedNodes.map((nd) => nd), anchor: null, mostRecent: null,
+      });
+    }
+  }, [selectedNodes]);
+
   function onSelectHandler(treeNodes: NodeApi[]) {
     if (treeNodes.length === 0) {
       return;
@@ -37,16 +54,14 @@ function ViewportLayersView({}) {
     if (!node.isLeaf) {
       node.toggle();
     } else {
-      const selectedNodes = treeNodes.map((node) => {
-        for (let i = 0; i < nodes.length; i++) {
-          if (node.id === nodes[i].id) {
-            return nodes[i];
-          }
+      const selected = [];
+      treeNodes.forEach((treeNode) => {
+        const node = nodes.find((nd) => nd.id === treeNode.id);
+        if (typeof node !== 'undefined') {
+          selected.push(node);
         }
-        return null;
-      }).filter((node) => node);
-
-      setSelectedNodes(selectedNodes);
+      });
+      setSelectedNodes(selected);
     }
   }
 
@@ -54,6 +69,7 @@ function ViewportLayersView({}) {
     <div style={{ marginTop: '5px', padding: '3px', border: '2px groove lightgray' }}>Layers</div>
     <div style={{ overflow: 'hidden', padding: '3px', border: '2px groove lightgray' }}>
       <Tree
+        ref={treeRef}
         data={[root]}
         idAccessor={'id'}
         className={'tree'}
