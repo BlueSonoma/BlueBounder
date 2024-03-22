@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
+import { ReactFlowProvider, useNodesState } from '@xyflow/react';
 import { Provider } from '../../../contexts/SessionManagerContext';
 import SelectorModeProvider from '../SelectorModeProvider';
-import type { ViewportType } from '../../../types/general';
-import { Node, ReactFlowProvider, useNodesState } from '@xyflow/react';
+import type { ViewportType } from '../../../types';
 import NodeSelectorProvider from '../NodeSelectorProvider';
 
 function SessionProvider({ children }) {
@@ -17,37 +17,41 @@ function SessionProvider({ children }) {
     if (!activeViewport) {
       return;
     }
-    viewports.forEach((viewport) => {
-      if (viewport.id !== activeViewport.id) {
-        viewport.props.active = false;
-      }
-    });
+    // Update the viewport active status
+    setViewports((prev) => prev.map((viewport) => {
+      return {
+        ...viewport, props: {
+          ...viewport.props, active: viewport.id !== activeViewport.id,
+        },
+      };
+    }));
   }, [activeViewport]);
 
   useEffect(() => {
-    viewports.forEach((vp) => {
+    // Update the nodes for each viewport
+    setViewports((prev) => prev.map((vp) => {
       vp.props.nodes = nodes.filter((nd) => nd.data.viewport === vp.id);
       return vp;
-    });
-    setViewports(() => [...viewports]);
+    }));
   }, [nodes]);
 
-  function setActiveViewport(viewportId) {
-    if (typeof viewportId === 'undefined') {
+  function setActiveViewport(viewport: ViewportType | string) {
+    if (typeof viewport === 'undefined') {
       return;
     }
 
-    const index = viewports.findIndex((vp) => vp.id === viewportId);
+    const index = getViewportIndex(viewport);
     if (index === -1) {
       return;
     }
 
     _setActiveViewport(() => viewports[index]);
-    viewports.forEach((vp, i) => vp.props.active = i === index);
-    setViewports(() => viewports);
   }
 
-  function getViewportIndex(viewport: ViewportType) {
+  function getViewportIndex(viewport: ViewportType | string) {
+    if (typeof viewport === 'string') {
+      return viewports.findIndex((vp) => vp.id === viewport);
+    }
     return viewports.findIndex((vp) => vp.id === viewport.id);
   }
 

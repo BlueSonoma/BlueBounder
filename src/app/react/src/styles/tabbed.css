@@ -42,6 +42,7 @@ div.tab-bar:hover {
     justify-content: center;
     background: silver;
     border: solid gray;
+    border-radius: 1px;
 }
 
 .tab-bar button.tab label {

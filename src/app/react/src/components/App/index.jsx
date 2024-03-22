@@ -13,25 +13,27 @@ import IconCleanUp from '../../resources/icons/clean-up.png';
 import IconGrainSize from '../../resources/icons/polygon-grain.png';
 import IconClassify from '../../resources/icons/classify.png';
 import IconLayers from '../../resources/icons/layers.png';
-import { DockPanelPosition } from '../../types/general';
+import { DockPanelPosition } from '../../types';
 import Navbar from '../../containers/Navbar';
 import WindowTitleBar from '../../additional-components/WindowTitleBar';
 import Canvas from '../Canvas';
 import useAppState from '../../hooks/useAppState';
-import type { ImageNodeType } from '../../types/nodes';
+import type { ImageNodeType } from '../../types';
 import { initialBottomSidebar, initialProjectSidebar, initialSettingsSidebar } from '../sidebars/initialSidebars';
 
 import '../../styles/bounder.css';
 import '../../styles/sidebar.css';
 import '../../styles/navbar.css';
 import { API } from '../../routes';
+import useNodeSelector from '../../hooks/useNodeSelector';
 
 function App() {
   const appState = useAppState();
 
   const {
-    sessionName, nodes, setNodes, viewports, setViewports, setActiveViewport,
+    sessionName, nodes, setNodes, setViewports, setActiveViewport,
   } = useSessionManager();
+  const { setSelectedNodes } = useNodeSelector();
 
   const [leftSidebar, setLeftSidebar] = useState(initialProjectSidebar);
   const [rightSidebar, setRightSidebar] = useState(initialSettingsSidebar);
@@ -65,8 +67,12 @@ function App() {
             }
             // Add the new viewport
             setViewports((prev) => [...prev, viewport]);
-            setActiveViewport(viewport.id);
+            setActiveViewport(viewport);
+
             setNodes(() => [...nodes]);
+            if (nodes.length > 0) {
+              setSelectedNodes(nodes[nodes.length - 1]);
+            }
           }
           appState.endLoadRequest();
         } else {
@@ -92,9 +98,8 @@ function App() {
           nodes.push(node);
 
           viewport.props.nodes.push(node);
-          viewport.props.active = true;
           setViewports((prev) => [...prev, viewport]);
-          setActiveViewport(viewports.id);
+          setActiveViewport(viewport);
         }
       }
     }
@@ -102,6 +107,9 @@ function App() {
     await createImageNodes(event);
     appState.endLoadRequest();
     setNodes((() => [...nodes]));
+    if (nodes.length > 0) {
+      setSelectedNodes(nodes[nodes.length - 1]);
+    }
   }
 
   async function handleCreateImageNode(pathOrFile): ImageNodeType {
@@ -114,15 +122,22 @@ function App() {
     }
 
     const node = await createImageNodeFromFilepath(filepath);
+    // Set the reload callback
     node.data.reload = async () => {
+      // Create a new image node
       const reNode = await createImageNodeFromFilepath(node.data.file.path);
-      node.data.image = reNode.data.image;
-      node.width = reNode.width;
-      node.height = reNode.height;
+
       setNodes((prev) => prev.map((nd) => {
         if (nd.id === node.id) {
+          // Update and return a newly created node
           return {
-            ...node,
+            ...nd,
+            data: {
+              width: reNode.width,
+              height: reNode.height,
+              ...node.data,
+              image: reNode.data.image,
+            },
           };
         }
         return nd;
