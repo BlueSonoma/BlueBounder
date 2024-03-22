@@ -6,6 +6,7 @@ import UploadForm from '../../additional-components/forms/UploadForm';
 import AlertModal from '../../additional-components/AlertModal';
 import useSessionManager from '../../hooks/useSessionManager';
 import WindowTitleBar from '../../additional-components/WindowTitleBar';
+import Routes from '../../routes';
 
 function NewSession() {
   const [showAlert, setShowAlert] = useState(false);
@@ -69,7 +70,7 @@ function NewSession() {
       name: sessionName, path: csvFilePath,
     };
 
-    navigate('/initSession', { state: { formData: formData } });
+    navigate(Routes.InitSession, { state: { formData: formData } });
   };
 
   return (<>

@@ -2,12 +2,13 @@ import React from 'react';
 import '../../styles/start.css';
 import { useNavigate } from 'react-router-dom';
 import WindowTitleBar from '../../additional-components/WindowTitleBar';
+import Routes from '../../routes';
 
 function Start() {
   const navigate = useNavigate();
 
   return (<div className={'start'}>
-    <WindowTitleBar/>
+    <WindowTitleBar />
     {/* <div id="title-bar">
                 <h1 id="title">Blue Segment</h1>
                 <div id="window-controls">
@@ -21,8 +22,8 @@ function Start() {
       <p>Welcome!</p>
       <p>What would you like to do?</p>
       <div className='div2class'>
-        <button className='butt1class' onClick={() => navigate('/newSession')}>New session</button>
-        <button className='butt1class' onClick={() => navigate('/oldSessions')}>Old session</button>
+        <button className='butt1class' onClick={() => navigate(Routes.NewSession)}>New session</button>
+        <button className='butt1class' onClick={() => navigate(Routes.OldSessions)}>Old session</button>
       </div>
     </div>
   </div>);

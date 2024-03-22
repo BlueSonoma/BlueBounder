@@ -1,8 +1,8 @@
 import { memo } from 'react';
 import { useState, useEffect } from 'react';
 import useSessionManager from '../../../hooks/useSessionManager';
-import { HOST_URL } from '../../../index';
 import Grid2Column from '../../../containers/Grid/Grid2Column';
+import { API } from '../../../routes';
 
 
 function ProjectInformationView({ children, ...rest }) {
@@ -12,7 +12,7 @@ function ProjectInformationView({ children, ...rest }) {
 
   useEffect(() => {
     if (sessionName) {
-      fetch(`${HOST_URL}/api/sessions/get_session_Info?sessionName=${sessionName}`, {
+      fetch(`${API.Sessions}/get_session_Info?sessionName=${sessionName}`, {
         method: 'GET',
       })
         .then(response => response.json())
