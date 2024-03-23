@@ -13,6 +13,7 @@ import IconCleanUp from '../../resources/icons/clean-up.png';
 import IconGrainSize from '../../resources/icons/polygon-grain.png';
 import IconClassify from '../../resources/icons/classify.png';
 import IconLayers from '../../resources/icons/layers.png';
+import IconSegment from '../../resources/icons/segment.png';
 import { DockPanelPosition } from '../../types';
 import Navbar from '../../containers/Navbar';
 import WindowTitleBar from '../../additional-components/WindowTitleBar';
@@ -186,9 +187,15 @@ function App() {
       />
       <Button
         id={'button__clean-up'}
-        onClick={() => toggleShowSidebar(rightSidebar, setRightSidebar)}
+        onClick={() => toggleShowSidebar(leftSidebar, setLeftSidebar())}
         imageUrl={IconCleanUp}
         label={'Clean Up'}
+      />
+      <Button
+        id={'button__segment'}
+        onClick={() => toggleShowSidebar(rightSidebar, setRightSidebar)}
+        imageUrl={IconSegment}
+        label={'Segment'}
       />
       <Button
         id={'button__grain-size'}
