@@ -8,6 +8,7 @@ import TreeImageNode from '../../nodes/TreeImageNode';
 import '../../../styles/tree.css';
 import type { ViewportType } from '../../../types';
 import useNodeSelector from '../../../hooks/useNodeSelector';
+import Frame from '../../../containers/Frame';
 
 function ViewportLayersView({}) {
   const [root, setRoot] = useTreeState({ id: 'root__viewports', name: 'Viewports' });
@@ -65,23 +66,20 @@ function ViewportLayersView({}) {
     }
   }
 
-  return (<div>
-    <div style={{ marginTop: '5px', padding: '3px', border: '2px groove lightgray' }}>Layers</div>
-    <div style={{ overflow: 'hidden', padding: '3px', border: '2px groove lightgray' }}>
-      <Tree
-        ref={treeRef}
-        data={[root]}
-        idAccessor={'id'}
-        className={'tree'}
-        rowClassName={'tree-row'}
-        rowHeight={30}
-        indent={35}
-        onSelect={onSelectHandler}
-      >
-        {TreeImageNode}
-      </Tree>
-    </div>
-  </div>);
+  return (<Frame label={'Layers'}>
+    <Tree
+      ref={treeRef}
+      data={[root]}
+      idAccessor={'id'}
+      className={'tree'}
+      rowClassName={'tree-row'}
+      rowHeight={30}
+      indent={35}
+      onSelect={onSelectHandler}
+    >
+      {TreeImageNode}
+    </Tree>
+  </Frame>);
 }
 
 export default ViewportLayersView;

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import useSessionManager from '../../../hooks/useSessionManager';
 import Grid2Column from '../../../containers/Grid/Grid2Column';
 import { API } from '../../../routes';
+import Frame from '../../../containers/Frame';
 
 
 function ProjectInformationView({ children, ...rest }) {
@@ -46,9 +47,9 @@ function ProjectInformationView({ children, ...rest }) {
     label: 'Step Size', content: stepSize,
   }];
 
-  return (<div style={{ padding: '5px', border: '2px inset lightgray' }} {...rest}>
+  return (<Frame label={'Information'} {...rest}>
     <Grid2Column data={gridData} />
-  </div>);
+  </Frame>);
 }
 
 export default memo(ProjectInformationView);
