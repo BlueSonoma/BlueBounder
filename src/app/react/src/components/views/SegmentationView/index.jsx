@@ -6,7 +6,7 @@ import useAppState from '../../../hooks/useAppState';
 import { API } from '../../../routes';
 import Frame from '../../../containers/Frame';
 
-function CleanUpView({ children, ...rest }) {
+function SegmentationView({ children, ...rest }) {
   const appState = useAppState();
   const { nodes } = useSessionManager();
   const { selectedNodes } = useNodeSelector();
@@ -85,7 +85,7 @@ function CleanUpView({ children, ...rest }) {
   }
 
   return (<>
-    <Frame label={'Clean Up View'}>
+    <Frame label={'Segmentation'}>
       <span style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
         <label style={{ padding: '3px' }}>Opacity</label>
           <input
@@ -110,4 +110,4 @@ function CleanUpView({ children, ...rest }) {
   </>);
 }
 
-export default memo(CleanUpView);
+export default memo(SegmentationView);
