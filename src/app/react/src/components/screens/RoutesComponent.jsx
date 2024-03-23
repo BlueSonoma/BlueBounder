@@ -7,8 +7,6 @@ import SessionInitializer from './SessionIntializer';
 import App from '../App';
 import AppRoutes from '../../routes';
 
-
-
 export function RoutesComponent() {
   return (<DomRouter>
     <DomRoutes>

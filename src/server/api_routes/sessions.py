@@ -20,10 +20,10 @@ def api__read_and_create():
     original_name = session
     file = flask.request.form['csvFilePath']
     Sessions = f'{project_root_dir}/Sessions/'
-    session = Sessions + session
-    Euler_dir = session + '/Euler_Images'
-    Chem_dir = session + '/Chemical_Images'
-    bandsPath = session + '/Bands/'
+    session = os.path.join(Sessions, session)
+    Euler_dir = os.path.join(session, '/Euler_Images')
+    Chem_dir = os.path.join(session, '/Chemical_Images')
+    bandsPath = os.path.join(session, '/Bands/')
 
     if not os.path.exists(Sessions):
         os.makedirs(Sessions)
@@ -38,21 +38,20 @@ def api__read_and_create():
     print(f'File: {file}')
 
     try:
-        
-        max_chemicals = find_max_of_chem(file)
-        
-        with ThreadPoolExecutor() as executor:
-            euler = executor.submit(get_phase_color, file,Euler_dir)
-            band = executor.submit(get_band_con, file,bandsPath)
-            AL = executor.submit(get_chem, file,Chem_dir, max_chemicals, 0)
-            CA = executor.submit(get_chem, file,Chem_dir, max_chemicals, 1)
-            NA = executor.submit(get_chem, file,Chem_dir, max_chemicals, 2)
-            FE = executor.submit(get_chem, file,Chem_dir, max_chemicals, 3)
-            SI = executor.submit(get_chem, file,Chem_dir, max_chemicals, 4)
-            K = executor.submit(get_chem, file,Chem_dir, max_chemicals, 5)
-      
 
-        create_session_JSON_and_return(session,original_name, file, ' ')
+        max_chemicals = find_max_of_chem(file)
+
+        with ThreadPoolExecutor() as executor:
+            euler = executor.submit(get_phase_color, file, Euler_dir)
+            band = executor.submit(get_band_con, file, bandsPath)
+            AL = executor.submit(get_chem, file, Chem_dir, max_chemicals, 0)
+            CA = executor.submit(get_chem, file, Chem_dir, max_chemicals, 1)
+            NA = executor.submit(get_chem, file, Chem_dir, max_chemicals, 2)
+            FE = executor.submit(get_chem, file, Chem_dir, max_chemicals, 3)
+            SI = executor.submit(get_chem, file, Chem_dir, max_chemicals, 4)
+            K = executor.submit(get_chem, file, Chem_dir, max_chemicals, 5)
+
+        create_session_JSON_and_return(session, original_name, file, ' ')
         create_folder_structure_json(original_name)
 
         return jsonify("Images created successfully", 200)
@@ -122,6 +121,7 @@ def api__getSessionImages():
     except Exception as e:
         return str(e), 500
 
+
 @api.route('/clean_Euler', methods=['GET'])
 def api__cleanEuler():
     session_name = flask.request.args.get('sessionName')
@@ -142,19 +142,13 @@ def api__cleanEuler():
         os.makedirs(image_Cache)
 
     area = flask.request.args.get('area')
-    quant= flask.request.args.get('quant')
+    quant = flask.request.args.get('quant')
     try:
         image = clean_Euler(red_area=area, quantization=quant)
         add_to_EulerCache(image=image, Cache_path=image_Cache)
         return jsonify("Image cleaned successfully", 200)
     except Exception as e:
         return jsonify(e, 500)
-
-    
-
-
-    
-
 
 
 @api.route('/clean_Chemical_img', methods=['GET'])
@@ -170,16 +164,16 @@ def api__cleanChemImg():
         os.makedirs(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
-    image_Cache= os.path.join(Session_ChemCache, image_name)
+    image_Cache = os.path.join(Session_ChemCache, image_name)
     if not os.path.exists(image_Cache):
         os.makedirs(image_Cache)
-    
-    area= flask.request.args.get('area')
+
+    area = flask.request.args.get('area')
     thresh = flask.request.args.get('thresh')
 
     try:
-        image = clean_chemistry( red_area=area, Threshold=thresh)
-        add_to_ChemCache(image=image,Cache_path=image_Cache)
+        image = clean_chemistry(red_area=area, Threshold=thresh)
+        add_to_ChemCache(image=image, Cache_path=image_Cache)
         return jsonify("Image cleaned successfully", 200)
     except Exception as e:
         return jsonify(e, 500)
