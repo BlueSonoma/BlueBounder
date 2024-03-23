@@ -111,3 +111,18 @@
     grid-area: footer-navbar;
     height: 25px;
 }
+
+.bounder__frame > .header {
+    margin-top: 5px;
+    padding: 3px;
+    border: 2px groove lightgray;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.bounder__frame > .body {
+    padding: 3px;
+    border: 2px inset lightgray;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import TabbedSidebar from '../TabbedSidebar';
-import { DockPanelPosition } from '../../../types/general';
+import { DockPanelPosition } from '../../../types';
 
 function BottomSidebar({ show, children, ...rest }) {
   return (<TabbedSidebar position={DockPanelPosition.Bottom} show={show} {...rest}>

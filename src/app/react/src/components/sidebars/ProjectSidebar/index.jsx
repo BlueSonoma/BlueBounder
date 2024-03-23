@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import TabbedSidebar from '../TabbedSidebar';
-import { DockPanelPosition } from '../../../types/general';
+import { DockPanelPosition } from '../../../types';
 import ProjectDetailsView from '../../views/ProjectDetailsView';
 import GrainSizeView from '../../views/GrainSizeView';
 import CleanUpView from '../../views/CleanUpView';

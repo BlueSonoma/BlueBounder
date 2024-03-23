@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react';
 import '../../../styles/sidebar.css';
 import useSessionManager from '../../../hooks/useSessionManager';
 import { API } from '../../../routes';
+import Frame from '../../../containers/Frame';
 
 type ListItem = {
   name: string; type: string; children?: ListItem[];
@@ -48,12 +49,10 @@ function ProjectStructureListView({ children, ...rest }) {
     </>);
   }
 
-  return (<>
-    <div className={'project-structure-list-view'} {...rest}>
-      {items?.map((item: ListItem) => getChildComponents(item, 1))}
-      {children}
-    </div>
-  </>);
+  return (<Frame label={'Project Structure'}>
+    {items?.map((item: ListItem) => getChildComponents(item, 1))}
+    {children}
+  </Frame>);
 }
 
 export default memo(ProjectStructureListView);
