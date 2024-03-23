@@ -38,10 +38,6 @@ function NewSession() {
       setShowAlert(true);
       setAlertMessage(error);
     }
-
-    console.log(sessionName);
-    console.log(csvFilePath);
-
   }, []);
 
   useEffect(() => {
@@ -65,6 +61,9 @@ function NewSession() {
       sessionNameInputRef.current?.focus();
       return;
     }
+
+    console.log(sessionName);
+    console.log(csvFilePath);
 
     const formData = {
       name: sessionName, path: csvFilePath,
@@ -116,7 +115,7 @@ function NewSession() {
               },
             }}
           />
-          <button className={'butt1class'} >Enter</button>
+          <button className={'butt1class'}>Enter</button>
         </form>
       </div>
     </div>

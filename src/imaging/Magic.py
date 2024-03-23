@@ -18,7 +18,8 @@ import math
 from datetime import datetime
 import shutil
 
-def get_band_con(file,bandsPath):
+
+def get_band_con(file, bandsPath):
     with open(file, 'r') as file:
         # skip the first two lines because that's just the header
         file.seek(0)
@@ -53,11 +54,12 @@ def get_band_con(file,bandsPath):
             y = int(line[1]) // 10  # line[1] is the x value
             x = int(line[2]) // 10  # line[2] is the y value
             band[x, y] = int(line[5])
-    imageio.imsave(bandsPath+'band_contrast.png', band.astype('uint8'))
-    
+    imageio.imsave(bandsPath + 'band_contrast.png', band.astype('uint8'))
+
     return band
 
-def get_phase_color(file,Euler_dir):
+
+def get_phase_color(file, Euler_dir):
     with open(file, 'r') as file:
         # skip the first two lines because that's just the header
 
@@ -105,10 +107,10 @@ def get_phase_color(file,Euler_dir):
             else:
                 euler_phase[x, y, :] = [1.0, 1.0, 1.0, 0.0]
 
-    
         imageio.imwrite(Euler_dir + '/euler_phase.png', (euler_phase * 255).astype(np.uint8))
-        
-def get_chem(file,Chem_dir, max_chemicals,chemical):
+
+
+def get_chem(file, Chem_dir, max_chemicals, chemical):
     with open(file, 'r') as file:
         # skip the first two lines because thats just the header
         file.seek(0)
@@ -151,25 +153,23 @@ def get_chem(file,Chem_dir, max_chemicals,chemical):
 
             chemical_img[x, y] = chemical_values[chemical]
 
-        chemical_img=chemical_img * 255
-        chemical_img=chemical_img.astype(np.uint8)
-        
+        chemical_img = chemical_img * 255
+        chemical_img = chemical_img.astype(np.uint8)
 
-        if chemical==0:
+        if chemical == 0:
             imageio.imwrite(Chem_dir + '/AL_fromFile.png', chemical_img)
-        if chemical==1:
+        if chemical == 1:
             imageio.imwrite(Chem_dir + '/CA_fromFile.png', chemical_img)
-        if chemical==2:
+        if chemical == 2:
             imageio.imwrite(Chem_dir + '/NA_fromFile.png', chemical_img)
-        if chemical==3:
+        if chemical == 3:
             imageio.imwrite(Chem_dir + '/FE_fromFile.png', chemical_img)
-        if chemical==4:
+        if chemical == 4:
             imageio.imwrite(Chem_dir + '/SI_fromFile.png', chemical_img)
-        if chemical==5:
+        if chemical == 5:
             imageio.imwrite(Chem_dir + '/K_fromFile.png', chemical_img)
 
-        
-    return 
+    return
 
 
 def find_max_of_chem(file):
@@ -204,7 +204,6 @@ def find_max_of_chem(file):
                 max_chem_5 = chemical_values[5]
 
     return [max_chem_0, max_chem_1, max_chem_2, max_chem_3, max_chem_4, max_chem_5]
-
 
 
 def quantization(img, L):
@@ -243,9 +242,8 @@ def my_modal_filter(image):
     return result
 
 
-def clean_Euler(image, quantization=16,red_area=100):
-
-    Cleaned_Euler_directory= 'Euler_images/cleaned/'
+def clean_Euler(image, quantization=16, red_area=100):
+    Cleaned_Euler_directory = 'Euler_images/cleaned/'
     # Create the directory if it does not exist
     if not os.path.exists(Cleaned_Euler_directory):
         os.makedirs(Cleaned_Euler_directory)
@@ -275,13 +273,7 @@ def clean_Euler(image, quantization=16,red_area=100):
     return euler_img
 
 
-    
-    
-
-
-def clean_chemistry(current_session,imageLabel, Threshold=0.5,red_area=100):
-
-
+def clean_chemistry(current_session, imageLabel, Threshold=0.5, red_area=100):
     Chemistry_directory_reduced = 'Chemical_images/reduced/'
     # Create the directory if it does not exist
     if not os.path.exists(Chemistry_directory_reduced):
@@ -292,105 +284,104 @@ def clean_chemistry(current_session,imageLabel, Threshold=0.5,red_area=100):
     image[image > Threshold] = 1
 
     max_image = my_modal_filter(image)
-    max_image= reduce_area(max_image, red_area)
-    image= im.fromarray(image.astype(np.uint8), mode="L")
+    max_image = reduce_area(max_image, red_area)
+    image = im.fromarray(image.astype(np.uint8), mode="L")
     # image.save(Chemistry_directory_reduced + imageLabel + ".png")
     return image
 
+    # def SI():
+    #     SI_img = io.imread('Chemical_Images/SI_fromFile.png')
 
-        # def SI():
-        #     SI_img = io.imread('Chemical_Images/SI_fromFile.png')
+    #     SI_img = SI_img / 255
+    #     SI_img[SI_img < 0.5] = 0
+    #     SI_img[SI_img > 0.5] = 1
 
-        #     SI_img = SI_img / 255
-        #     SI_img[SI_img < 0.5] = 0
-        #     SI_img[SI_img > 0.5] = 1
+    #     SI_img = io.imread('Chemical_Images/SI_fromFile.png')
+    #     SI_img = SI_img / 255
+    #     SI_img[SI_img < 0.5] = 0
+    #     max_SI_img = my_modal_filter(SI_img)
+    #     max_SI_img = reduce_area(max_SI_img, 100)
+    #     SI_img = im.fromarray(max_SI_img.astype(np.uint8), mode="L")
+    #     SI_img.save(Chemistry_directory_reduced + "SI_img.png")
+    #     print("Done with SI")
+    #     return "SI"
 
-        #     SI_img = io.imread('Chemical_Images/SI_fromFile.png')
-        #     SI_img = SI_img / 255
-        #     SI_img[SI_img < 0.5] = 0
-        #     max_SI_img = my_modal_filter(SI_img)
-        #     max_SI_img = reduce_area(max_SI_img, 100)
-        #     SI_img = im.fromarray(max_SI_img.astype(np.uint8), mode="L")
-        #     SI_img.save(Chemistry_directory_reduced + "SI_img.png")
-        #     print("Done with SI")
-        #     return "SI"
+    # def AL():
+    #     AL_img = io.imread('Chemical_Images/AL_fromFile.png')
 
-        # def AL():
-        #     AL_img = io.imread('Chemical_Images/AL_fromFile.png')
+    #     AL_img = AL_img / 255
+    #     AL_img[AL_img < 0.2] = 0
+    #     AL_img[AL_img > 0.2] = 1
 
-        #     AL_img = AL_img / 255
-        #     AL_img[AL_img < 0.2] = 0
-        #     AL_img[AL_img > 0.2] = 1
+    #     max_AL_img = my_modal_filter(AL_img)
+    #     max_AL_img = reduce_area(max_AL_img, 100)
+    #     AL_img = im.fromarray(max_AL_img.astype(np.uint8), mode="L")
+    #     AL_img.save(Chemistry_directory_reduced + "AL_img.png")
+    #     print("Done with AL")
+    #     return "SI"
 
-        #     max_AL_img = my_modal_filter(AL_img)
-        #     max_AL_img = reduce_area(max_AL_img, 100)
-        #     AL_img = im.fromarray(max_AL_img.astype(np.uint8), mode="L")
-        #     AL_img.save(Chemistry_directory_reduced + "AL_img.png")
-        #     print("Done with AL")
-        #     return "SI"
+    # def CA():
+    #     CA_img = io.imread('Chemical_Images/CA_fromFile.png')
+    #     CA_img = CA_img / 255
+    #     CA_img[CA_img < 0.2] = 0
+    #     CA_img[CA_img > 0.2] = 1
 
-        # def CA():
-        #     CA_img = io.imread('Chemical_Images/CA_fromFile.png')
-        #     CA_img = CA_img / 255
-        #     CA_img[CA_img < 0.2] = 0
-        #     CA_img[CA_img > 0.2] = 1
+    #     max_CA_img = my_modal_filter(CA_img)
+    #     max_CA_img = reduce_area(max_CA_img, 100)
+    #     CA_img = im.fromarray(max_CA_img.astype(np.uint8), mode="L")
+    #     CA_img.save(Chemistry_directory_reduced + "CA_img.png")
+    #     print("Done with CA")
+    #     return "SI"
 
-        #     max_CA_img = my_modal_filter(CA_img)
-        #     max_CA_img = reduce_area(max_CA_img, 100)
-        #     CA_img = im.fromarray(max_CA_img.astype(np.uint8), mode="L")
-        #     CA_img.save(Chemistry_directory_reduced + "CA_img.png")
-        #     print("Done with CA")
-        #     return "SI"
+    # def FE():
+    #     FE_img = io.imread('Chemical_Images/FE_fromFile.png')
+    #     FE_img = FE_img / 255
+    #     FE_img[FE_img < 0.2] = 0
+    #     FE_img[FE_img > 0.2] = 1
 
-        # def FE():
-        #     FE_img = io.imread('Chemical_Images/FE_fromFile.png')
-        #     FE_img = FE_img / 255
-        #     FE_img[FE_img < 0.2] = 0
-        #     FE_img[FE_img > 0.2] = 1
+    #     max_FE_img = my_modal_filter(FE_img)
+    #     max_FE_img = reduce_area(max_FE_img, 100)
+    #     FE_img = im.fromarray(max_FE_img.astype(np.uint8), mode="L")
+    #     FE_img.save(Chemistry_directory_reduced + "FE_img.png")
+    #     print("Done with FE")
+    #     return "FE"
 
-        #     max_FE_img = my_modal_filter(FE_img)
-        #     max_FE_img = reduce_area(max_FE_img, 100)
-        #     FE_img = im.fromarray(max_FE_img.astype(np.uint8), mode="L")
-        #     FE_img.save(Chemistry_directory_reduced + "FE_img.png")
-        #     print("Done with FE")
-        #     return "FE"
+    # def K():
+    #     K_img = io.imread('Chemical_Images/K_fromFile.png')
+    #     K_img = K_img / 255
 
-        # def K():
-        #     K_img = io.imread('Chemical_Images/K_fromFile.png')
-        #     K_img = K_img / 255
+    #     K_img[K_img < 0.2] = 0
+    #     K_img[K_img > 0.2] = 1
 
-        #     K_img[K_img < 0.2] = 0
-        #     K_img[K_img > 0.2] = 1
+    #     max_K_img = my_modal_filter(K_img)
+    #     max_K_img = reduce_area(max_K_img, 100)
+    #     K_img = im.fromarray(max_K_img.astype(np.uint8), mode="L")
+    #     K_img.save(Chemistry_directory_reduced + "K_img.png")
+    #     print("Done with K")
+    #     return "K"
 
-        #     max_K_img = my_modal_filter(K_img)
-        #     max_K_img = reduce_area(max_K_img, 100)
-        #     K_img = im.fromarray(max_K_img.astype(np.uint8), mode="L")
-        #     K_img.save(Chemistry_directory_reduced + "K_img.png")
-        #     print("Done with K")
-        #     return "K"
+    # def NA():
+    #     NA_img = io.imread('Chemical_Images/NA_fromFile.png')
+    #     NA_img = NA_img / 255
 
-        # def NA():
-        #     NA_img = io.imread('Chemical_Images/NA_fromFile.png')
-        #     NA_img = NA_img / 255
+    #     NA_img[NA_img < 0.2] = 0
+    #     NA_img[NA_img > 0.2] = 1
 
-        #     NA_img[NA_img < 0.2] = 0
-        #     NA_img[NA_img > 0.2] = 1
+    #     max_NA_img = my_modal_filter(NA_img)
+    #     max_NA_img = reduce_area(max_NA_img, 100)
+    #     NA_img = im.fromarray(max_NA_img.astype(np.uint8), mode="L")
+    #     NA_img.save(Chemistry_directory_reduced + "NA_img.png")
+    #     print("Done with NA")
+    #     return "NA"
 
-        #     max_NA_img = my_modal_filter(NA_img)
-        #     max_NA_img = reduce_area(max_NA_img, 100)
-        #     NA_img = im.fromarray(max_NA_img.astype(np.uint8), mode="L")
-        #     NA_img.save(Chemistry_directory_reduced + "NA_img.png")
-        #     print("Done with NA")
-        #     return "NA"
-
-        # switch = {
-        #     0: SI,
-        #     1: AL,
-        #     2: CA,
-        #     3: FE,
-        #     4: K,
-        #     5: NA
-        # }
+    # switch = {
+    #     0: SI,
+    #     1: AL,
+    #     2: CA,
+    #     3: FE,
+    #     4: K,
+    #     5: NA
+    # }
 
 
 def make_binary(img):
@@ -609,28 +600,24 @@ def get_session_JSON(sessionJSON):
     except json.JSONDecodeError:
         print(f"File does not contain valid JSON: {sessionJSON}")
 
-def add_to_ChemCache(image,Cache_path):
+
+def add_to_ChemCache(image, Cache_path):
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     image_extension = os.path.splitext(image)[1]
     image_name = f'{timestamp}{image_extension}'
     image_path = os.path.join(Cache_path, image_name)
 
     shutil.copy(image, image_path)
-
-    
 
     return
 
-def add_to_EulerCache(image,Cache_path):
+
+def add_to_EulerCache(image, Cache_path):
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     image_extension = os.path.splitext(image)[1]
     image_name = f'{timestamp}{image_extension}'
     image_path = os.path.join(Cache_path, image_name)
 
     shutil.copy(image, image_path)
-
-    
-
-
 
     return
