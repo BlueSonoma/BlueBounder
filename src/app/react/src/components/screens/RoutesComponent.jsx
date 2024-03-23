@@ -16,7 +16,7 @@ export function RoutesComponent() {
       <DomRoute path={AppRoutes.NewSession} element={<NewSession />} />
       <DomRoute path={AppRoutes.App} element={<App />} />
       <DomRoute path={AppRoutes.OldSessions} element={<OldSessions />} />
-      <DomRoute path={AppRoutes.NewSession} element={<SessionInitializer />} />
+      <DomRoute path={AppRoutes.InitSession} element={<SessionInitializer />} />
     </DomRoutes>
   </DomRouter>);
 }

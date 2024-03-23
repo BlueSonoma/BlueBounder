@@ -173,36 +173,38 @@ def get_chem(file,Chem_dir, max_chemicals,chemical):
 
 
 def find_max_of_chem(file):
-    file.seek(0)
-    file.readline()
-    file.readline()
+    with open(file, 'r') as file:
+        file.seek(0)
+        file.readline()
+        file.readline()
 
-    max_chem_0 = 0
-    max_chem_1 = 0
-    max_chem_2 = 0
-    max_chem_3 = 0
-    max_chem_4 = 0
-    max_chem_5 = 0
+        max_chem_0 = 0
+        max_chem_1 = 0
+        max_chem_2 = 0
+        max_chem_3 = 0
+        max_chem_4 = 0
+        max_chem_5 = 0
 
-    for line in file:
-        line = line.split(",")
+        for line in file:
+            line = line.split(",")
 
-        chemical_values = line[6].split(' ')
-        chemical_values = np.array(chemical_values, "float")
-        if chemical_values[0] > max_chem_0:
-            max_chem_0 = chemical_values[0]
-        if chemical_values[1] > max_chem_1:
-            max_chem_1 = chemical_values[1]
-        if chemical_values[2] > max_chem_2:
-            max_chem_2 = chemical_values[2]
-        if chemical_values[3] > max_chem_3:
-            max_chem_3 = chemical_values[3]
-        if chemical_values[4] > max_chem_4:
-            max_chem_4 = chemical_values[4]
-        if chemical_values[5] > max_chem_5:
-            max_chem_5 = chemical_values[5]
+            chemical_values = line[6].split(' ')
+            chemical_values = np.array(chemical_values, "float")
+            if chemical_values[0] > max_chem_0:
+                max_chem_0 = chemical_values[0]
+            if chemical_values[1] > max_chem_1:
+                max_chem_1 = chemical_values[1]
+            if chemical_values[2] > max_chem_2:
+                max_chem_2 = chemical_values[2]
+            if chemical_values[3] > max_chem_3:
+                max_chem_3 = chemical_values[3]
+            if chemical_values[4] > max_chem_4:
+                max_chem_4 = chemical_values[4]
+            if chemical_values[5] > max_chem_5:
+                max_chem_5 = chemical_values[5]
 
     return [max_chem_0, max_chem_1, max_chem_2, max_chem_3, max_chem_4, max_chem_5]
+
 
 
 def quantization(img, L):
