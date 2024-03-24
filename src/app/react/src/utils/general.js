@@ -32,20 +32,7 @@ export function createUrlFromPath(path) {
   return URL.createObjectURL(blob);
 }
 
-export function getFilenameFromPath(path, stripExt = false) {
-  // let start = path.lastIndexOf('\\') + 1;
-  // if (start === -1) {
-  //   start = path.lastIndexOf('/') + 1;
-  //   if (start === -1) {
-  //     start = 0;
-  //   }
-  // }
-  // let end = path.length;
-  // if (stripExt) {
-  //   end = path.lastIndexOf('.');
-  // }
-  // return path.slice(start, end);
-  
+export function getFilenameFromPath(path) {
   return path.split('\\').pop().split('/').pop().split('.').shift();
 }
 
