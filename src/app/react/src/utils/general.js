@@ -33,18 +33,20 @@ export function createUrlFromPath(path) {
 }
 
 export function getFilenameFromPath(path, stripExt = false) {
-  let start = path.lastIndexOf('\\') + 1;
-  if (start === -1) {
-    start = path.lastIndexOf('/') + 1;
-    if (start === -1) {
-      start = 0;
-    }
-  }
-  let end = path.length;
-  if (stripExt) {
-    end = path.lastIndexOf('.');
-  }
-  return path.slice(start, end);
+  // let start = path.lastIndexOf('\\') + 1;
+  // if (start === -1) {
+  //   start = path.lastIndexOf('/') + 1;
+  //   if (start === -1) {
+  //     start = 0;
+  //   }
+  // }
+  // let end = path.length;
+  // if (stripExt) {
+  //   end = path.lastIndexOf('.');
+  // }
+  // return path.slice(start, end);
+  
+  return path.split('\\').pop().split('/').pop().split('.').shift();
 }
 
 export function getFileExtFromPath(path) {
