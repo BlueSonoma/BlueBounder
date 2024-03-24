@@ -1,8 +1,7 @@
 .tree {
     padding: 5px;
-    margin-right: 2px;
-    overflow-x: scroll;
-    overflow-y: scroll;
+    margin-left: 3px;
+    overflow: auto;
     scrollbar-width: thin;
 }
 
@@ -19,5 +18,4 @@
 
 .tree-node.selected {
     background: rgba(100, 149, 237, 0.7);
-    border-radius: 5px;
 }
