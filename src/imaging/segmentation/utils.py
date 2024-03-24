@@ -3,12 +3,12 @@
 
 import os
 
-dir_map = {
-    'INPUT_IMAGES_DIR': '../../',
-    'OUTPUT_IMAGES_DIR': '../../',
-    'REDUCED_DIR': '../../Reduced/',
-    'CHEMISTRY_DIR': '../../Chemistry/',
-}
+# dir_map = {
+#     'INPUT_IMAGES_DIR': '../../',
+#     'OUTPUT_IMAGES_DIR': '../../',
+#     'REDUCED_DIR': '../../Reduced/',
+#     'CHEMISTRY_DIR': '../../Chemistry/',
+# }
 
 
 def create_directory(dir):
@@ -19,7 +19,7 @@ def create_directory(dir):
         print(f'Directory "{str(dir)}" already exists')
 
 
-cwd = os.getcwd()
-for _, path in dir_map.items():
-    dir = cwd + '/' + path
-    create_directory(dir)
+# cwd = os.getcwd()
+# for _, path in dir_map.items():
+#     dir = cwd + '/' + path
+#     create_directory(dir)
