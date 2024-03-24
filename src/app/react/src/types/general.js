@@ -1,5 +1,15 @@
 import { Node, NodeMouseHandler } from '@xyflow/react';
 
+export const Colors = {
+  Black: 'black',
+  Red: 'red',
+  Green: 'green',
+  Blue: 'blue',
+  Yellow: 'yellow',
+  Pink: 'pink',
+  Purple: 'purple',
+};
+
 export const DockPanelPosition = {
   Left: 'left',
   Right: 'right',

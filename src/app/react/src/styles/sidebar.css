@@ -74,8 +74,9 @@
 .bounder__sidebar .content-container {
     grid-area: body;
     display: flex;
+    position: relative;
     flex-flow: column;
-    overflow: hidden;
+    overflow: auto;
     scrollbar-width: thin;
     padding: 5px
 }

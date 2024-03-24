@@ -1,28 +1,30 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import Button from '../../buttons/Button';
+import { getRelativePath } from '../../../utils/general';
 
 function UploadForm({
                       id,
                       className,
                       style,
                       multiple = false,
+                      disabled,
                       onChange,
                       onClick,
                       type,
                       acceptTypes,
-                      label,
+                      label = 'Browse',
                       browseButtonItem,
-                      textForm,
-                      textValue,
+                      textForm = true,
+                      textFormStyle,
+                      textValue = '',
                       browseButtonProps,
                       placeholder,
                       ...rest
-                    }, ref) {
+                    }, ref = null) {
 
-  const [inputValue, setInputValue] = useState(textValue ?? '');
-  const textInputRef = useRef();
-  const fileInputRef = useRef(ref ?? null);
-
+  const [inputValue, setInputValue] = useState(textValue);
+  const textInputRef = useRef(null);
+  const fileInputRef = useRef(ref);
 
   useEffect(() => {
     textInputRef.current?.focus();
@@ -35,22 +37,19 @@ function UploadForm({
   }
 
   function onFileChosenChangeHandler(event) {
-    const file = event.target.files[0];
-    setInputValue(file.path);
-    onChange?.(event, file.path);
+    let path = event.target.files[0].path;
+    setInputValue(path);
+    onChange?.(event, path);
   }
 
   const onClickHandler = () => {
     fileInputRef.current?.click();
-    onClick?.();
   };
-
-  label = label ?? 'Browse';
-  textForm = textForm ?? true;
 
   function defaultButton() {
     return (<>
       {textForm && (<input
+        disabled={disabled}
         ref={textInputRef}
         type={'text'}
         value={inputValue}
@@ -59,6 +58,7 @@ function UploadForm({
         className={className}
       />)}
       <Button
+        disabled={disabled}
         onClick={onClickHandler}
         {...browseButtonProps}
         label={label}
@@ -84,12 +84,14 @@ function UploadForm({
     type: 'file',
     accept: acceptTypes,
     style: { display: 'none' },
+    onClick: onClick?.(),
     onChange: onFileChosenChangeHandler,
+    disabled: disabled,
   };
 
   return (<div {...divProps}>
     {multiple ? <input {...inputProps} multiple /> : <input {...inputProps} />}
-    <ButtonComponent />
+    <ButtonComponent disabled={disabled} />
   </div>);
 }
 

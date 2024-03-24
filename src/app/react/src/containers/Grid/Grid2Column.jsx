@@ -20,8 +20,8 @@ function Grid2Column({ data }) {
 
     let maxLength = -Number.MAX_VALUE;
     data?.forEach((item) => {
-      const length = item.label.length;
-      if (length > maxLength) {
+      const length = item.label?.length;
+      if (length && length > maxLength) {
         maxLength = length;
       }
     });
@@ -33,10 +33,10 @@ function Grid2Column({ data }) {
     return <></>;
   }
 
-  return (<div className='grid-container'>
-    {data.map((item, index) => (<div key={index} className='row'>
-      <div style={{ width: `${labelWidth}px` }} className='label'>{item.label}</div>
-      <div className='content'>{item.content}</div>
+  return (<div className={'grid-container'}>
+    {data.map((item, index) => (<div key={index} className={'row'}>
+      {item.label && <div style={{ width: `${labelWidth}px` }} className={'label'}>{item.label}</div>}
+      {item.content && <div className={'content'}>{item.content}</div>}
     </div>))}
   </div>);
 }

@@ -190,7 +190,7 @@ BatchConfig = dict[str | Any, list | int | float | str | bool | list[str] | Any]
 def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min_size: int = 20,
                        outline_color: str = 'black', overlay: bool = True, overlay_image: Image = None,
                        label: bool = True, label_uniform: bool = False, label_color: str = 'red',
-                       label_opacity: float = 1.0, batch_config: BatchConfig = None) -> Image | list[Image]:
+                       label_opacity: float = 1.0, batch_config: BatchConfig = None):
     """Given an input image, returns a copy of the image with its boundaries segmented and outlined.
 
         Parameters

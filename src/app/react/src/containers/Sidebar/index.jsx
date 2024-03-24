@@ -1,7 +1,5 @@
-import { memo, useEffect, useState } from 'react';
-
 import DockPanel from '../DockPanel';
-import { DockPanelPosition } from '../../types/general';
+import { DockPanelPosition } from '../../types';
 
 import '../../styles/sidebar.css';
 import '../../styles/mode-selector.css';
