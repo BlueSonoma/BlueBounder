@@ -4,8 +4,15 @@ type TreeState = {
   id: string, name: string, children: TreeState[],
 };
 
-function useTreeState(initialState) {
-  const [root, setRoot] = useState(initialState ?? {});
+function getInitialState({ id, name, children }: TreeState) {
+  return {
+    id: id ?? 'root', name: name ?? 'root', children: children ?? [],
+  };
+}
+
+function useTreeState(initialState: TreeState) {
+  const [root, setRoot] = useState(getInitialState(initialState ?? {}));
+
   return [root, setRoot];
 }
 
