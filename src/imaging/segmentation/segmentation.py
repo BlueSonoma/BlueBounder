@@ -175,8 +175,8 @@ def postprocess(background_image: Image, overlay_image: Image, mask: Image, bord
                         if mask[x, y] == 0:
                             background_image[x, y] = border_color
                             background_image[i - x, j - c] = border_color
-                else:
-                    background_image[i, j] = overlay_image[i, j] * 255
+                        else:
+                            background_image[i, j] = overlay_image[i, j] * 255
     return background_image
 
 
@@ -189,7 +189,7 @@ BatchConfig = dict[str | Any, list | int | float | str | bool | list[str] | Any]
 
 def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min_size: int = 20,
                        outline_color: str = 'black', overlay: bool = True, overlay_image: Image = None,
-                       label: bool = True, label_uniform: bool = False, label_color: str = 'red',
+                       label_regions: bool = True, label_uniform: bool = False, label_color: str = 'red',
                        label_opacity: float = 1.0, batch_config: BatchConfig = None):
     """Given an input image, returns a copy of the image with its boundaries segmented and outlined.
 
@@ -212,7 +212,7 @@ def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min
             If None, the `image` argument will be the image used. Otherwise, the image
             provided in this argument will be used. NOTE: The image provided must be of the
             same shape as the input image.
-        label:
+        label_regions:
 
         label_uniform:
             If enabled, all labels will be converted to a single label.
@@ -252,7 +252,7 @@ def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min
     """
 
     # Define a local closure function that actually performs the algorithm
-    def __exec_segment_boundaries(image, scale, sigma, min_size, outline_color, overlay, overlay_image, label,
+    def __exec_segment_boundaries(image, scale, sigma, min_size, outline_color, overlay, overlay_image, label_regions,
                                   label_uniform, label_color, label_opacity) -> Image:
         background = None
 
@@ -267,7 +267,7 @@ def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min
             else:
                 background = image
 
-        if label:
+        if label_regions:
             # Get the labeled image overlayed with the mask
             _, overlay_img = label_mask(mask, overlay_image=background, uniform=label_uniform, color=label_color,
                                         opacity=label_opacity)
@@ -279,7 +279,8 @@ def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min
 
     # Run the algorithm on a single image
     if batch_config is None:
-        return __exec_segment_boundaries(image, scale, sigma, min_size, outline_color, overlay, overlay_image, label,
+        return __exec_segment_boundaries(image, scale, sigma, min_size, outline_color, overlay, overlay_image,
+                                         label_regions,
                                          label_uniform, label_color, label_opacity)
 
     # Destructure configurations
@@ -288,7 +289,7 @@ def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min
     sigma = batch_config['sigma']
     min_size = batch_config['min_size']
     outline_color = batch_config['outline_color']
-    label = batch_config['label']
+    label_regions = batch_config['labelRegions']
     label_uniform = batch_config['label_uniform']
     overlay = batch_config['overlay']
     overlay_image = batch_config['overlay_image']
@@ -302,8 +303,9 @@ def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min
     for i, image in enumerate(in_images):
         image = preprocess(image)
         segmented = __exec_segment_boundaries(image, scale=scale, sigma=sigma, min_size=min_size,
-                                              outline_color=outline_color, label=label, label_uniform=label_uniform,
-                                              overlay=overlay, overlay_image=overlay_image, label_color=label_color[i],
+                                              outline_color=outline_color, label_regions=label_regions,
+                                              label_uniform=label_uniform, overlay=overlay, overlay_image=overlay_image,
+                                              label_color=label_color[i],
                                               label_opacity=opacity)
 
         results.append(segmented)
@@ -328,7 +330,7 @@ def segment_and_overlay_chemistry(band_contrast: Image, chem_mask: Image, opacit
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         # Segment the band contrast
         img_future = executor.submit(segment_boundaries, band_contrast, scale=200, sigma=0.55, min_size=300,
-                                     outline_color='black', label=False)
+                                     outline_color='black', label_regions=False)
 
         # Segment the mask
         mask_future = executor.submit(segment_boundaries, chem_mask, scale=30, sigma=0.1, min_size=10,
@@ -343,3 +345,36 @@ def segment_and_overlay_chemistry(band_contrast: Image, chem_mask: Image, opacit
     # Clean up the result by removing invalid labels and replacing borders removed in `overlay`
     return postprocess(background_image=band_contrast, overlay_image=overlay_seg, mask=chem_mask,
                        border_color='black').astype(np.uint8)
+
+
+def bounder_segmentation(bc_image: Image, chem_mask: Image, *, border_color='black', overlay_opacity=1.0, bc_scale=200,
+                         bc_sigma=0.55, bc_min_size=300, bc_outline_color='black', mask_scale=10, mask_sigma=0.1,
+                         mask_min_size=10, mask_outline_color='black', label_regions=True, uniform_label=True,
+                         label_color='yellow', label_opacity=1.0):
+    """
+      Segments the boundaries of an image `band_contrast` and its mask `chem_mask` and overlays
+      the segmented `chem_mask` image onto `band_contrast` such that only the boundaries of
+      `band_contrast` within the area of the of `chem_mask` labels are segmented and bordered.
+    """
+    import concurrent.futures
+
+    # Run the segmentation algorithms concurrently to reduce processing time
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        # Segment the band contrast
+        img_future = executor.submit(segment_boundaries, bc_image, scale=bc_scale, sigma=bc_sigma, min_size=bc_min_size,
+                                     outline_color=bc_outline_color, label_regions=False)
+
+        # Segment the mask
+        mask_future = executor.submit(segment_boundaries, chem_mask, scale=mask_scale, sigma=mask_sigma,
+                                      min_size=mask_min_size, outline_color=mask_outline_color,
+                                      label_uniform=uniform_label, label_color=label_color,
+                                      label_opacity=label_opacity, label_regions=label_regions)
+        img_seg = img_future.result()
+        mask_seg = mask_future.result()
+
+    # Overlay the segmented mask onto the segmented band contrast
+    overlay_seg = overlay(img_seg, mask_seg, opacity=overlay_opacity)
+
+    # Clean up the result by removing invalid labels and replacing borders removed in `overlay`
+    return postprocess(background_image=bc_image, overlay_image=overlay_seg, mask=chem_mask,
+                       border_color=border_color).astype(np.uint8)

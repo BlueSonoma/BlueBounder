@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useSessionManager from '../../hooks/useSessionManager';
 import {
-  addFilepathToNode, createImageNodeFromFilepath, createViewport, imageAlreadyLoaded, toggleShowSidebar,
+  toggleShowSidebar,
 } from './utils';
 import ImageUploadForm from '../../additional-components/forms/ImageUploadForm';
 import IconLiveFolder from '../../resources/icons/live-folder.png';
@@ -19,22 +19,18 @@ import Navbar from '../../containers/Navbar';
 import WindowTitleBar from '../../additional-components/WindowTitleBar';
 import Canvas from '../Canvas';
 import useAppState from '../../hooks/useAppState';
-import type { ImageNodeType } from '../../types';
 import { initialBottomSidebar, initialProjectSidebar, initialSettingsSidebar } from '../sidebars/initialSidebars';
 
 import '../../styles/bounder.css';
 import '../../styles/sidebar.css';
 import '../../styles/navbar.css';
 import { API } from '../../routes';
-import useNodeSelector from '../../hooks/useNodeSelector';
+import { getFilenameFromPath } from '../../utils/general';
 
 function App() {
   const appState = useAppState();
-
-  const {
-    sessionName, nodes, setNodes, setViewports, setActiveViewport,
-  } = useSessionManager();
-  const { setSelectedNodes } = useNodeSelector();
+  const sessionManager = useSessionManager();
+  const { sessionName, nodes, setNodes, setSelectedNodes } = sessionManager;
 
   const [leftSidebar, setLeftSidebar] = useState(initialProjectSidebar);
   const [rightSidebar, setRightSidebar] = useState(initialSettingsSidebar);
@@ -52,25 +48,16 @@ function App() {
       .then(async ([data, status]) => {
         if (status === 200) {
           if (Array.isArray(data)) {
-            // Create a new viewport
-            const viewport = createViewport(sessionName);
-
             // Create a new ImageNode with the file paths we got from the back-end
             for (const file of data) {
-              const node = await handleCreateImageNode(file);
-
+              const node = await sessionManager.createDefaultImageNode(file);
               if (!node) {
                 continue;
               }
-              node.data.viewport = viewport.id;
               nodes.push(node);
-              viewport.props.nodes.push(node);
             }
-            // Add the new viewport
-            setViewports((prev) => [...prev, viewport]);
-            setActiveViewport(viewport);
-
             setNodes(() => [...nodes]);
+
             if (nodes.length > 0) {
               setSelectedNodes(nodes[nodes.length - 1]);
             }
@@ -88,65 +75,29 @@ function App() {
   }, []);
 
   async function handleOnImagesSelected(event) {
-    appState.startLoadRequest();
-
-    async function createImageNodes(event) {
+    async function doWork() {
+      // Create a new ImageNode with the file paths we got from the back-end
       for (const file of event.target.files) {
-        const node = await handleCreateImageNode(file);
-        if (node) {
-          const viewport = createViewport(node.data.file.prefix);
-          node.data.viewport = viewport.id;
-          nodes.push(node);
+        const node = await sessionManager.createDefaultImageNode(file);
 
-          viewport.props.nodes.push(node);
-          setViewports((prev) => [...prev, viewport]);
-          setActiveViewport(viewport);
+        if (!node) {
+          continue;
+        }
+        sessionManager.createAndAddViewport({
+          name: `${getFilenameFromPath(file.path)}`, nodes: [node], options: { setActive: true },
+        });
+        nodes.push(node);
+        setNodes(() => [...nodes]);
+
+        if (nodes.length > 0) {
+          setSelectedNodes(nodes[nodes.length - 1]);
         }
       }
     }
 
-    await createImageNodes(event);
+    appState.startLoadRequest();
+    doWork().then().catch((e) => console.log(e));
     appState.endLoadRequest();
-    setNodes((() => [...nodes]));
-    if (nodes.length > 0) {
-      setSelectedNodes(nodes[nodes.length - 1]);
-    }
-  }
-
-  async function handleCreateImageNode(pathOrFile): ImageNodeType {
-    let filepath = pathOrFile;
-    if (typeof filepath !== 'string') {
-      filepath = pathOrFile.path;
-    }
-    if (imageAlreadyLoaded(filepath, nodes)) {
-      return null;
-    }
-
-    const node = await createImageNodeFromFilepath(filepath);
-    // Set the reload callback
-    node.data.reload = async () => {
-      // Create a new image node
-      const reNode = await createImageNodeFromFilepath(node.data.file.path);
-
-      setNodes((prev) => prev.map((nd) => {
-        if (nd.id === node.id) {
-          // Update and return a newly created node
-          return {
-            ...nd,
-            data: {
-              width: reNode.width,
-              height: reNode.height,
-              ...node.data,
-              image: reNode.data.image,
-            },
-          };
-        }
-        return nd;
-      }));
-    };
-    addFilepathToNode(node, filepath);
-
-    return node;
   }
 
   function renderFileLoader() {

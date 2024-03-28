@@ -1,13 +1,13 @@
 import React, { memo, useEffect, useState } from 'react';
-import '../../styles/bounder.css';
-
 import { DockPanelPosition } from '../../types';
 import TabbedPanel from '../TabbedPanel';
 import useSessionManager from '../../hooks/useSessionManager';
 
+import '../../styles/bounder.css';
+
 function Canvas({ className, ...rest }) {
   const [currentIndex, setCurrentIndex] = useState(null);
-  const { viewports, getViewportIndex, activeViewport, setActiveViewport } = useSessionManager();
+  const { viewports, setViewports, getViewportIndex, activeViewport, setActiveViewport } = useSessionManager();
 
   useEffect(() => {
     if (activeViewport) {
@@ -19,8 +19,22 @@ function Canvas({ className, ...rest }) {
   function onTabClickHandler(event, tab) {
     if (tab) {
       const index = tab.current;
-      if (viewports.length < index) {
+      if (index < viewports.length) {
         setActiveViewport(viewports[index]);
+      }
+    }
+  }
+
+  function onTabCloseHandler(event, tab) {
+    if (tab) {
+      const index = tab.current;
+      if (index < viewports.length) {
+        const viewport = viewports[index];
+        if (typeof viewport !== 'undefined') {
+          setViewports((prev) => prev.filter((vp) => vp.id !== viewport.id));
+          setActiveViewport(null);
+          setCurrentIndex(null);
+        }
       }
     }
   }
@@ -31,6 +45,7 @@ function Canvas({ className, ...rest }) {
       position={DockPanelPosition.Center}
       tabComponents={viewports}
       onTabClick={onTabClickHandler}
+      onTabClose={onTabCloseHandler}
       selectedIndex={currentIndex}
     />
   </div>);

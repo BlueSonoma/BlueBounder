@@ -1,9 +1,9 @@
-import { memo, useEffect, useState } from 'react';
-
-import '../../styles/tabbed.css';
+import { useEffect, useState } from 'react';
 import '../../styles/mode-selector.css';
 import Button from '../../additional-components/buttons/Button';
 import Panel from '../../containers/Panel';
+
+import '../../styles/tabbed.css';
 
 function getInitialTabsLength(components) {
   if (typeof components === 'undefined') {
@@ -49,7 +49,17 @@ function getInitialSelectedIndex(components) {
 }
 
 const TabbedPanel = ({
-                       id, style, show, className, position, tabComponents, onTabClick, selectedIndex, children, ...rest
+                       id,
+                       style,
+                       show,
+                       className,
+                       position,
+                       tabComponents,
+                       onTabClick,
+                       onTabClose,
+                       selectedIndex,
+                       children,
+                       ...rest
                      }) => {
   const [currentTabIndex, setCurrentTabIndex] = useState(selectedIndex ?? getInitialSelectedIndex(tabComponents));
   const [tabsLength, setTabsLength] = useState(getInitialTabsLength(tabComponents));
@@ -101,6 +111,10 @@ const TabbedPanel = ({
     }
   }
 
+  function onTabCloseClickedHandler(event, index) {
+    onTabClose?.(event, { previous: currentTabIndex, current: index });
+  }
+
   // FIXME:
   //  This is still broken -- `id` property is undefined; need to trace
   useEffect(() => {
@@ -130,13 +144,30 @@ const TabbedPanel = ({
           title={label}
           label={label}
           onClick={(event) => onTabClickedHandler(event, idx)}
-        />);
+        >
+          <Button
+            label={'X'}
+            style={{
+              position: 'absolute',
+              right: '2px',
+              top: '2px',
+              width: '20px',
+              height: '20px',
+              padding: '0',
+              fontSize: 'smaller',
+              border: 'none',
+              justifyContent: 'center',
+            }}
+            onClick={(event) => onTabCloseClickedHandler(event, idx)}
+          />
+        </Button>);
       })}
     </div>
-    <div className={'content-container'}
-         style={{
-           borderTop: labels?.length > 0 ? 'solid gray 2px' : '',
-         }}
+    <div
+      className={'content-container'}
+      style={{
+        borderTop: labels?.length > 0 ? 'solid gray 2px' : '',
+      }}
     >
       {components.map((Component, index) => {
         let componentProps = props[index];
