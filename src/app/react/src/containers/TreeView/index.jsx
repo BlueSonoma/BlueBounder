@@ -64,7 +64,6 @@ function TreeView({
     }
 
     handleClick(treeNodes);
-    console.log(`Selected: ${treeNodes.map((nd) => nd.id)}`);
 
     const node = treeNodes[0];
     if (!node.isLeaf) {
