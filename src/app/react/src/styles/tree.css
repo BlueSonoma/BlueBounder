@@ -1,11 +1,10 @@
 .tree {
     padding: 5px;
     margin-left: 3px;
-    overflow: auto;
-    scrollbar-width: thin;
 }
 
 .tree-row {
+    width: 100%;
 }
 
 .tree-node {
@@ -14,6 +13,7 @@
     flex-direction: row;
     padding-top: 2px;
     padding-bottom: 2px;
+    text-wrap: none;
 }
 
 .tree-node.selected {
