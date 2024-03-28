@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import NodesManagerContext from '../contexts/NodesManagerContext';
+import ViewportsManagerContext from '../contexts/ViewportsManagerContext';
 
-export default function useNodesManager() {
-  return useContext(NodesManagerContext);
+export default function useViewportsManager() {
+  return useContext(ViewportsManagerContext);
 }

@@ -1,14 +1,12 @@
 import { useNodesState } from '@xyflow/react';
-import { Provider } from '../../../contexts/NodesManagerContext';
-import NodeSelectorProvider from '../NodeSelectorProvider';
+import { Provider } from '../../../contexts/NodesContext';
 import type { ImageNodeType } from '../../../types';
 import {
   createBlobFromText, createImageFromBlob, getFileExtFromPath, getFilenameFromPath, getNextId,
 } from '../../../utils/general';
 import { imageExists } from '../../../utils/nodes';
-import useNodeSelector from '../../../hooks/useNodeSelector';
 
-function NodesManagerProvider({ children }) {
+function NodesProvider({ children }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
 
   function createImageNode(image): ImageNodeType {
@@ -45,8 +43,6 @@ function NodesManagerProvider({ children }) {
     if (typeof pathOrFile === 'undefined') {
       throw new Error(`Missing required arguments: Expected File or filepath.`);
     }
-
-    console.log('Creating default node');
 
     let filepath = pathOrFile;
     if (typeof filepath !== 'string') {
@@ -98,7 +94,6 @@ function NodesManagerProvider({ children }) {
   }
 
   const contextProps = {
-    ...useNodeSelector(),
     nodes,
     setNodes,
     onNodesChange,
@@ -114,10 +109,4 @@ function NodesManagerProvider({ children }) {
     {children}</Provider>);
 }
 
-function Container({ children }) {
-  return (<NodesManagerProvider>
-    <NodeSelectorProvider>
-      {children}
-    </NodeSelectorProvider>
-  </NodesManagerProvider>);
-}
+export default NodesProvider;

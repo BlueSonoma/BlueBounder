@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 
-const NodesManagerContext = createContext(null);
+const NodesContext = createContext(null);
 
-export const Provider = NodesManagerContext.Provider;
+export const Provider = NodesContext.Provider;
 
-export default NodesManagerContext;
+export default NodesContext;

@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import NodesManagerContext from '../contexts/NodesManagerContext';
+import NodesContext from '../contexts/NodesContext';
 
-export default function useNodesManager() {
-  return useContext(NodesManagerContext);
+export default function useNodes() {
+  return useContext(NodesContext);
 }
