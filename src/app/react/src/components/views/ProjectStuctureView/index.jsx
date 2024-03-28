@@ -1,58 +1,77 @@
-import { memo, useEffect, useState } from 'react';
-import '../../../styles/sidebar.css';
+import { useEffect } from 'react';
+import type { ViewportType } from '../../../types';
+import TreeView from '../../../containers/TreeView';
+import useTreeState from '../../../hooks/useTreeState';
+import { getFilenameFromPath } from '../../../utils/general';
 import useSessionManager from '../../../hooks/useSessionManager';
-import { API } from '../../../routes';
-import Frame from '../../../containers/Frame';
+import TreeImageNode from '../../nodes/tree-nodes/TreeImageNode';
 
-type ListItem = {
-  name: string; type: string; children?: ListItem[];
-}
+function ProjectStructureView() {
+  const [data, setData] = useTreeState();
+  const { csvFilePath, ctfFilePath, nodes, setSelectedNodes, createAndAddViewport } = useSessionManager();
 
-function ProjectStructureListView({ children, ...rest }) {
-  const [items, setItems] = useState([]);
-  const { sessionName, setSessionName } = useSessionManager();
+  const nextData = [];
+  const files = { id: '0', name: 'Files', children: [] };
 
   useEffect(() => {
-    fetch(`${API.Sessions}/get_session_Folder?sessionName=${sessionName}`, {
-      method: 'GET',
-    })
-      .then(response => response.json())
-      .then(data => {
-        const parsedData = JSON.parse(data[0]);
-        setItems([parsedData]); // Wrap the object in an array
-        console.log(parsedData);
-      })
-      .catch(error => console.error('Error:', error));
-  }, []);
-
-  let itemCounter = 0;
-
-  function getChildComponents(item: ListItem, level) {
-    if (!item) {
-      return null;
+    if (csvFilePath.length > 0) {
+      files.children = [{
+        id: '0a', name: getFilenameFromPath(csvFilePath), path: csvFilePath,
+      }];
+    }
+    if (ctfFilePath.length > 0) {
+      files.children = [...files.children, {
+        id: '0b', name: getFilenameFromPath(ctfFilePath), path: ctfFilePath,
+      }];
     }
 
-    return (<>
-      <label key={itemCounter++} style={{ padding: '5px' }}>{item.name}</label>
-      {item.children?.map((child) => {
-        return (<div
-          style={{
-            marginLeft: `${(level === 1 ? '10px' : '0')}`, padding: '2px',
-          }}
-        >
-          <span>
-            {Array(3 * level).fill('-').map((val) => val)}
-            {getChildComponents(child, level + 1)}
-          </span>
-        </div>);
-      })}
-    </>);
+    if (files.children.length > 0) {
+      nextData.push(files);
+    }
+
+    nextData.push({
+      id: '1', name: 'Images', children: nodes.map((node) => {
+        return {
+          id: node.id, name: node.data.file.name, hidden: node.hidden, ...node.data,
+        };
+      }),
+    });
+
+    setData((root) => root.children = nextData);
+  }, [csvFilePath, ctfFilePath, nodes]);
+
+  function onDoubleClickHandler(treeNodes) {
+    const clickedNodes = [];
+    treeNodes.forEach((tn) => {
+      for (let i = 0; i < nodes.length; i++) {
+        const nd = nodes[i];
+        if (nd.type === 'imageNode' && nd.id === tn.id) {
+          clickedNodes.push(nd);
+          break;
+        }
+      }
+    });
+
+    if (clickedNodes.length === 0) {
+      return;
+    }
+
+    const newViewport: ViewportType = {
+      name: clickedNodes[0].data.file.prefix, nodes: clickedNodes, options: { setActive: true },
+    };
+    createAndAddViewport(newViewport);
+
+    setSelectedNodes(clickedNodes);
   }
 
-  return (<Frame label={'Project Structure'}>
-    {items?.map((item: ListItem) => getChildComponents(item, 1))}
-    {children}
-  </Frame>);
+  return (<TreeView
+    label={'Project Structure'}
+    data={data}
+    indent={20}
+    onDoubleClick={onDoubleClickHandler}
+  >
+    {TreeImageNode}
+  </TreeView>);
 }
 
-export default memo(ProjectStructureListView);
+export default ProjectStructureView;
