@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import '../../../styles/tree.css';
-import IconFolderOpened from '../../../resources/icons/folder-opened.png';
-import IconFolderClosed from '../../../resources/icons/folder-closed.png';
-import useSessionManager from '../../../hooks/useSessionManager';
 import { NodeRendererProps } from 'react-arborist';
+import IconFolderOpened from '../../../../resources/icons/folder-opened.png';
+import IconFolderClosed from '../../../../resources/icons/folder-closed.png';
+import useNodesManager from '../../../../hooks/useNodesManager';
+
+import '../../../../styles/tree.css';
 
 function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps) {
-  const { nodes, setNodes } = useSessionManager();
+  const { nodes, setNodes, selectedNodes } = useNodesManager();
   const [hidden, setHidden] = useState(treeNode.isLeaf ? null : false);
   const id = `tree-node__${treeNode.id}`;
   const tnSrc = treeNode.data.image?.src;
@@ -15,9 +16,14 @@ function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps)
   const tnHeight = '25px';
 
   useEffect(() => {
-    const isSelected = treeNode.isSelected;
-    document.querySelector(`#treeNode__${id}`).classList.toggle('selected', isSelected);
-  }, [treeNode]);
+    let isSelected = false;
+    const node = selectedNodes.find((nd) => nd.id === treeNode.id);
+    if (node) {
+      isSelected = node.selected;
+    }
+    const selectors = document.querySelectorAll(`#treeNode__${id}`);
+    selectors.forEach((selector) => selector?.classList.toggle('selected', isSelected));
+  }, [selectedNodes]);
 
   useEffect(() => {
     if (hidden) {
@@ -89,14 +95,14 @@ function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps)
         onClick={onLeafCheckboxClickHandler}
         title={`${treeNode.data.hidden ? 'Show' : 'Hide'}`}
       />
-      <img
+      {tnSrc && <img
         alt={tnName}
         src={tnSrc}
         width={tnWidth}
         height={tnHeight}
         title={tnName}
         style={{ border: 'solid black 1px', borderRadius: '5px' }}
-      /></>);
+      />}</>);
   }
 
   function onLeafCheckboxClickHandler() {
@@ -112,7 +118,9 @@ function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps)
 
   return (<div className={'tree-node'} id={`treeNode__${id}`} style={style} ref={dragHandle}>
     {renderThumbnail()}
-    <label style={{ paddingLeft: '5px' }}>{tnName}</label>
+    <label style={{
+      paddingLeft: '5px', overflow: 'hidden', scrollbarWidth: 'none',
+    }}>{tnName}</label>
   </div>);
 }
 
