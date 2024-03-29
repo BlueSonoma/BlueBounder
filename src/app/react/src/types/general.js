@@ -1,13 +1,7 @@
 import { Node, NodeMouseHandler } from '@xyflow/react';
 
 export const Colors = {
-  Black: 'black',
-  Red: 'red',
-  Green: 'green',
-  Blue: 'blue',
-  Yellow: 'yellow',
-  Pink: 'pink',
-  Purple: 'purple',
+  Black: 'black', Red: 'red', Green: 'green', Blue: 'blue', Yellow: 'yellow', Pink: 'pink', Purple: 'purple',
 };
 
 export const DockPanelPosition = {
@@ -25,8 +19,7 @@ export const DockPanelPosition = {
 };
 
 export type SelectorModeProviderProps = {
-  selectorMode: string;
-  setSelectorMode(mode: string): void;
+  selectorMode: string; setSelectorMode(mode: string): void;
 }
 
 export type ViewportProps = {
@@ -42,5 +35,5 @@ export type FileProps = {
 }
 
 export type ImageProps = {
-  width?: number; height?: number; src: string
+  width?: number; height?: number; src: string; type?: string;
 }

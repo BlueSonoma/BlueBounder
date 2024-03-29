@@ -19,8 +19,7 @@ function ImageNode(props: NodeProps) {
   }
 
   return (<div id={id}>
-    <img src={image} alt={data.label} width={data.image.width} height={data.image.height} imageType={data.image.type}/>
-    
+    <img src={image} alt={data.label} width={data.image.width} height={data.image.height} />
   </div>);
 }
 

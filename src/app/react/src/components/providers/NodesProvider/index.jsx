@@ -16,16 +16,17 @@ function NodesProvider({ children }) {
     if (typeof image === 'undefined') {
       data = {
         label: id, width: 0, height: 0, viewport: null, image: {
-          width: 0, height: 0, src: '',imageType: imageType,
+          width: 0, height: 0, src: '', type: imageType,
         },
       };
     } else {
       data = {
         label: image.alt ?? id, width: image.width, height: image.height, viewport: null, image: {
-          width: image.width, height: image.height, src: image.src, imageType: image.imageType,
+          width: image.width, height: image.height, src: image.src, type: imageType,
         },
       };
     }
+
 
     return {
       id: id,
@@ -43,6 +44,7 @@ function NodesProvider({ children }) {
     if (typeof pathOrFile === 'undefined') {
       throw new Error(`Missing required arguments: Expected File or filepath.`);
     }
+    // console.log("pathOrFile Type: ", pathOrFile)
 
     let filepath = pathOrFile;
     let imageType;
@@ -50,13 +52,13 @@ function NodesProvider({ children }) {
       filepath = pathOrFile.path;
       imageType = pathOrFile.type;
     }
-    //console.log("Image Type: ", imageType)
-    
+    // console.log("Image Type: ", imageType)
+
     const node = await createImageNodeFromFilepath(filepath, imageType);
     // Set the reload callback
     node.data.reload = async () => {
       // Create a new image node
-      const reNode = await createImageNodeFromFilepath(node.data.file.path, node.data.file.type);
+      const reNode = await createImageNodeFromFilepath(node.data.file.path, imageType);
 
       setNodes((prev) => prev.map((nd) => {
         if (nd.id === node.id) {
