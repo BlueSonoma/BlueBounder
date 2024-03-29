@@ -19,7 +19,7 @@ function ProjectInformationView({ children, ...rest }) {
         .then(response => response.json())
         .then(([data, status]) => {
           if (status === 200) {
-            console.log(data);
+            // console.log(data);
             setCsvFilePath(data.csvFilePath);
             setCtfFilePath(data.ctfFilePath);
             setStepSize(data.grainStepSize);

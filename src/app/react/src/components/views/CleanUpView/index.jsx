@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import Frame from '../../../containers/Frame';
+import useSessionManager from '../../../hooks/useSessionManager';
 
 function CleanUpView({ children, ...rest }) {
   const [Area, setArea] = useState(0);
@@ -7,7 +8,7 @@ function CleanUpView({ children, ...rest }) {
   const [quantize, setQuantize] = useState(0);
   const [disableThreshold, setDisableThreshold] = useState(false);
   const [disableQuantize, setDisableQuantize] = useState(false);
-
+  
   const HandleAreaChange = (event) => {
     setArea(event.target.value);
   };

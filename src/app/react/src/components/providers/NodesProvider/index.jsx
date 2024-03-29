@@ -9,20 +9,20 @@ import { imageExists } from '../../../utils/nodes';
 function NodesProvider({ children }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
 
-  function createImageNode(image): ImageNodeType {
+  function createImageNode(image, imageType): ImageNodeType {
     const id = `imageNode_${getNextId(4)}`;
 
     let data;
     if (typeof image === 'undefined') {
       data = {
         label: id, width: 0, height: 0, viewport: null, image: {
-          width: 0, height: 0, src: '',
+          width: 0, height: 0, src: '',imageType: imageType,
         },
       };
     } else {
       data = {
         label: image.alt ?? id, width: image.width, height: image.height, viewport: null, image: {
-          width: image.width, height: image.height, src: image.src,
+          width: image.width, height: image.height, src: image.src, imageType: image.imageType,
         },
       };
     }
@@ -45,15 +45,18 @@ function NodesProvider({ children }) {
     }
 
     let filepath = pathOrFile;
+    let imageType;
     if (typeof filepath !== 'string') {
       filepath = pathOrFile.path;
+      imageType = pathOrFile.type;
     }
-
-    const node = await createImageNodeFromFilepath(filepath);
+    //console.log("Image Type: ", imageType)
+    
+    const node = await createImageNodeFromFilepath(filepath, imageType);
     // Set the reload callback
     node.data.reload = async () => {
       // Create a new image node
-      const reNode = await createImageNodeFromFilepath(node.data.file.path);
+      const reNode = await createImageNodeFromFilepath(node.data.file.path, node.data.file.type);
 
       setNodes((prev) => prev.map((nd) => {
         if (nd.id === node.id) {
@@ -82,15 +85,15 @@ function NodesProvider({ children }) {
     node.data.label = filePrefix;
   }
 
-  async function createImageNodeFromFilepath(filepath) {
+  async function createImageNodeFromFilepath(filepath, imageType) {
     const blob = await createBlobFromText(filepath);
     const altLabel = getFilenameFromPath(filepath);
-    return createImageNodeFromBlob(blob, altLabel);
+    return createImageNodeFromBlob(blob, altLabel, imageType);
   }
 
-  async function createImageNodeFromBlob(blob, altLabel) {
+  async function createImageNodeFromBlob(blob, altLabel, imageType) {
     const image = await createImageFromBlob(blob, altLabel);
-    return createImageNode(image);
+    return createImageNode(image, imageType);
   }
 
   const contextProps = {

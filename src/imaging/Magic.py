@@ -621,3 +621,11 @@ def add_to_EulerCache(image, Cache_path):
     shutil.copy(image, image_path)
 
     return
+
+def extract_DIR(DirPath):
+    for i in reversed(range(len(DirPath))):
+        if DirPath[i] == '/':
+            DirName= DirPath[i+1:]
+            break
+
+    return DirName

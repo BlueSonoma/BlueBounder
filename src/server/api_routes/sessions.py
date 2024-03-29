@@ -110,8 +110,18 @@ def api__getSessionImages():
         for file in os.listdir(dir):
             filepath = os.path.join(dir, file)
             if file.endswith(".png") or file.endswith('.jpg'):
-                print(file)
-                files.append(filepath)
+
+                DirName = extract_DIR(dir)
+                if(DirName == 'Euler_Images'):
+                    imageType = 'Euler'
+                if(DirName == 'Chemical_Images'):
+                   imageType = 'Chemical'
+                if(DirName == 'Bands'):
+                    imageType = 'Band'
+                
+
+                file_info = {"path": filepath, "type": imageType}
+                files.append(file_info)
             elif not os.path.isfile(filepath):
                 collect_images_rec(filepath)
 
@@ -177,3 +187,30 @@ def api__cleanChemImg():
         return jsonify("Image cleaned successfully", 200)
     except Exception as e:
         return jsonify(e, 500)
+
+
+
+# def getSessionImages(session_name):
+#     session_name = flask.request.args.get('sessionName')
+#     curr_dir = os.path.join(project_root_dir, 'Sessions')
+#     session_dir = os.path.join(curr_dir, session_name)
+
+#     files = []
+
+#     def collect_images_rec(dir):
+#         for file in os.listdir(dir):
+#             filepath = os.path.join(dir, file)
+#             if file.endswith(".png") or file.endswith('.jpg'):
+#                 print(f"File: {file} Directory: {dir}")
+#                 files.append(filepath)
+#             elif not os.path.isfile(filepath):
+#                 collect_images_rec(filepath)
+
+#     try:
+#         collect_images_rec(session_dir)
+#         return jsonify(files, 200)
+#     except Exception as e:
+#         return str(e), 500
+
+
+# getSessionImages('test-69') 
