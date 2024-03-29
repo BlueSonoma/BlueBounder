@@ -14,7 +14,7 @@ import time
 from skimage import io
 
 from src.imaging.segmentation.segmentation import segment_boundaries, BatchConfig
-from src.imaging.segmentation.utils import dir_map
+from src.shared.python.utils import dir_map
 
 # The file for which we will overlay the chemistry mask onto
 band_filename = 'band_image.png'

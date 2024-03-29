@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify
 from skimage import io
 
 from src.imaging.Magic import clean_chemistry
-from src.imaging.segmentation.utils import create_directory
+from src.shared.python.utils import create_directory
 
 api = Blueprint('imaging', __name__)
 
@@ -79,14 +79,14 @@ def api__exec_segmentation():
                                          mask_outline_color=mask_outline_color
                                          )
 
-        print(f'completed in {time.time() - start} seconds')
+        print(f'completed in {((time.time() - start) / 60) :.2f} minutes')
         path = os.path.join(output_path, output_filename + '.png')
 
         print('Saving resulting image...')
         io.imsave(path, segmented)
         print('ok')
-
         print('Done')
+
         return jsonify(path, 200)
     except Exception as e:
         print()
