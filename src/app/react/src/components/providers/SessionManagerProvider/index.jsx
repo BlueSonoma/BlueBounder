@@ -14,6 +14,7 @@ function SessionManagerProvider({ children }) {
   const [eulerCachePointer, setEulerCachePointer] = useState(null);
 
   const contextProps = {
+   
     sessionName,
     setSessionName,
     csvFilePath,

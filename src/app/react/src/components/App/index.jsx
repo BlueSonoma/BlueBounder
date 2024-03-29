@@ -50,6 +50,7 @@ function App() {
           if (Array.isArray(data)) {
             // Create a new ImageNode with the file paths we got from the back-end
             for (const file of data) {
+              //console.log("File: ", file);
               const node = await sessionManager.createDefaultImageNode(file);
               if (!node) {
                 continue;
