@@ -10,13 +10,12 @@ from scipy.ndimage import maximum_filter
 from skimage import color
 from skimage.filters.rank import modal
 from skimage.morphology import square
-import threading
-import itertools
-import time
 import json
 import math
 from datetime import datetime
 import shutil
+
+from src.shared.python.utils import create_directory, get_dir_path
 
 
 def get_band_con(file, bandsPath):
@@ -54,7 +53,7 @@ def get_band_con(file, bandsPath):
             y = int(line[1]) // 10  # line[1] is the x value
             x = int(line[2]) // 10  # line[2] is the y value
             band[x, y] = int(line[5])
-    imageio.imsave(bandsPath + 'band_contrast.png', band.astype('uint8'))
+    imageio.imsave(os.path.join(bandsPath, 'band_contrast.png'), band.astype('uint8'))
 
     return band
 
@@ -107,7 +106,7 @@ def get_phase_color(file, Euler_dir):
             else:
                 euler_phase[x, y, :] = [1.0, 1.0, 1.0, 0.0]
 
-        imageio.imwrite(Euler_dir + '/euler_phase.png', (euler_phase * 255).astype(np.uint8))
+        imageio.imwrite(os.path.join(Euler_dir, 'euler_phase.png'), (euler_phase * 255).astype(np.uint8))
 
 
 def get_chem(file, Chem_dir, max_chemicals, chemical):
@@ -157,17 +156,17 @@ def get_chem(file, Chem_dir, max_chemicals, chemical):
         chemical_img = chemical_img.astype(np.uint8)
 
         if chemical == 0:
-            imageio.imwrite(Chem_dir + '/AL_fromFile.png', chemical_img)
+            imageio.imwrite(os.path.join(Chem_dir, 'AL_fromFile.png'), chemical_img)
         if chemical == 1:
-            imageio.imwrite(Chem_dir + '/CA_fromFile.png', chemical_img)
+            imageio.imwrite(os.path.join(Chem_dir, 'CA_fromFile.png'), chemical_img)
         if chemical == 2:
-            imageio.imwrite(Chem_dir + '/NA_fromFile.png', chemical_img)
+            imageio.imwrite(os.path.join(Chem_dir, 'NA_fromFile.png'), chemical_img)
         if chemical == 3:
-            imageio.imwrite(Chem_dir + '/FE_fromFile.png', chemical_img)
+            imageio.imwrite(os.path.join(Chem_dir, 'FE_fromFile.png'), chemical_img)
         if chemical == 4:
-            imageio.imwrite(Chem_dir + '/SI_fromFile.png', chemical_img)
+            imageio.imwrite(os.path.join(Chem_dir, 'SI_fromFile.png'), chemical_img)
         if chemical == 5:
-            imageio.imwrite(Chem_dir + '/K_fromFile.png', chemical_img)
+            imageio.imwrite(os.path.join(Chem_dir, 'K_fromFile.png'), chemical_img)
 
     return
 
@@ -243,10 +242,9 @@ def my_modal_filter(image):
 
 
 def clean_Euler(image, quantization=16, red_area=100):
-    Cleaned_Euler_directory = 'Euler_images/cleaned/'
+    Cleaned_Euler_directory = os.path.join('Euler_images', 'cleaned')
     # Create the directory if it does not exist
-    if not os.path.exists(Cleaned_Euler_directory):
-        os.makedirs(Cleaned_Euler_directory)
+    create_directory(Cleaned_Euler_directory)
 
     euler_img = image
 
@@ -274,10 +272,9 @@ def clean_Euler(image, quantization=16, red_area=100):
 
 
 def clean_chemistry(current_session, imageLabel, Threshold=0.5, red_area=100):
-    Chemistry_directory_reduced = 'Chemical_images/reduced/'
+    Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
     # Create the directory if it does not exist
-    if not os.path.exists(Chemistry_directory_reduced):
-        os.makedirs(Chemistry_directory_reduced)
+    create_directory(Chemistry_directory_reduced)
 
     image = image / 255
     image[image < Threshold] = 0
@@ -399,15 +396,14 @@ def make_binary(img):
 
 
 def create_X():
-    if not os.path.exists('Chemical_Images/masks/'):
-        os.makedirs('Chemical_Images/masks/')
+    create_directory(os.path.join('Chemical_Images', 'masks'))
 
-    AL_img = io.imread('Chemical_Images/reduced/AL_img.png')
-    CA_img = io.imread('Chemical_Images/reduced/CA_img.png')
-    NA_img = io.imread('Chemical_Images/reduced/NA_img.png')
-    FE_img = io.imread('Chemical_Images/reduced/FE_img.png')
-    SI_img = io.imread('Chemical_Images/reduced/SI_img.png')
-    K_img = io.imread('Chemical_Images/reduced/K_img.png')
+    AL_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'AL_img.png'))
+    CA_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'CA_img.png'))
+    NA_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'NA_img.png'))
+    FE_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'FE_img.png'))
+    SI_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'SI_img.png'))
+    K_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'K_img.png'))
     # turn images to binary images
 
     AL_img = AL_img > 0
@@ -435,22 +431,22 @@ def create_X():
 
     # now save he xor_SI image
 
-    imageio.imsave('Chemical_Images/masks/xor_SI.png', xor_SI.astype('uint8') * 255)  # save image
+    imageio.imsave(os.path.join('Chemical_Images', 'masks', 'xor_SI.png'), xor_SI.astype('uint8') * 255)  # save image
 
 
 def create_A():
-    if not os.path.exists("Euler_Images/binary/"):
-        os.makedirs("Euler_Images/binary/")
+    create_directory(os.path.join('Euler_Image', 'binary'))
 
-    max_16_reduced = io.imread('Euler_Images/clean_Euler_fast.png')
+    max_16_reduced = io.imread(os.path.join('Euler_Images', 'clean_Euler_fast.png'))
     for x in range(max_16_reduced.shape[0]):
         for y in range(max_16_reduced.shape[1]):
             if max_16_reduced[x, y].all() == 240:
                 max_16_reduced[x, y] = 0
 
-    xor_SI = io.imread('Chemical_Images/masks/xor_SI.png')
+    xor_SI = io.imread(os.path.join('Chemical_Images', 'masks', 'xor_SI.png'))
     binary_SI = make_binary(xor_SI)
-    imageio.imsave('Euler_Images/binary/binary_SI.png', binary_SI.astype('uint8') * 255)  # save image
+    imageio.imsave(os.path.join('Euler_Images', 'binary', 'binary_SI.png'),
+                   binary_SI.astype('uint8') * 255)  # save image
 
     # save the binary image in a folder called Euler_Images/binary
 
@@ -465,7 +461,8 @@ def create_A():
     thresh = skimage.filters.threshold_otsu(gray)
     binary = gray < thresh
 
-    imageio.imsave('Euler_Images/binary/binary_euler.png', binary.astype('uint8') * 255)  # Save image
+    imageio.imsave(os.path.join('Euler_Images', 'binary', 'binary_euler.png'),
+                   binary.astype('uint8') * 255)  # Save image
 
     def AND_Euler_wth_SI(SI, img):
         for x in range(img.shape[0]):
@@ -480,7 +477,8 @@ def create_A():
     AND_Euler = AND_Euler_wth_SI(binary_SI, binary)
     # create a folder called Euler_Images/binary
 
-    imageio.imsave('Euler_Images/binary/AND_Euler.png', AND_Euler.astype('uint8') * 255)  # save image
+    imageio.imsave(os.path.join('Euler_Images', 'binary', 'AND_Euler.png'),
+                   AND_Euler.astype('uint8') * 255)  # save image
 
 
 def create_XA():
@@ -564,9 +562,9 @@ def create_folder_structure_dict(path):
     return result
 
 
-def create_folder_structure_json(SessionName):
+def create_folder_structure_json(sessionsName):
     try:
-        path = 'Sessions/' + SessionName
+        path = os.path.join(get_dir_path('sessions'), sessionsName)
         folder_dict = create_folder_structure_dict(path)
         folder_json_str = json.dumps(folder_dict, indent=4)
 
@@ -575,7 +573,7 @@ def create_folder_structure_json(SessionName):
 
 
 def create_session_JSON_and_return(cur_directory, sessionName, csvFilePath, ctfFilePath, grainStepSize=10):
-    sessionInfo_path = cur_directory + '/session.json'
+    sessionInfo_path = os.path.join(cur_directory, 'session.json')
     print(sessionInfo_path)
     session = {
         "sessionName": sessionName,
@@ -622,10 +620,16 @@ def add_to_EulerCache(image, Cache_path):
 
     return
 
+
 def extract_DIR(DirPath):
-    for i in reversed(range(len(DirPath))):
-        if DirPath[i] == '/':
-            DirName= DirPath[i+1:]
-            break
+    import re
+
+    # Find last '/' or '\\'
+    pattern = r"[/\\](?!.*[/\\])"
+    match = re.search(pattern, DirPath)
+
+    DirName = ''
+    if match:
+        DirName = DirPath[match.start() + 1:]
 
     return DirName

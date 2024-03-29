@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from skimage import io
 
 from src.imaging.segmentation.segmentation import segment_and_overlay_chemistry
-from src.imaging.segmentation.utils import dir_map
+from src.shared.python.utils import dir_map
 
 # The file for the band contrast image in which we will overlay the chemistry mask
 band_filename = 'band_image.png'

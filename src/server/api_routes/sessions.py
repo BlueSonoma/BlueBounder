@@ -1,11 +1,11 @@
-import os.path
+from os import path
 
 import flask
 from flask import Blueprint, jsonify
 from concurrent.futures import ThreadPoolExecutor
 
 from src.imaging.Magic import *
-from src.server.api_routes import project_root_dir
+from src.shared.python.utils import create_directory, get_dir_path
 
 api = Blueprint('sessions', __name__)
 
@@ -16,29 +16,23 @@ api = Blueprint('sessions', __name__)
 @api.route('/create_starter_images', methods=['POST'])
 def api__read_and_create():
     print("Creating starter images...")
-    session = flask.request.form['sessionName']
-    original_name = session
-    file = flask.request.form['csvFilePath']
-    Sessions = f'{project_root_dir}/Sessions/'
-    session = os.path.join(Sessions, session)
-    Euler_dir = os.path.join(session, '/Euler_Images')
-    Chem_dir = os.path.join(session, '/Chemical_Images')
-    bandsPath = os.path.join(session, '/Bands/')
+    session_name = flask.request.form['sessionName'].strip()
+    file = flask.request.form['csvFilePath'].strip()
+    sessions_path = get_dir_path('sessions')
+    sessions_path = os.path.join(sessions_path, session_name)
+    Euler_dir = os.path.join(sessions_path, 'Euler_Images')
+    Chem_dir = os.path.join(sessions_path, 'Chemical_Images')
+    bandsPath = os.path.join(sessions_path, 'Bands')
 
-    if not os.path.exists(Sessions):
-        os.makedirs(Sessions)
-    if not os.path.exists(session):
-        os.makedirs(session)
-    if not os.path.exists(Euler_dir):
-        os.makedirs(Euler_dir)
-    if not os.path.exists(Chem_dir):
-        os.makedirs(Chem_dir)
-    if not os.path.exists(bandsPath):
-        os.makedirs(bandsPath)
+    create_directory(sessions_path)
+    create_directory(sessions_path)
+    create_directory(Euler_dir)
+    create_directory(Chem_dir)
+    create_directory(bandsPath)
     print(f'File: {file}')
 
     try:
-
+        print('')
         max_chemicals = find_max_of_chem(file)
 
         with ThreadPoolExecutor() as executor:
@@ -51,8 +45,8 @@ def api__read_and_create():
             SI = executor.submit(get_chem, file, Chem_dir, max_chemicals, 4)
             K = executor.submit(get_chem, file, Chem_dir, max_chemicals, 5)
 
-        create_session_JSON_and_return(session, original_name, file, ' ')
-        create_folder_structure_json(original_name)
+        create_session_JSON_and_return(sessions_path, session_name, file, ' ')
+        create_folder_structure_json(session_name)
 
         return jsonify("Images created successfully", 200)
     except Exception as e:
@@ -63,8 +57,7 @@ def api__read_and_create():
 def api__getSessions():
     print("Getting sessions...")
     try:
-        Sessions = os.path.join(project_root_dir, 'Sessions')
-        session_list = os.listdir(Sessions)
+        session_list = os.listdir(get_dir_path('sessions'))
         session_json = [{"label": name} for name in session_list]
         return json.dumps(session_json), 200
     except Exception as e:
@@ -76,8 +69,7 @@ def api__getSessionJSON():
     try:
         session = flask.request.args.get('sessionName')
         print(f"Getting session info for {session}...")
-        cur_directory = os.path.join(project_root_dir, 'Sessions')
-        sessionJSON = os.path.join(cur_directory, session, 'session.json')
+        sessionJSON = os.path.join(get_dir_path('sessions'), session, 'session.json')
         _JSON = get_session_JSON(sessionJSON)
 
         return jsonify(_JSON, 200)
@@ -88,9 +80,8 @@ def api__getSessionJSON():
 @api.route('/get_session_Folder', methods=['GET'])
 def api__getSessionFolderJSON():
     try:
-        session = flask.request.args.get('sessionName')
-        cur_directory = os.path.join(project_root_dir, 'Sessions')
-        sessionJSON = os.path.join(cur_directory, session, 'session.json')
+        session_name = flask.request.args.get('sessionName')
+        sessionJSON = os.path.join(get_dir_path('sessions'), session_name, 'session.json')
         _JSON = create_folder_structure_json(sessionJSON)
 
         return jsonify(_JSON, 200)
@@ -101,28 +92,27 @@ def api__getSessionFolderJSON():
 @api.route('/get_session_images', methods=['GET'])
 def api__getSessionImages():
     session_name = flask.request.args.get('sessionName')
-    curr_dir = os.path.join(project_root_dir, 'Sessions')
-    session_dir = os.path.join(curr_dir, session_name)
+    session_dir = os.path.join(get_dir_path('sessions'), session_name)
 
     files = []
 
-    def collect_images_rec(dir):
-        for file in os.listdir(dir):
-            filepath = os.path.join(dir, file)
+    def collect_images_rec(_dir):
+        for file in os.listdir(_dir):
+            filepath = os.path.join(_dir, file)
             if file.endswith(".png") or file.endswith('.jpg'):
 
-                DirName = extract_DIR(dir)
-                if(DirName == 'Euler_Images'):
+                imageType = ''
+                DirName = extract_DIR(_dir)
+                if DirName == 'Euler_Images':
                     imageType = 'Euler'
-                if(DirName == 'Chemical_Images'):
-                   imageType = 'Chemical'
-                if(DirName == 'Bands'):
+                if DirName == 'Chemical_Images':
+                    imageType = 'Chemical'
+                if DirName == 'Bands':
                     imageType = 'Band'
-                
 
                 file_info = {"path": filepath, "type": imageType}
                 files.append(file_info)
-            elif not os.path.isfile(filepath):
+            elif not path.isfile(filepath):
                 collect_images_rec(filepath)
 
     try:
@@ -135,21 +125,17 @@ def api__getSessionImages():
 @api.route('/clean_Euler', methods=['GET'])
 def api__cleanEuler():
     session_name = flask.request.args.get('sessionName')
-    curr_dir = os.path.join(project_root_dir, 'Sessions')
-    session_dir = os.path.join(curr_dir, session_name)
+    session_dir = os.path.join(get_dir_path('sessions'), session_name)
 
     session_Cache = os.path.join(session_dir, 'Cache')
-    if not os.path.exists(session_Cache):
-        os.makedirs(session_Cache)
+    create_directory(session_Cache)
     session_EulerCache = os.path.join(session_Cache, 'Euler_Images')
-    if not os.path.exists(session_EulerCache):
-        os.makedirs(session_EulerCache)
+    create_directory(session_EulerCache)
     image_name = flask.request.args.get('imageName')
 
     image_Cache = os.path.join(session_EulerCache, image_name)
 
-    if not os.path.exists(image_Cache):
-        os.makedirs(image_Cache)
+    create_directory(image_Cache)
 
     area = flask.request.args.get('area')
     quant = flask.request.args.get('quant')
@@ -164,19 +150,15 @@ def api__cleanEuler():
 @api.route('/clean_Chemical_img', methods=['GET'])
 def api__cleanChemImg():
     session_name = flask.request.args.get('sessionName')
-    curr_dir = os.path.join(project_root_dir, 'Sessions')
-    session_dir = os.path.join(curr_dir, session_name)
+    session_dir = os.path.join(get_dir_path('sessions'), session_name)
     session_Cache = os.path.join(session_dir, 'Cache')
-    if not os.path.exists(session_Cache):
-        os.makedirs(session_Cache)
+    create_directory(session_Cache)
     Session_ChemCache = os.path.join(session_Cache, 'Chemical_Images')
-    if not os.path.exists(Session_ChemCache):
-        os.makedirs(Session_ChemCache)
+    create_directory(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
     image_Cache = os.path.join(Session_ChemCache, image_name)
-    if not os.path.exists(image_Cache):
-        os.makedirs(image_Cache)
+    create_directory(image_Cache)
 
     area = flask.request.args.get('area')
     thresh = flask.request.args.get('thresh')
@@ -187,30 +169,3 @@ def api__cleanChemImg():
         return jsonify("Image cleaned successfully", 200)
     except Exception as e:
         return jsonify(e, 500)
-
-
-
-# def getSessionImages(session_name):
-#     session_name = flask.request.args.get('sessionName')
-#     curr_dir = os.path.join(project_root_dir, 'Sessions')
-#     session_dir = os.path.join(curr_dir, session_name)
-
-#     files = []
-
-#     def collect_images_rec(dir):
-#         for file in os.listdir(dir):
-#             filepath = os.path.join(dir, file)
-#             if file.endswith(".png") or file.endswith('.jpg'):
-#                 print(f"File: {file} Directory: {dir}")
-#                 files.append(filepath)
-#             elif not os.path.isfile(filepath):
-#                 collect_images_rec(filepath)
-
-#     try:
-#         collect_images_rec(session_dir)
-#         return jsonify(files, 200)
-#     except Exception as e:
-#         return str(e), 500
-
-
-# getSessionImages('test-69') 
