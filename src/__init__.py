@@ -2,11 +2,6 @@
 import sys
 from os import path
 
-
-def init():
-    pass
-
-
 current_dir = path.dirname(path.abspath(__file__))
 project_root_dir = path.abspath(path.join(current_dir, '..'))
 sys.path.append(project_root_dir)
