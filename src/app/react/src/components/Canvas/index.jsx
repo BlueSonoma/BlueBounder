@@ -7,7 +7,9 @@ import '../../styles/bounder.css';
 
 function Canvas({ className, ...rest }) {
   const [currentIndex, setCurrentIndex] = useState(null);
-  const { viewports, setViewports, getViewportIndex, activeViewport, setActiveViewport } = useSessionManager();
+  const {
+    nodes, setNodes, viewports, setViewports, getViewportIndex, activeViewport, setActiveViewport,
+  } = useSessionManager();
 
   useEffect(() => {
     if (activeViewport) {
@@ -31,9 +33,23 @@ function Canvas({ className, ...rest }) {
       if (index < viewports.length) {
         const viewport = viewports[index];
         if (typeof viewport !== 'undefined') {
+          const viewportNodes = viewport.props.nodes;
+          viewportNodes.forEach((node) => {
+            const nd = nodes.find((nd) => nd.id === node.id);
+            if (typeof nd !== 'undefined') {
+              nd.data.viewport = null;
+            }
+          });
           setViewports((prev) => prev.filter((vp) => vp.id !== viewport.id));
           setActiveViewport(null);
           setCurrentIndex(null);
+
+          setNodes(() => nodes.map((node) => {
+            if (typeof viewportNodes.find((nd) => nd.id === node.id) !== 'undefined') {
+              return { ...node };
+            }
+            return node;
+          }));
         }
       }
     }

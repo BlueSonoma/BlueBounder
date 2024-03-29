@@ -8,7 +8,9 @@ import TreeImageNode from '../../nodes/tree-nodes/TreeImageNode';
 
 function ProjectStructureView() {
   const [data, setData] = useTreeState();
-  const { csvFilePath, ctfFilePath, nodes, setSelectedNodes, createAndAddViewport } = useSessionManager();
+  const {
+    csvFilePath, ctfFilePath, nodes, setSelectedNodes, createAndAddViewport, setActiveViewport,
+  } = useSessionManager();
 
   const nextData = [];
   const files = { id: '0', name: 'Files', children: [] };
@@ -42,10 +44,14 @@ function ProjectStructureView() {
 
   function onDoubleClickHandler(treeNodes) {
     const clickedNodes = [];
+    let viewportId = null;
     treeNodes.forEach((tn) => {
       for (let i = 0; i < nodes.length; i++) {
         const nd = nodes[i];
         if (nd.type === 'imageNode' && nd.id === tn.id) {
+          if (nd.data.viewport) {
+            viewportId = nd.data.viewport;
+          }
           clickedNodes.push(nd);
           break;
         }
@@ -56,10 +62,14 @@ function ProjectStructureView() {
       return;
     }
 
-    const newViewport: ViewportType = {
-      name: clickedNodes[0].data.file.prefix, nodes: clickedNodes, options: { setActive: true },
-    };
-    createAndAddViewport(newViewport);
+    if (viewportId) {
+      setActiveViewport(viewportId);
+    } else {
+      const newViewport: ViewportType = {
+        name: clickedNodes[0].data.file.prefix, nodes: clickedNodes, options: { setActive: true },
+      };
+      createAndAddViewport(newViewport);
+    }
 
     setSelectedNodes(clickedNodes);
   }
