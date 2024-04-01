@@ -3,6 +3,7 @@ import Frame from '../../../containers/Frame';
 import useNodesManager from '../../../hooks/useNodesManager';
 import useSessionManager from '../../../hooks/useSessionManager';
 import { API } from '../../../routes';
+import useAppState from '../../../hooks/useAppState';
 
 function CleanUpView({ children, ...rest }) {
   const [Area, setArea] = useState(0);
@@ -10,8 +11,12 @@ function CleanUpView({ children, ...rest }) {
   const [quantize, setQuantize] = useState(0);
   const [disableThreshold, setDisableThreshold] = useState(false);
   const [disableQuantize, setDisableQuantize] = useState(false);
-  const { selectedNodes } = useNodesManager();
+  const [disableAll, setDisableAll] = useState(false);
+
+  const { selectedNodes, addFilepathToNode } = useNodesManager();
   const { sessionName } = useSessionManager();
+  const { startLoadRequest, endLoadRequest } = useAppState();
+
   const Quantization = 2 ** quantize;
 
   // console.log('Session Name: ', sessionName);
@@ -34,7 +39,6 @@ function CleanUpView({ children, ...rest }) {
     }
   }, [selectedNodes]);
 
-
   console.log('Selected Nodes image type: ', selectedNodes[0].data.image.type);
 
   const HandleAreaChange = (event) => {
@@ -50,35 +54,50 @@ function CleanUpView({ children, ...rest }) {
   };
 
   const handleSubmission = () => {
-    const imageName = selectedNodes[0].data.file.name;
-    if (selectedNodes[0].data.image.type === 'Euler') {//image selected is Euler execute corresponding code
+    async function handleImageEditAndGetFilepath(node) {
+      async function fetchAndGetFilepath(fileName, imageType) {
+        let url;
+        if (imageType === 'Euler') {
+          url = `${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${fileName}&area=${Area}&quant=${Quantization}`;
+        } else if (imageType === 'Chemical') {
+          url = `${API.Sessions}/clean_Chemical_img?sessionName=${sessionName}&imageName=${fileName}&area=${Area}&thresh=${Threshold}`;
+        } else if (imageType === 'Band') {//image selected is Band execute corresponding code
+        } else {
+          throw new Error(`Error: Unknown image type "${imageType}"`);
+        }
 
-      // console.log('Image Name: ', imageName)
+        return await fetch(url, {
+          method: 'GET',
+        })
+          .then(response => response.json())
+          .then(data => data[0].path)
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
 
-      fetch(`${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${imageName}&area=${Area}&quant=${Quantization}`, {
-        method: 'GET',
-      })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-
-    } else if (selectedNodes[0].data.image.type === 'Band') {//image selected is Band execute corresponding code
-
-    } else if (selectedNodes[0].data.image.type === 'Chemical') {//image selected is Chemical execute corresponding code
-      fetch(`${API.Sessions}/clean_Chemical_img?sessionName=${sessionName}&imageName=${imageName}&area=${Area}&thresh=${Threshold}`, {
-        method: 'GET',
-      })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-
-    } else {
-      //throw error message for undefined type or unrecognized type
+      const filename = node.data.file.name;
+      const imageType = node.data.image.type;
+      return await fetchAndGetFilepath(filename, imageType);
     }
+
+    startLoadRequest();
+    setDisableAll(true);
+
+    const node = selectedNodes[0];
+    handleImageEditAndGetFilepath(node).then(async (filepath) => {
+      console.log(filepath);
+      const label = node.data.label;
+      addFilepathToNode(node, filepath);
+      node.data.label = label;
+      await node.data.reload();
+      endLoadRequest();
+      setDisableAll(false);
+    }).catch((e) => {
+      console.log(e);
+      endLoadRequest();
+      setDisableAll(false);
+    });
   };
 
 
@@ -86,14 +105,15 @@ function CleanUpView({ children, ...rest }) {
 
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <input type='range' min='0' max='1' step='.01' value={Threshold} onChange={HandleThresholdChange}
-             disabled={disableThreshold} />
+             disabled={disableThreshold || disableAll} />
       <p style={{ paddingBottom: '20px' }}>Threshold: {Threshold}</p>
-      <input type='range' min='0' max='8' value={quantize} onChange={HandleQuantizeChange} disabled={disableQuantize} />
+      <input type='range' min='0' max='8' value={quantize} onChange={HandleQuantizeChange}
+             disabled={disableQuantize || disableAll} />
       <p style={{ paddingBottom: '20px' }}>Quantization 2^input: {Quantization}</p>
-      <input type='range' min='0' max='300' value={Area} onChange={HandleAreaChange} />
+      <input type='range' min='0' max='300' value={Area} disabled={disableAll} onChange={HandleAreaChange} />
       <p>Reduce Area Under: {Area}</p>
 
-      <button onClick={handleSubmission}>Apply</button>
+      <button disabled={disableAll} onClick={handleSubmission}>Apply</button>
     </div>
   </Frame>);
 }
