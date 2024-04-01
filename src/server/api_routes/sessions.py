@@ -122,17 +122,18 @@ def api__getSessionImages():
         return str(e), 500
 
 
-@api.route('/clean_Euler', methods=['GET'])
+@api.route('/clean_Euler_img', methods=['GET'])
 def api__cleanEuler():
+    print("Cleaning Euler image...")
     session_name = flask.request.args.get('sessionName')
     session_dir = os.path.join(get_dir_path('sessions'), session_name)
-
     session_Cache = os.path.join(session_dir, 'Cache')
     create_directory(session_Cache)
-    session_EulerCache = os.path.join(session_Cache, 'Euler_Images')
+    session_EulerCache = os.path.join(session_Cache, 'Euler_Images/')
     create_directory(session_EulerCache)
     image_name = flask.request.args.get('imageName')
 
+    image= session_dir + '/Euler_Images/' + image_name
     image_Cache = os.path.join(session_EulerCache, image_name)
 
     create_directory(image_Cache)
@@ -140,8 +141,8 @@ def api__cleanEuler():
     area = flask.request.args.get('area')
     quant = flask.request.args.get('quant')
     try:
-        image = clean_Euler(red_area=area, quantization=quant)
-        add_to_EulerCache(image=image, Cache_path=image_Cache)
+        newImage = clean_Euler(image= image ,red_area=area, quant=quant)
+        add_to_EulerCache(image=newImage, Cache_path=image_Cache)
         return jsonify("Image cleaned successfully", 200)
     except Exception as e:
         return jsonify(e, 500)
@@ -153,19 +154,23 @@ def api__cleanChemImg():
     session_dir = os.path.join(get_dir_path('sessions'), session_name)
     session_Cache = os.path.join(session_dir, 'Cache')
     create_directory(session_Cache)
-    Session_ChemCache = os.path.join(session_Cache, 'Chemical_Images')
+    Session_ChemCache = os.path.join(session_Cache, 'Chemical_Images/')
     create_directory(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
     image_Cache = os.path.join(Session_ChemCache, image_name)
     create_directory(image_Cache)
 
+    image= session_dir + '/Chemical_Images/' + image_name
+
     area = flask.request.args.get('area')
     thresh = flask.request.args.get('thresh')
 
     try:
-        image = clean_chemistry(red_area=area, Threshold=thresh)
-        add_to_ChemCache(image=image, Cache_path=image_Cache)
+        newImage = clean_chemistry(image=image,red_area=area, Threshold=thresh)
+        add_to_ChemCache(image=newImage, Cache_path=image_Cache)
         return jsonify("Image cleaned successfully", 200)
     except Exception as e:
         return jsonify(e, 500)
+
+
