@@ -11,21 +11,21 @@ function CleanUpView({ children, ...rest }) {
   const [disableThreshold, setDisableThreshold] = useState(false);
   const [disableQuantize, setDisableQuantize] = useState(false);
   const { selectedNodes } = useNodesManager();
-  const { sessionName} = useSessionManager();
-  const Quantization = 2**quantize;
-  
+  const { sessionName } = useSessionManager();
+  const Quantization = 2 ** quantize;
+
   // console.log('Session Name: ', sessionName);
-console.log('Selected Nodes: ', selectedNodes);
+  console.log('Selected Nodes: ', selectedNodes);
   useEffect(() => {
     if (selectedNodes.length === 1) {
-      const imageType = selectedNodes[0].data.image.imageType;
-      if(imageType === 'Euler'){
+      const imageType = selectedNodes[0].data.image.type;
+      if (imageType === 'Euler') {
         setDisableThreshold(true);
         setDisableQuantize(false);
-      } else if(imageType === 'Band'){
+      } else if (imageType === 'Band') {
         setDisableThreshold(true);
         setDisableQuantize(true);
-      } else if(imageType === 'Chemical'){
+      } else if (imageType === 'Chemical') {
         setDisableQuantize(true);
         setDisableThreshold(false);
       } else {
@@ -34,8 +34,8 @@ console.log('Selected Nodes: ', selectedNodes);
     }
   }, [selectedNodes]);
 
- 
-  console.log('Selected Nodes image type: ', selectedNodes[0].data.image.imageType)
+
+  console.log('Selected Nodes image type: ', selectedNodes[0].data.image.type);
 
   const HandleAreaChange = (event) => {
     setArea(event.target.value);
@@ -50,36 +50,36 @@ console.log('Selected Nodes: ', selectedNodes);
   };
 
   const handleSubmission = () => {
-    const imageName = selectedNodes[0].data.file.name
-    if(selectedNodes[0].data.image.imageType === 'Euler'){//image selected is Euler execute corresponding code
-     
+    const imageName = selectedNodes[0].data.file.name;
+    if (selectedNodes[0].data.image.type === 'Euler') {//image selected is Euler execute corresponding code
+
       // console.log('Image Name: ', imageName)
 
       fetch(`${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${imageName}&area=${Area}&quant=${Quantization}`, {
         method: 'GET',
       })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-
-      }else if(selectedNodes[0].data.image.imageType === 'Band'){//image selected is Band execute corresponding code
-
-      }else if(selectedNodes[0].data.image.imageType === 'Chemical'){//image selected is Chemical execute corresponding code
-        fetch(`${API.Sessions}/clean_Chemical_img?sessionName=${sessionName}&imageName=${imageName}&area=${Area}&thresh=${Threshold}`, {
-          method: 'GET',
-        })
         .then(response => response.json())
         .then(data => console.log(data))
         .catch((error) => {
           console.error('Error:', error);
         });
 
-      }else {
-        //throw error message for undefined type or unrecognized type
-      }
+    } else if (selectedNodes[0].data.image.type === 'Band') {//image selected is Band execute corresponding code
+
+    } else if (selectedNodes[0].data.image.type === 'Chemical') {//image selected is Chemical execute corresponding code
+      fetch(`${API.Sessions}/clean_Chemical_img?sessionName=${sessionName}&imageName=${imageName}&area=${Area}&thresh=${Threshold}`, {
+        method: 'GET',
+      })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+
+    } else {
+      //throw error message for undefined type or unrecognized type
     }
+  };
 
 
   return (<Frame label={'Clean Up View'}>
@@ -93,7 +93,7 @@ console.log('Selected Nodes: ', selectedNodes);
       <input type='range' min='0' max='300' value={Area} onChange={HandleAreaChange} />
       <p>Reduce Area Under: {Area}</p>
 
-      <button onClick ={handleSubmission} >Apply</button>
+      <button onClick={handleSubmission}>Apply</button>
     </div>
   </Frame>);
 }

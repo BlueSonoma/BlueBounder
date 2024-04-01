@@ -35,5 +35,5 @@ export type FileProps = {
 }
 
 export type ImageProps = {
-  width?: number; height?: number; src: string; type?: string; imageType?: string;
+  width?: number; height?: number; src: string; type?: string;
 }
