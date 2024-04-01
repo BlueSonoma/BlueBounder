@@ -25,7 +25,6 @@ def api__read_and_create():
     bandsPath = os.path.join(sessions_path, 'Bands')
 
     create_directory(sessions_path)
-    create_directory(sessions_path)
     create_directory(Euler_dir)
     create_directory(Chem_dir)
     create_directory(bandsPath)
