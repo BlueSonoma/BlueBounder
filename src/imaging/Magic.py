@@ -253,7 +253,7 @@ def clean_Euler(image, quant=16, red_area=100):
 
     quant = int(quant)
     red_area = int(red_area)
-    euler_img = quantization(img = euler_img, L=quant)
+    euler_img = quantization(img=euler_img, L=quant)
 
     red_channel = my_max_neighbor_fast(euler_img, 0)
     green_channel = my_max_neighbor_fast(euler_img, 1)
@@ -272,9 +272,11 @@ def clean_Euler(image, quant=16, red_area=100):
     # imageio.imsave('Euler_Images/clean_Euler_fast.png', euler_img.astype('uint8'))
     return euler_img
 
+
 def getImage_withPath(imagePath):
     image = io.imread(imagePath)
     return image
+
 
 def clean_chemistry(image, Threshold=0.5, red_area=100):
     Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
@@ -288,11 +290,11 @@ def clean_chemistry(image, Threshold=0.5, red_area=100):
     image = image / 255
     image[image < Threshold] = 0
     image[image > Threshold] = 1
- 
+
     max_image = my_modal_filter(image)
     max_image = reduce_area(max_image, red_area)
     image = im.fromarray((image * 255).astype(np.uint8), mode="L")
-  
+
     return image
 
     # def SI():
@@ -610,24 +612,23 @@ def get_session_JSON(sessionJSON):
 
 def add_to_ChemCache(image, Cache_path):
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    #image_extension = os.path.splitext(image)[1]
+    # image_extension = os.path.splitext(image)[1]
     image_name = f'{timestamp}.png'
     image_path = os.path.join(Cache_path, image_name)
-    imageio.imsave(image_path, image) 
-    
+    imageio.imsave(image_path, image)
 
-    return
+    return image_path
 
 
 def add_to_EulerCache(image, Cache_path):
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    #image_extension = os.path.splitext(image)[1]
+    # image_extension = os.path.splitext(image)[1]
     image_name = f'{timestamp}.png'
     image_path = os.path.join(Cache_path, image_name)
-    
-    imageio.imsave(image_path, image.astype('uint8')) 
 
-    return
+    imageio.imsave(image_path, image.astype('uint8'))
+
+    return image_path
 
 
 def extract_DIR(DirPath):

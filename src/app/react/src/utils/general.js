@@ -22,9 +22,9 @@ export async function createBlobFromText(text) {
     .catch((e) => console.log(e));
 }
 
-export function createFileFromPath(path, type) {
+export function createFileFromPath(path) {
   const blob = createBlobFromText(path);
-  return new File([blob], getFilenameFromPath(path), { type });
+  return new File([blob], getFilenameFromPath(path));
 }
 
 export function createUrlFromPath(path) {

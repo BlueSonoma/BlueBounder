@@ -16,13 +16,13 @@ function NodesProvider({ children }) {
     if (typeof image === 'undefined') {
       data = {
         label: id, width: 0, height: 0, viewport: null, image: {
-          width: 0, height: 0, src: '',imageType: imageType,
+          width: 0, height: 0, src: '', type: imageType,
         },
       };
     } else {
       data = {
         label: image.alt ?? id, width: image.width, height: image.height, viewport: null, image: {
-          width: image.width, height: image.height, src: image.src, imageType: imageType,
+          width: image.width, height: image.height, src: image.src, type: imageType,
         },
       };
     }
@@ -52,7 +52,7 @@ function NodesProvider({ children }) {
       imageType = pathOrFile.type;
     }
     //console.log("Image Type: ", imageType)
-    
+
     const node = await createImageNodeFromFilepath(filepath, imageType);
     // Set the reload callback
     node.data.reload = async () => {
@@ -60,7 +60,7 @@ function NodesProvider({ children }) {
       const reNode = await createImageNodeFromFilepath(node.data.file.path, node.data.image.type);
 
       setNodes((prev) => prev.map((nd) => {
-        if (nd.id === node.id) {  
+        if (nd.id === node.id) {
           // Update and return a newly created node
           return {
             ...nd, data: {
