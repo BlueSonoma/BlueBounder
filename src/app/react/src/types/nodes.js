@@ -10,7 +10,7 @@ export type NodeType = Node & {
 }
 
 export type ImageNodeData = NodeBaseData & {
-  width?: number; height?: number; image: ImageProps; file?: FileProps; reload?: () => void;
+  width?: number; height?: number; image: ImageProps; imageType?: string; file?: FileProps; reload?: () => void; 
 };
 
 export type ImageNodeType = NodeBase & {

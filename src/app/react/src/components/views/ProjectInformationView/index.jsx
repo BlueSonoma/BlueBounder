@@ -33,7 +33,7 @@ function ProjectInformationView({ children, ...rest }) {
         });
     }
 
-    console.log(`This is the session name in ProjectInfo: ${sessionName}`);
+    //console.log(`This is the session name in ProjectInfo: ${sessionName}`);
   }, [sessionName, csvFilePath, ctfFilePath]);
 
 
