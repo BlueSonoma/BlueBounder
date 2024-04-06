@@ -10,7 +10,7 @@ project_root_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
 sys.path.append(project_root_dir)
 
 from src.server import create_app
-
+    
 main = create_app()
 CORS(main)
 

@@ -18,6 +18,8 @@ import shutil
 from src.shared.python.utils import create_directory, get_dir_path
 
 
+
+
 def get_band_con(file, bandsPath):
     with open(file, 'r') as file:
         # skip the first two lines because that's just the header
@@ -293,103 +295,9 @@ def clean_chemistry(image, Threshold=0.5, red_area=100):
 
     max_image = my_modal_filter(image)
     max_image = reduce_area(max_image, red_area)
-    image = im.fromarray((image * 255).astype(np.uint8), mode="L")
+    image = im.fromarray((max_image * 255).astype(np.uint8), mode="L")
 
     return image
-
-    # def SI():
-    #     SI_img = io.imread('Chemical_Images/SI_fromFile.png')
-
-    #     SI_img = SI_img / 255
-    #     SI_img[SI_img < 0.5] = 0
-    #     SI_img[SI_img > 0.5] = 1
-
-    #     SI_img = io.imread('Chemical_Images/SI_fromFile.png')
-    #     SI_img = SI_img / 255
-    #     SI_img[SI_img < 0.5] = 0
-    #     max_SI_img = my_modal_filter(SI_img)
-    #     max_SI_img = reduce_area(max_SI_img, 100)
-    #     SI_img = im.fromarray(max_SI_img.astype(np.uint8), mode="L")
-    #     SI_img.save(Chemistry_directory_reduced + "SI_img.png")
-    #     print("Done with SI")
-    #     return "SI"
-
-    # def AL():
-    #     AL_img = io.imread('Chemical_Images/AL_fromFile.png')
-
-    #     AL_img = AL_img / 255
-    #     AL_img[AL_img < 0.2] = 0
-    #     AL_img[AL_img > 0.2] = 1
-
-    #     max_AL_img = my_modal_filter(AL_img)
-    #     max_AL_img = reduce_area(max_AL_img, 100)
-    #     AL_img = im.fromarray(max_AL_img.astype(np.uint8), mode="L")
-    #     AL_img.save(Chemistry_directory_reduced + "AL_img.png")
-    #     print("Done with AL")
-    #     return "SI"
-
-    # def CA():
-    #     CA_img = io.imread('Chemical_Images/CA_fromFile.png')
-    #     CA_img = CA_img / 255
-    #     CA_img[CA_img < 0.2] = 0
-    #     CA_img[CA_img > 0.2] = 1
-
-    #     max_CA_img = my_modal_filter(CA_img)
-    #     max_CA_img = reduce_area(max_CA_img, 100)
-    #     CA_img = im.fromarray(max_CA_img.astype(np.uint8), mode="L")
-    #     CA_img.save(Chemistry_directory_reduced + "CA_img.png")
-    #     print("Done with CA")
-    #     return "SI"
-
-    # def FE():
-    #     FE_img = io.imread('Chemical_Images/FE_fromFile.png')
-    #     FE_img = FE_img / 255
-    #     FE_img[FE_img < 0.2] = 0
-    #     FE_img[FE_img > 0.2] = 1
-
-    #     max_FE_img = my_modal_filter(FE_img)
-    #     max_FE_img = reduce_area(max_FE_img, 100)
-    #     FE_img = im.fromarray(max_FE_img.astype(np.uint8), mode="L")
-    #     FE_img.save(Chemistry_directory_reduced + "FE_img.png")
-    #     print("Done with FE")
-    #     return "FE"
-
-    # def K():
-    #     K_img = io.imread('Chemical_Images/K_fromFile.png')
-    #     K_img = K_img / 255
-
-    #     K_img[K_img < 0.2] = 0
-    #     K_img[K_img > 0.2] = 1
-
-    #     max_K_img = my_modal_filter(K_img)
-    #     max_K_img = reduce_area(max_K_img, 100)
-    #     K_img = im.fromarray(max_K_img.astype(np.uint8), mode="L")
-    #     K_img.save(Chemistry_directory_reduced + "K_img.png")
-    #     print("Done with K")
-    #     return "K"
-
-    # def NA():
-    #     NA_img = io.imread('Chemical_Images/NA_fromFile.png')
-    #     NA_img = NA_img / 255
-
-    #     NA_img[NA_img < 0.2] = 0
-    #     NA_img[NA_img > 0.2] = 1
-
-    #     max_NA_img = my_modal_filter(NA_img)
-    #     max_NA_img = reduce_area(max_NA_img, 100)
-    #     NA_img = im.fromarray(max_NA_img.astype(np.uint8), mode="L")
-    #     NA_img.save(Chemistry_directory_reduced + "NA_img.png")
-    #     print("Done with NA")
-    #     return "NA"
-
-    # switch = {
-    #     0: SI,
-    #     1: AL,
-    #     2: CA,
-    #     3: FE,
-    #     4: K,
-    #     5: NA
-    # }
 
 
 def make_binary(img):
@@ -406,23 +314,45 @@ def make_binary(img):
     return binary_img
 
 
-def create_X():
-    create_directory(os.path.join('Chemical_Images', 'masks'))
+def create_XOR_default(Chem_dir):
 
-    AL_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'AL_img.png'))
-    CA_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'CA_img.png'))
-    NA_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'NA_img.png'))
-    FE_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'FE_img.png'))
-    SI_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'SI_img.png'))
-    K_img = io.imread(os.path.join('Chemical_Images', 'reduced', 'K_img.png'))
+    create_directory(os.path.join(Chem_dir, 'masks'))
+    AL = os.path.join(Chem_dir, 'AL_fromFile.png')
+    CA = os.path.join(Chem_dir, 'CA_fromFile.png')
+    NA = os.path.join(Chem_dir, 'NA_fromFile.png')
+    FE = os.path.join(Chem_dir, 'FE_fromFile.png')
+    SI = os.path.join(Chem_dir, 'SI_fromFile.png')
+    K = os.path.join(Chem_dir, 'K_fromFile.png')
+
+    AL = clean_chemistry(image = AL, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_AL.png'), AL)  # save image
+    CA = clean_chemistry(image =CA, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_CA.png'), CA)  # save image
+    NA = clean_chemistry(image =NA, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_NA.png'), NA)  # save image
+    FE = clean_chemistry(image =FE, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_FE.png'), FE)  # save image
+    SI = clean_chemistry(image =SI)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_SI.png'), SI)  # save image
+    K = clean_chemistry(image =K, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_K.png'), K)  # save image
+
     # turn images to binary images
+    AL = np.array(AL)
+    CA = np.array(CA)
+    NA = np.array(NA)
+    FE = np.array(FE)
+    SI = np.array(SI)
+    K = np.array(K)
 
-    AL_img = AL_img > 0
-    CA_img = CA_img > 0
-    NA_img = NA_img > 0
-    FE_img = FE_img > 0
-    SI_img = SI_img > 0
-    K_img = K_img > 0
+    AL = AL > 0
+    CA = CA > 0
+    NA = NA > 0
+    FE = FE > 0
+    SI = SI > 0
+    K = K > 0
+
+
 
     # now the final image will be the result of XOR'ing all the binary images together
 
@@ -434,29 +364,29 @@ def create_X():
 
         return SI
 
-    xor_SI = xor_image_with_SI(SI_img, AL_img)
-    xor_SI = xor_image_with_SI(xor_SI, CA_img)
-    xor_SI = xor_image_with_SI(xor_SI, NA_img)
-    xor_SI = xor_image_with_SI(xor_SI, FE_img)
-    xor_SI = xor_image_with_SI(xor_SI, K_img)
+    xor_SI = xor_image_with_SI(SI, AL)
+    xor_SI = xor_image_with_SI(xor_SI, CA)
+    xor_SI = xor_image_with_SI(xor_SI, NA)
+    xor_SI = xor_image_with_SI(xor_SI, FE)
+    xor_SI = xor_image_with_SI(xor_SI, K)
 
     # now save he xor_SI image
+    
+    imageio.imsave(os.path.join(Chem_dir,'masks', 'xor_SI.png'), xor_SI.astype('uint8') * 255)  # save image
 
-    imageio.imsave(os.path.join('Chemical_Images', 'masks', 'xor_SI.png'), xor_SI.astype('uint8') * 255)  # save image
 
-
-def create_A():
+def create_AND_default(Euler_directory, Chem_directory):
     create_directory(os.path.join('Euler_Image', 'binary'))
 
-    max_16_reduced = io.imread(os.path.join('Euler_Images', 'clean_Euler_fast.png'))
+    max_16_reduced = clean_Euler(image=os.path.join(Euler_directory, 'euler_phase.png'))
     for x in range(max_16_reduced.shape[0]):
         for y in range(max_16_reduced.shape[1]):
             if max_16_reduced[x, y].all() == 240:
                 max_16_reduced[x, y] = 0
 
-    xor_SI = io.imread(os.path.join('Chemical_Images', 'masks', 'xor_SI.png'))
+    xor_SI = io.imread(os.path.join(Chem_directory, 'masks', 'xor_SI.png'))
     binary_SI = make_binary(xor_SI)
-    imageio.imsave(os.path.join('Euler_Images', 'binary', 'binary_SI.png'),
+    imageio.imsave(os.path.join(Chem_directory, 'binary_SI.png'),
                    binary_SI.astype('uint8') * 255)  # save image
 
     # save the binary image in a folder called Euler_Images/binary
@@ -472,7 +402,7 @@ def create_A():
     thresh = skimage.filters.threshold_otsu(gray)
     binary = gray < thresh
 
-    imageio.imsave(os.path.join('Euler_Images', 'binary', 'binary_euler.png'),
+    imageio.imsave(os.path.join(Euler_directory, 'binary_euler.png'),
                    binary.astype('uint8') * 255)  # Save image
 
     def AND_Euler_wth_SI(SI, img):
@@ -488,7 +418,7 @@ def create_A():
     AND_Euler = AND_Euler_wth_SI(binary_SI, binary)
     # create a folder called Euler_Images/binary
 
-    imageio.imsave(os.path.join('Euler_Images', 'binary', 'AND_Euler.png'),
+    imageio.imsave(os.path.join(Euler_directory, 'AND_Euler.png'),
                    AND_Euler.astype('uint8') * 255)  # save image
 
 
@@ -643,3 +573,5 @@ def extract_DIR(DirPath):
         DirName = DirPath[match.start() + 1:]
 
     return DirName
+
+
