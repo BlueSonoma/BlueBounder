@@ -44,6 +44,9 @@ def api__read_and_create():
             SI = executor.submit(get_chem, file, Chem_dir, max_chemicals, 4)
             K = executor.submit(get_chem, file, Chem_dir, max_chemicals, 5)
 
+        create_XOR_default(Chem_dir)
+        create_AND_default(Euler_directory=Euler_dir, Chem_directory=Chem_dir)
+
         create_session_JSON_and_return(sessions_path, session_name, file, ' ')
         create_folder_structure_json(session_name)
 
