@@ -12,7 +12,6 @@ function getInitialState({ id, name, children }: TreeState) {
 
 function useTreeState(initialState: TreeState) {
   const [root, setRoot] = useState(getInitialState(initialState ?? {}));
-
   return [root, setRoot];
 }
 
