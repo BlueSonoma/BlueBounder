@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify
 from concurrent.futures import ThreadPoolExecutor
 
 from src.imaging.Magic import *
-from src.shared.python.utils import create_directory, get_dir_path
+from src.shared.python.utils import create_directory, get_dir_path, remove_file_ext
 
 api = Blueprint('sessions', __name__)
 
@@ -96,15 +96,20 @@ def api__getSessionImages():
     DIR_NAMES_TYPES = {
         'Euler_Images': 'Euler',
         'Chemical_Images': 'Chemical',
-        'Bands': 'Band'
+        'Bands': 'Band',
+        'Cache': None
     }
 
-    def collect_images_rec(dir_name, dir_path):
+    def collect_images_rec(dir_name, dir_path, cached=False, cache_dir=None):
         for file in os.listdir(dir_path):
             filepath = os.path.join(dir_path, file)
             if not path.isfile(filepath):
+                # if file this is an accepted dir
                 if file in DIR_NAMES_TYPES.keys():
-                    collect_images_rec(file, filepath)
+                    collect_images_rec(file, filepath, cached)
+                # if this dir is an accepted dir (i.e. this file is child of the Cache/ dir)
+                elif dir_name in DIR_NAMES_TYPES.keys():
+                    collect_images_rec(dir_name, filepath, True, file)
                 continue
             imageType = None
             for _name, _type in DIR_NAMES_TYPES.items():
@@ -113,8 +118,15 @@ def api__getSessionImages():
             if imageType is None:
                 continue
             if file.endswith(".png") or file.endswith('.jpg'):
-                file_info = {"path": filepath, "type": imageType}
+                file_info = {
+                    "name": file,
+                    "path": filepath,
+                    "type": imageType,
+                    "cached": cached,
+                    "dir": dir_name if not cached else cache_dir
+                }
                 files.append(file_info)
+                print(file_info)
 
     session_name = flask.request.args.get('sessionName')
     session_dir = os.path.join(get_dir_path('sessions'), session_name)
@@ -134,12 +146,12 @@ def api__cleanEuler():
     session_dir = os.path.join(get_dir_path('sessions'), session_name)
     session_Cache = os.path.join(session_dir, 'Cache')
     create_directory(session_Cache)
-    session_EulerCache = os.path.join(session_Cache, 'Euler_Images/')
+    session_EulerCache = os.path.join(session_Cache, 'Euler_Images')
     create_directory(session_EulerCache)
     image_name = flask.request.args.get('imageName')
 
     image = os.path.join(session_dir, 'Euler_Images', image_name)
-    image_Cache = os.path.join(session_EulerCache, image_name)
+    image_Cache = os.path.join(session_EulerCache, remove_file_ext(image_name))
 
     create_directory(image_Cache)
 
@@ -147,9 +159,16 @@ def api__cleanEuler():
     quant = flask.request.args.get('quant')
     try:
         newImage = clean_Euler(image=image, red_area=area, quant=quant)
-        image_path = add_to_EulerCache(image=newImage, Cache_path=image_Cache)
+        image_name, image_path = add_to_EulerCache(image=newImage, Cache_path=image_Cache)
         print(image_path)
-        return jsonify({'path': image_path}, 200)
+        return jsonify({
+            "name": image_name,
+            "path": image_path,
+            "dir": remove_file_ext(image_name),
+            "type": "Euler",
+            "cached": True},
+            200)
+
     except Exception as e:
         return jsonify(e, 500)
 
@@ -164,7 +183,7 @@ def api__cleanChemImg():
     create_directory(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
-    image_Cache = os.path.join(Session_ChemCache, image_name)
+    image_Cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
     create_directory(image_Cache)
 
     image = os.path.join(session_dir, 'Chemical_Images', image_name)
@@ -174,7 +193,13 @@ def api__cleanChemImg():
 
     try:
         newImage = clean_chemistry(image=image, red_area=area, Threshold=thresh)
-        image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
-        return jsonify({'path': image_path}, 200)
+        image_name, image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
+        return jsonify({
+            "name": image_name,
+            "path": image_path,
+            "dir": remove_file_ext(image_name),
+            "type": "Chemical",
+            "cached": True},
+            200)
     except Exception as e:
         return jsonify(e, 500)
