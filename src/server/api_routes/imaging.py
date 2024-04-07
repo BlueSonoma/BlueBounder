@@ -26,24 +26,42 @@ def api__exec_segmentation():
 
     print('Preparing arguments...')
     band_contrast_path = flask.request.form['bandContrastPath']
+    print(f'\tBand contrast path: {band_contrast_path}')
     mask_path = flask.request.form['maskPath']
+    print(f'\tMask path: {mask_path}')
     border_color = flask.request.form['borderColor']
+    print(f'\tBorder color: {border_color}')
     overlay_opacity = flask.request.form['overlayOpacity']
+    print(f'\tOverlay opacity: {overlay_opacity}')
     bc_scale = flask.request.form['bandContrastScale']
+    print(f'\tBand contrast scale: {bc_scale}')
     bc_sigma = flask.request.form['bandContrastSigma']
+    print(f'\tBand contrast sigma: {bc_sigma}')
     bc_min_size = flask.request.form['bandContrastMinSize']
+    print(f'\tBand contrast min size: {bc_min_size}')
     bc_outline_color = flask.request.form['bandContrastOutlineColor']
+    print(f'\tBand contrast outline color: {bc_outline_color}')
     mask_scale = flask.request.form['maskScale']
+    print(f'\tMask scale: {mask_scale}')
     mask_sigma = flask.request.form['maskSigma']
+    print(f'\tMask sigma: {mask_sigma}')
     mask_min_size = flask.request.form['maskMinSize']
+    print(f'\tMask min size: {mask_min_size}')
     mask_outline_color = flask.request.form['maskOutlineColor']
+    print(f'\tMask outline color: {mask_outline_color}')
     label_regions = flask.request.form['labelRegions']
+    print(f'\tLabel regions: {label_regions}')
     uniform_label = flask.request.form['uniformLabel']
+    print(f'\tUniform label: {uniform_label}')
     label_color = flask.request.form['labelColor']
+    print(f'\tLabel color: {label_color}')
     label_opacity = flask.request.form['labelOpacity']
+    print(f'\tLabel opacity: {label_opacity}')
 
     output_path = flask.request.form['outputPath']
+    print(f'\tOutput path: {output_path}')
     output_filename = flask.request.form['outputFilename']
+    print(f'\tOutput filename: {output_filename}')
 
     print('ok')
 
