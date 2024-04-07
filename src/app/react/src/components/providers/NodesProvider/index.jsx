@@ -5,28 +5,37 @@ import {
   createBlobFromText, createImageFromBlob, getFileExtFromPath, getFilenameFromPath, getNextId,
 } from '../../../utils/general';
 import { imageExists } from '../../../utils/nodes';
+import { createThumbnailFromImage } from '../../../utils/image';
+
+type createImageNodeFromFilepathParams = {
+  path: string; name: string; type: string; cached?: boolean; dir?: string;
+}
 
 function NodesProvider({ children }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
 
-  function createImageNode(image, imageType): ImageNodeType {
+  async function createImageNode(image, params: { type: string, cached: boolean, name?: string }): ImageNodeType {
     const id = `imageNode_${getNextId(4)}`;
-    // console.log("Image Type: ", imageType)
+    const { name, ...rest } = params;
     let data;
-    if (typeof image === 'undefined') {
+
+    const hasImage = typeof image !== 'undefined';
+    if (hasImage) {
+      const thumbnail = createThumbnailFromImage(image, 25, 25);
       data = {
-        label: id, width: 0, height: 0, viewport: null, image: {
-          width: 0, height: 0, src: '', type: imageType,
+        label: image.alt ?? id, width: image.width, height: image.height, viewport: null, image: {
+          width: image.width, height: image.height, src: image.src, cached: rest.cached, type: rest.type, thumbnail: {
+            src: thumbnail.src, alt: thumbnail.alt, width: thumbnail.width, height: thumbnail.height,
+          },
         },
       };
     } else {
       data = {
-        label: image.alt ?? id, width: image.width, height: image.height, viewport: null, image: {
-          width: image.width, height: image.height, src: image.src, type: imageType,
+        label: id, width: 0, height: 0, viewport: null, image: {
+          width: 0, height: 0, src: '', cached: false, ...rest,
         },
       };
     }
-
 
     return {
       id: id,
@@ -36,6 +45,7 @@ function NodesProvider({ children }) {
       focusable: true,
       draggable: false,
       deletable: false,
+      parent: rest.cached ? name : null,
       data,
     };
   }
@@ -45,25 +55,33 @@ function NodesProvider({ children }) {
       throw new Error(`Missing required arguments: Expected File or filepath.`);
     }
 
-    let filepath = pathOrFile;
-    let imageType;
-    if (typeof filepath !== 'string') {
-      filepath = pathOrFile.path;
-      imageType = pathOrFile.type;
-    }
+    const isString = typeof pathOrFile === 'string';
+    const params: createImageNodeFromFilepathParams = {
+      path: isString ? pathOrFile : pathOrFile.path,
+      name: isString ? null : pathOrFile.name,
+      dir: isString ? null : pathOrFile.dir,
+      type: isString ? null : pathOrFile.type,
+      cached: isString ? null : pathOrFile.cached,
+    };
     //console.log("Image Type: ", imageType)
 
-    const node = await createImageNodeFromFilepath(filepath, imageType);
+    const node = await createImageNodeFromFilepath(params);
     // Set the reload callback
     node.data.reload = async () => {
       // Create a new image node
-      const reNode = await createImageNodeFromFilepath(node.data.file.path, node.data.image.type);
+      const reNode = await createImageNodeFromFilepath({
+        name: node.data.file.name,
+        path: node.data.file.path,
+        dir: node.data.file.dir,
+        type: node.data.image.type,
+        cached: node.data.image.cached,
+      });
 
       setNodes((prev) => prev.map((nd) => {
         if (nd.id === node.id) {
           // Update and return a newly created node
           return {
-            ...nd, data: {
+            ...node, data: {
               width: reNode.width, height: reNode.height, ...node.data, image: reNode.data.image,
             },
           };
@@ -71,30 +89,30 @@ function NodesProvider({ children }) {
         return nd;
       }));
     };
-    addFilepathToNode(node, filepath);
+    addFilepathToNode(node, { path: params.path, dir: params.dir });
 
     return node;
   }
 
-  function addFilepathToNode(node, filepath) {
-    const filePrefix = getFilenameFromPath(filepath, true);
-    const fileExt = getFileExtFromPath(filepath);
+  function addFilepathToNode(node, params: { path: string, dir?: string, }) {
+    const filePrefix = getFilenameFromPath(params.path, true);
+    const fileExt = getFileExtFromPath(params.path);
     const filename = filePrefix + '.' + fileExt;
     node.data.file = {
-      prefix: filePrefix, name: filename, path: filepath, extension: fileExt,
+      prefix: filePrefix, name: filename, extension: fileExt, ...params,
     };
     node.data.label = filePrefix;
   }
 
-  async function createImageNodeFromFilepath(filepath, imageType) {
-    const blob = await createBlobFromText(filepath);
-    const altLabel = getFilenameFromPath(filepath);
-    return createImageNodeFromBlob(blob, altLabel, imageType);
+  async function createImageNodeFromFilepath({ path, ...rest }: createImageNodeFromFilepathParams) {
+    const blob = await createBlobFromText(path);
+    const altLabel = getFilenameFromPath(path);
+    return await createImageNodeFromBlob(blob, altLabel, rest);
   }
 
-  async function createImageNodeFromBlob(blob, altLabel, imageType) {
+  async function createImageNodeFromBlob(blob, altLabel, params: { type: string, cached: boolean }) {
     const image = await createImageFromBlob(blob, altLabel);
-    return createImageNode(image, imageType);
+    return createImageNode(image, params);
   }
 
   const contextProps = {

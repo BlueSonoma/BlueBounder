@@ -4,6 +4,7 @@ import useNodesManager from '../../../hooks/useNodesManager';
 import useSessionManager from '../../../hooks/useSessionManager';
 import { API } from '../../../routes';
 import useAppState from '../../../hooks/useAppState';
+import useViewportsManager from '../../../hooks/useViewportsManager';
 
 function CleanUpView({ children, ...rest }) {
   const [Area, setArea] = useState(0);
@@ -13,23 +14,25 @@ function CleanUpView({ children, ...rest }) {
   const [disableQuantize, setDisableQuantize] = useState(false);
   const [disableAll, setDisableAll] = useState(false);
 
-  const { selectedNodes, addFilepathToNode } = useNodesManager();
+  const nodesManager = useNodesManager();
+  const viewportManager = useViewportsManager();
   const { sessionName } = useSessionManager();
   const { startLoadRequest, endLoadRequest } = useAppState();
 
   const Quantization = 2 ** quantize;
 
-  // console.log('Session Name: ', sessionName);
-  console.log('Selected Nodes: ', selectedNodes);
   useEffect(() => {
-    if (selectedNodes.length === 1) {
-      const imageType = selectedNodes[0].data.image.type;
+    if (nodesManager.selectedNodes.length > 0) {
+      // Safety: Unset disableAll in case it is currently set.
+      // If this gets set again within this function, this will be overwritten.
+      setDisableAll(false);
+      const imageType = nodesManager.selectedNodes[0].data.image.type;
       if (imageType === 'Euler') {
         setDisableThreshold(true);
         setDisableQuantize(false);
       } else if (imageType === 'Band') {
-        setDisableThreshold(true);
-        setDisableQuantize(true);
+        setDisableAll(true);
+
       } else if (imageType === 'Chemical') {
         setDisableQuantize(true);
         setDisableThreshold(false);
@@ -37,9 +40,7 @@ function CleanUpView({ children, ...rest }) {
         // Throw error message for undefined type or unrecognized type
       }
     }
-  }, [selectedNodes]);
-
-  console.log('Selected Nodes image type: ', selectedNodes[0].data.image.type);
+  }, [nodesManager.selectedNodes]);
 
   const HandleAreaChange = (event) => {
     setArea(event.target.value);
@@ -54,7 +55,7 @@ function CleanUpView({ children, ...rest }) {
   };
 
   const handleSubmission = () => {
-    async function handleImageEditAndGetFilepath(node) {
+    async function handleImageEditAndGetData(node) {
       async function fetchAndGetFilepath(fileName, imageType) {
         let url;
         if (imageType === 'Euler') {
@@ -70,13 +71,13 @@ function CleanUpView({ children, ...rest }) {
           method: 'GET',
         })
           .then(response => response.json())
-          .then(data => data[0].path)
+          .then(data => data[0])
           .catch((error) => {
             console.error('Error:', error);
           });
       }
 
-      const filename = node.data.file.name;
+      let filename = node.data.file.name;
       const imageType = node.data.image.type;
       return await fetchAndGetFilepath(filename, imageType);
     }
@@ -84,13 +85,30 @@ function CleanUpView({ children, ...rest }) {
     startLoadRequest();
     setDisableAll(true);
 
-    const node = selectedNodes[0];
-    handleImageEditAndGetFilepath(node).then(async (filepath) => {
-      console.log(filepath);
-      const label = node.data.label;
-      addFilepathToNode(node, filepath);
-      node.data.label = label;
-      await node.data.reload();
+    const node = nodesManager.selectedNodes[0];
+    handleImageEditAndGetData(node).then(async (data) => {
+      console.log(data);
+      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
+      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
+
+      newNode.data.viewport = node.data.viewport;
+      if (!newNode.data.viewport) {
+        const viewport = viewportManager.createAndAddViewport({
+          label: newNode.data.label, options: { setActive: true },
+        });
+        newNode.data.viewport = viewport.id;
+      }
+      newNode.data.image.cached = true;
+      newNode.selected = true;
+      nodesManager.setNodes((prev) => [...prev.map((nd) => {
+        if (nd.id === node.id) {
+          return {
+            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
+          };
+        }
+        return nd;
+      }), newNode]);
+
       endLoadRequest();
       setDisableAll(false);
     }).catch((e) => {
@@ -100,9 +118,7 @@ function CleanUpView({ children, ...rest }) {
     });
   };
 
-
   return (<Frame label={'Clean Up View'}>
-
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <input type='range' min='0' max='1' step='.01' value={Threshold} onChange={HandleThresholdChange}
              disabled={disableThreshold || disableAll} />

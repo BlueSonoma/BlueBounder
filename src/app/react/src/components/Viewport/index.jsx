@@ -7,24 +7,57 @@ import useViewport from '../../hooks/useViewport';
 import ViewportMetricsBar from '../ViewportMetricsBar';
 
 import ViewportProvider from '../providers/ViewportProvider';
-import useSessionManager from '../../hooks/useSessionManager';
 
 import '../../styles/canvas-viewport.css';
+import useNodesManager from '../../hooks/useNodesManager';
+import useViewportsManager from '../../hooks/useViewportsManager';
 
 function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest }) {
-  const { onNodesChange } = useSessionManager();
+  const [nodeSize, setNodeSize] = useState(0);
+  const [lastNodeSize, setLastNodeSize] = useState(0);
   const [initialized, setInitialized] = useState(false);
   const {
     setViewport, minZoom, setMinZoom, maxZoom, zoom, setViewportExtent, getViewportExtent, fitView,
   } = useViewport(id);
+  const { setActiveViewport } = useViewportsManager();
+  const { setSelectedNodes, onNodesChange } = useNodesManager();
+
+  function fitViewOnLoad() {
+    fitView({ nodes, options: { duration: 400 } });
+  }
 
   useEffect(() => {
-    fitView({ nodes: nodes, options: { duration: 400 } });
+    fitViewOnLoad();
   }, [initialized]);
 
+  useEffect(() => {
+    if (lastNodeSize === 0 && nodeSize > 0) {
+      onInit();
+      fitViewOnLoad();
+    }
+  }, [lastNodeSize, nodeSize]);
+
+  useEffect(() => {
+    const size = nodes.length;
+    if (size !== nodeSize) {
+      setLastNodeSize(nodeSize);
+      setNodeSize(size);
+    }
+  }, [nodes]);
+
   function onInit() {
-    if (nodes.length > 0) {
-      const node = nodes[0];
+    if (nodeSize > 0) {
+      const node = nodes[nodes.length - 1];
+      let isSelected = false;
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes.selected) {
+          isSelected = true;
+          break;
+        }
+      }
+      if (!isSelected) {
+        setSelectedNodes(node);
+      }
 
       const width = node.data.width;
       const height = node.data.height;
@@ -45,8 +78,25 @@ function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest 
         nodes: nodes, edges: [], zoom: 1,
       });
     }
-
     setInitialized(true);
+  }
+
+  function onClickHandler() {
+    // If there is a node within the viewport, make sure that there is a selected node
+    if (nodes.length > 0) {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].selected) {
+          return;
+        }
+      }
+      setSelectedNodes(nodes[nodes.length - 1]);
+    }
+  }
+
+  function onNodeClickHandler(event, node) {
+    event.preventDefault();
+    setSelectedNodes(node);
+    setActiveViewport(id);
   }
 
   const backgroundLineWidth = useMemo(() => {
@@ -62,6 +112,8 @@ function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest 
       nodes={nodes}
       nodeTypes={nodeTypes}
       nodesDraggable={false}
+      onPaneClick={onClickHandler}
+      onNodeClick={onNodeClickHandler}
       onNodesChange={onNodesChange}
       maxZoom={maxZoom}
       minZoom={minZoom}
@@ -78,7 +130,7 @@ function ViewportFlow({ id, className, style, onClick, children, nodes, ...rest 
     </ReactFlow>
     <ViewportMetricsBar
       className={'bounder__mode-selector'}
-      onFitView={() => fitView({ nodes: nodes })}
+      onFitView={() => fitView({ nodes })}
     />
   </div>);
 }

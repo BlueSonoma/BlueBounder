@@ -82,6 +82,11 @@ function SegmentationView({ children, ...rest }) {
 
   function applyChanges() {
     async function applyChangesAsync() {
+      console.log(`Filename: ${outputFilename}`);
+      console.log(`Save path: ${outputPath}`);
+      console.log(`Band contrast path: ${bandContrastPath}`);
+      console.log(`Mask path: ${maskPath}`);
+
       const formData = new FormData();
       formData.append('outputPath', outputPath);
       formData.append('outputFilename', outputFilename);
@@ -105,11 +110,18 @@ function SegmentationView({ children, ...rest }) {
       console.log(`Executing boundary segmentation...`);
 
       const filepath = await fetch(`${API.Imaging}/exec_segmentation`, { method: 'POST', body: formData })
-        .then((response) => response.json())
-        .then((data) => data[0])
         .catch((e) => {
-          console.log('Error fetching `exec_segmentation`', e);
+          throw new Error('Error fetching `exec_segmentation` JSON', e);
+        })
+        .then((response) => response.json())
+        .catch((e) => {
+          throw new Error('Error in `exec_segmentation` data', e);
+        })
+        .then((data) => {
+          console.log(JSON.stringify(data));
+          return data[0];
         });
+
       appState.endSaveRequest();
 
       if (filepath) {
@@ -136,8 +148,12 @@ function SegmentationView({ children, ...rest }) {
     appState.startSaveRequest();
     setDisabled(true);
     applyChangesAsync().then(() => {
-      setDisabled(false);
       console.log(`Boundary segmentation completed`);
+      setDisabled(false);
+    }).catch((e) => {
+      console.log(`Error with boundary segmentation:`, e);
+      setDisabled(false);
+      appState.endSaveRequest();
     });
   }
 
@@ -148,7 +164,6 @@ function SegmentationView({ children, ...rest }) {
 
   function onSaveLocationChange(event, path) {
     if (typeof path !== 'undefined') {
-      console.log(`Save path: ${path}`);
       setOutputPath(path);
     }
   }
@@ -384,8 +399,9 @@ function SegmentationView({ children, ...rest }) {
             </select>,
           }]}>
           </Grid2Column>
+        </Frame>
 
-          {/* Miscellaneous Settings:
+        {/* Miscellaneous Settings:
             Border Color
             Overlay Opacity
             Label Regions
@@ -394,74 +410,73 @@ function SegmentationView({ children, ...rest }) {
             Label Opacity
           */}
 
-          <Frame label={'Miscellaneous Settings'}>
-            <Grid2Column data={[{
-              label: 'Border Color',
-            }, {
-              content: <select
-                disabled={disabled}
-                style={{ width: '200px' }}
-                defaultValue={colorSelections[0]}
-                value={borderColor}
-                onChange={onBorderColorChange}>
-                {colorSelections.map((item, i) => {
-                  return <option key={i} value={item.value}>{item.label}</option>;
-                })}
-              </select>,
-            }, {
-              label: 'Overlay Opacity',
-            }, {
-              content: <Slider
-                disabled={disabled}
-                min={0}
-                max={1}
-                step={0.1}
-                value={overlayOpacity}
-                onChange={onOverlayOpacityChange}
-              />,
-            }, {
-              label: 'Label Regions', content: <input
-                disabled={disabled}
-                type='checkbox'
-                checked={labelRegions}
-                style={{ marginLeft: '60px' }}
-                onChange={onLabelRegionsChange}
-              />,
-            }, {
-              label: 'Uniform Labels', content: <input
-                disabled={disabled || !labelRegions}
-                type='checkbox'
-                checked={uniformLabel}
-                style={{ marginLeft: '60px' }}
-                onChange={onUniformLabelsChange}
-              />,
-            }, {
-              label: 'Label Opacity',
-            }, {
-              content: <Slider
-                disabled={disabled || !labelRegions}
-                min={0}
-                max={1}
-                step={0.1}
-                value={labelOpacity}
-                onChange={onLabelOpacityChange}
-              />,
-            }, {
-              label: 'Label Color',
-            }, {
-              content: <select
-                disabled={disabled || !uniformLabel}
-                style={{ width: '200px' }}
-                defaultValue={colorSelections[4]}
-                value={labelColor}
-                onChange={onLabelColorChange}>
-                {colorSelections.map((item, i) => {
-                  return <option key={i} value={item.value}>{item.label}</option>;
-                })}
-              </select>,
-            }]}>
-            </Grid2Column>
-          </Frame>
+        <Frame label={'Miscellaneous Settings'}>
+          <Grid2Column data={[{
+            label: 'Border Color',
+          }, {
+            content: <select
+              disabled={disabled}
+              style={{ width: '200px' }}
+              defaultValue={colorSelections[0]}
+              value={borderColor}
+              onChange={onBorderColorChange}>
+              {colorSelections.map((item, i) => {
+                return <option key={i} value={item.value}>{item.label}</option>;
+              })}
+            </select>,
+          }, {
+            label: 'Overlay Opacity',
+          }, {
+            content: <Slider
+              disabled={disabled}
+              min={0}
+              max={1}
+              step={0.1}
+              value={overlayOpacity}
+              onChange={onOverlayOpacityChange}
+            />,
+          }, {
+            label: 'Label Regions', content: <input
+              disabled={disabled}
+              type='checkbox'
+              checked={labelRegions}
+              style={{ marginLeft: '60px' }}
+              onChange={onLabelRegionsChange}
+            />,
+          }, {
+            label: 'Uniform Labels', content: <input
+              disabled={disabled || !labelRegions}
+              type='checkbox'
+              checked={uniformLabel}
+              style={{ marginLeft: '60px' }}
+              onChange={onUniformLabelsChange}
+            />,
+          }, {
+            label: 'Label Opacity',
+          }, {
+            content: <Slider
+              disabled={disabled || !labelRegions}
+              min={0}
+              max={1}
+              step={0.1}
+              value={labelOpacity}
+              onChange={onLabelOpacityChange}
+            />,
+          }, {
+            label: 'Label Color',
+          }, {
+            content: <select
+              disabled={disabled || !uniformLabel}
+              style={{ width: '200px' }}
+              defaultValue={colorSelections[4]}
+              value={labelColor}
+              onChange={onLabelColorChange}>
+              {colorSelections.map((item, i) => {
+                return <option key={i} value={item.value}>{item.label}</option>;
+              })}
+            </select>,
+          }]}>
+          </Grid2Column>
         </Frame>
       </Frame>
     </div>

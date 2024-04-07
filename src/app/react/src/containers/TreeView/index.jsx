@@ -3,6 +3,7 @@ import Frame from '../Frame';
 import { NodeApi, Tree } from 'react-arborist';
 import useNodesManager from '../../hooks/useNodesManager';
 import { TreeProps } from 'react-arborist/dist/main/types/tree-props';
+import { TreeViewContextProvider } from '../../contexts/TreeViewContext';
 
 import '../../styles/tree.css';
 
@@ -16,6 +17,8 @@ function TreeView({
                     indent = 35,
                     children,
                     onDoubleClick,
+                    showCheckBox = true,
+                    openByDefault = true,
                     ...rest
                   }: TreeProps, ref) {
   const treeRef = useRef(ref);
@@ -35,7 +38,7 @@ function TreeView({
     };
   }, []);
 
-  function handleClick(treeNodes: NodeApi[]) {
+  function onClickHandler(treeNodes: NodeApi[]) {
     if (treeNodes.length === 0) {
       return;
     }
@@ -63,7 +66,7 @@ function TreeView({
       return;
     }
 
-    handleClick(treeNodes);
+    onClickHandler(treeNodes);
 
     const node = treeNodes[0];
     if (!node.isLeaf) {
@@ -78,19 +81,22 @@ function TreeView({
   }, [selectedNodes]);
 
   return (<Frame label={label}>
-    <Tree
-      ref={treeRef}
-      data={data}
-      idAccessor={idAccessor}
-      className={'tree ' + className}
-      rowClassName={'tree-row ' + rowClassName}
-      rowHeight={rowHeight}
-      indent={indent}
-      onSelect={onSelectHandler}
-      {...rest}
-    >
-      {children}
-    </Tree>
+    <TreeViewContextProvider value={{ showCheckBox }}>
+      <Tree
+        ref={treeRef}
+        data={data}
+        idAccessor={idAccessor}
+        className={'tree ' + className}
+        rowClassName={'tree-row ' + rowClassName}
+        rowHeight={rowHeight}
+        indent={indent}
+        openByDefault={openByDefault}
+        onSelect={onSelectHandler}
+        {...rest}
+      >
+        {children}
+      </Tree>
+    </TreeViewContextProvider>
   </Frame>);
 }
 

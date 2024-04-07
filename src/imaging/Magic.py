@@ -13,11 +13,8 @@ from skimage.morphology import square
 import json
 import math
 from datetime import datetime
-import shutil
 
 from src.shared.python.utils import create_directory, get_dir_path
-
-
 
 
 def get_band_con(file, bandsPath):
@@ -315,7 +312,6 @@ def make_binary(img):
 
 
 def create_XOR_default(Chem_dir):
-
     create_directory(os.path.join(Chem_dir, 'masks'))
     AL = os.path.join(Chem_dir, 'AL_fromFile.png')
     CA = os.path.join(Chem_dir, 'CA_fromFile.png')
@@ -324,18 +320,18 @@ def create_XOR_default(Chem_dir):
     SI = os.path.join(Chem_dir, 'SI_fromFile.png')
     K = os.path.join(Chem_dir, 'K_fromFile.png')
 
-    AL = clean_chemistry(image = AL, Threshold=0.2)
-    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_AL.png'), AL)  # save image
-    CA = clean_chemistry(image =CA, Threshold=0.2)
-    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_CA.png'), CA)  # save image
-    NA = clean_chemistry(image =NA, Threshold=0.2)
-    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_NA.png'), NA)  # save image
-    FE = clean_chemistry(image =FE, Threshold=0.2)
-    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_FE.png'), FE)  # save image
-    SI = clean_chemistry(image =SI)
-    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_SI.png'), SI)  # save image
-    K = clean_chemistry(image =K, Threshold=0.2)
-    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_K.png'), K)  # save image
+    AL = clean_chemistry(image=AL, Threshold=0.2)
+    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_AL.png'), AL)  # save image
+    CA = clean_chemistry(image=CA, Threshold=0.2)
+    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_CA.png'), CA)  # save image
+    NA = clean_chemistry(image=NA, Threshold=0.2)
+    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_NA.png'), NA)  # save image
+    FE = clean_chemistry(image=FE, Threshold=0.2)
+    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_FE.png'), FE)  # save image
+    SI = clean_chemistry(image=SI)
+    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_SI.png'), SI)  # save image
+    K = clean_chemistry(image=K, Threshold=0.2)
+    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_K.png'), K)  # save image
 
     # turn images to binary images
     AL = np.array(AL)
@@ -351,8 +347,6 @@ def create_XOR_default(Chem_dir):
     FE = FE > 0
     SI = SI > 0
     K = K > 0
-
-
 
     # now the final image will be the result of XOR'ing all the binary images together
 
@@ -371,8 +365,8 @@ def create_XOR_default(Chem_dir):
     xor_SI = xor_image_with_SI(xor_SI, K)
 
     # now save he xor_SI image
-    
-    imageio.imsave(os.path.join(Chem_dir,'masks', 'xor_SI.png'), xor_SI.astype('uint8') * 255)  # save image
+
+    imageio.imsave(os.path.join(Chem_dir, 'masks', 'xor_SI.png'), xor_SI.astype('uint8') * 255)  # save image
 
 
 def create_AND_default(Euler_directory, Chem_directory):
@@ -420,13 +414,6 @@ def create_AND_default(Euler_directory, Chem_directory):
 
     imageio.imsave(os.path.join(Euler_directory, 'AND_Euler.png'),
                    AND_Euler.astype('uint8') * 255)  # save image
-
-
-def create_XA():
-    print("Creating the masks...")
-    create_X()
-    create_A()
-    print("Done with creating the masks!")
 
 
 # def createBandContrast():
@@ -547,7 +534,7 @@ def add_to_ChemCache(image, Cache_path):
     image_path = os.path.join(Cache_path, image_name)
     imageio.imsave(image_path, image)
 
-    return image_path
+    return image_name, image_path
 
 
 def add_to_EulerCache(image, Cache_path):
@@ -558,7 +545,7 @@ def add_to_EulerCache(image, Cache_path):
 
     imageio.imsave(image_path, image.astype('uint8'))
 
-    return image_path
+    return image_name, image_path
 
 
 def extract_DIR(DirPath):
@@ -573,5 +560,3 @@ def extract_DIR(DirPath):
         DirName = DirPath[match.start() + 1:]
 
     return DirName
-
-

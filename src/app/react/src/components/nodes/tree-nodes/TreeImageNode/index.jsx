@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NodeRendererProps } from 'react-arborist';
 import IconFolderOpened from '../../../../resources/icons/folder-opened.png';
 import IconFolderClosed from '../../../../resources/icons/folder-closed.png';
 import useNodesManager from '../../../../hooks/useNodesManager';
+import useTreeView from '../../../../hooks/useTreeView';
 
 import '../../../../styles/tree.css';
 
 function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps) {
   const { nodes, setNodes, selectedNodes } = useNodesManager();
+  const { showCheckBox } = useTreeView();
   const [hidden, setHidden] = useState(treeNode.isLeaf ? null : false);
-  const id = `tree-node__${treeNode.id}`;
-  const tnSrc = treeNode.data.image?.src;
+  const id = `${treeNode.id}`;
+  const tnSrc = treeNode.data.image?.thumbnail.src ?? null;
   const tnName = treeNode.data.name;
   const tnWidth = '25px';
   const tnHeight = '25px';
@@ -73,7 +75,7 @@ function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps)
       const isOpen = treeNode.isOpen;
       const isRoot = treeNode.id === 'root__viewports';
       return (<>
-        {!isRoot && <input
+        {!isRoot && showCheckBox && <input
           type={'checkbox'}
           checked={!hidden}
           onClick={onFolderCheckboxClickedHandler}
@@ -89,12 +91,12 @@ function TreeImageNode({ style, node: treeNode, dragHandle }: NodeRendererProps)
     }
 
     return (<>
-      <input
+      {showCheckBox && <input
         type={'checkbox'}
         checked={!treeNode.data.hidden}
         onClick={onLeafCheckboxClickHandler}
         title={`${treeNode.data.hidden ? 'Show' : 'Hide'}`}
-      />
+      />}
       {tnSrc && <img
         alt={tnName}
         src={tnSrc}
