@@ -14,8 +14,12 @@ function ViewportManagerProvider({ children }) {
 
   useEffect(() => {
     // Update the nodes for each viewport
-    setViewports((prev) => prev.map((vp) => {
+    setViewports((prev) => prev.map((vp: ViewportType) => {
       vp.props.nodes = nodes.filter((nd) => nd.data.viewport === vp.id);
+      if (vp.label === vp.id && vp.props.nodes.length > 0) {
+        // For now, if the viewport has a default label and has nodes, assign the label as the node's label
+        vp.label = vp.props.nodes[0].data.label;
+      }
       return vp;
     }));
   }, [nodes]);
@@ -54,25 +58,26 @@ function ViewportManagerProvider({ children }) {
 
   function createViewport(params: ViewportParams): ViewportType {
     let {
-      id, name, nodes, ...rest
+      id, label, nodes: childNodes, options, ...rest
     } = params;
 
     id = id ?? `Viewport_${getNextId()}`;
-    name = name ?? id;
+    label = label ?? id;
 
-    nodes = nodes ?? [];
-    const isArray = Array.isArray(nodes);
-    nodes = isArray ? nodes : [nodes];
+    childNodes = childNodes ?? [];
+    const isArray = Array.isArray(childNodes);
+    childNodes = isArray ? childNodes : [childNodes];
 
-    nodes = nodes.map((node: NodeType) => {
+    childNodes = childNodes.map((node: NodeType) => {
       console.log(node);
       node.data.viewport = id;
       return node;
     });
 
+    const active = options ? options.setActive ?? false : false;
     return {
-      id: id, label: name, component: Viewport, props: {
-        id: id, nodes: nodes, ...rest,
+      id: id, label: label, component: Viewport, props: {
+        id: id, nodes: childNodes, active: active, ...rest,
       },
     };
   }
