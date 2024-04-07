@@ -31,9 +31,17 @@ export type ViewportType = {
 }
 
 export type FileProps = {
-  prefix?: string; name?: string; path?: string; extension?: string;
+  prefix?: string;
+  name?: string;
+  path?: string;
+  extension?: string;
+  dir?: string;
 }
 
 export type ImageProps = {
-  width?: number; height?: number; src: string; type?: string;
+  width?: number;
+  height?: number;
+  src: string;
+  type?: string;
+  cached: boolean;
 }
