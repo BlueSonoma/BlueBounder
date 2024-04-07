@@ -1,8 +1,3 @@
-#######################################
-#
-#  Run this cell before proceeding
-#
-#######################################
 from typing import Any
 
 import numpy as np
@@ -135,8 +130,6 @@ def get_marked_boundaries(image: Image, mask: Image, color: str = 'red', backgro
 def outline_boundaries(image: Image, marked: Image, color: str = 'black') -> Image:
     """Returns a copy of `image` overlay with `marked` boundaries colored `color`
     """
-    assert (image.shape == marked.shape)
-
     outlined = image.copy()
     color = list(get_rgb_value(color))
     for i in range(marked.shape[0]):
@@ -280,8 +273,7 @@ def segment_boundaries(image: Image, *, scale: int = 50, sigma: float = 0.8, min
     # Run the algorithm on a single image
     if batch_config is None:
         return __exec_segment_boundaries(image, scale, sigma, min_size, outline_color, overlay, overlay_image,
-                                         label_regions,
-                                         label_uniform, label_color, label_opacity)
+                                         label_regions, label_uniform, label_color, label_opacity)
 
     # Destructure configurations
     in_images = batch_config['in_images']
@@ -357,6 +349,11 @@ def bounder_segmentation(bc_image: Image, chem_mask: Image, *, border_color='bla
       `band_contrast` within the area of the of `chem_mask` labels are segmented and bordered.
     """
     import concurrent.futures
+
+    if bc_image.shape[0] != chem_mask.shape[0] or bc_image.shape[1] != chem_mask.shape[1]:
+        raise Exception('Band contrast and chemical mask must have the same size')
+    if len(bc_image.shape) < 3:
+        bc_image = skimage.color.gray2rgb(bc_image)
 
     # Run the segmentation algorithms concurrently to reduce processing time
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
