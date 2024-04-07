@@ -111,17 +111,13 @@
 }
 
 .bounder__frame {
-    width: 100%;
     height: 100%;
     position: relative;
-    /*overflow: hidden;*/
-    /*overflow-y: auto;*/
-    /*scrollbar-width: thin;*/
 }
 
 .bounder__frame .header {
     margin-top: 5px;
-    padding: 3px;
+    padding: 2px;
     border: 2px groove lightgray;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
@@ -129,19 +125,13 @@
 
 .bounder__frame .body {
     overflow: hidden;
-    /*padding: 3px;*/
-    position: relative;
-    /*width: 100%;*/
-    /*height: 100%;*/
     border: 2px inset lightgray;
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
 }
 
-.bounder__frame .content {
-    /*width: 100%;*/
-    height: 100%;
-    position: relative;
-    overflow-y: auto;
+.bounder__frame .body .content {
+    padding-left: 3px;
+    margin: 0;
     scrollbar-width: thin;
 }

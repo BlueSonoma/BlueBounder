@@ -9,21 +9,20 @@
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 5px;
-    padding: 5px;
     align-items: start;
 }
 
-.grid-container .label {
+.grid-container .row .label {
     grid-column: 1;
     white-space: nowrap;
+    padding: 2px
 }
 
-.grid-container .content {
+.grid-container .row .content {
     grid-column: 2;
     overflow-x: auto;
     scrollbar-width: none;
-    max-width: 100%;
     white-space: nowrap;
     text-wrap: none;
-    padding: 0 5px 0 5px;
+    padding: 0 5px 0;
 }
