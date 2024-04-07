@@ -14,6 +14,10 @@ def create_directory(dir_path):
     else:
         print(f'Directory "{str(dir_path)}" already exists')
 
+
+def remove_file_ext(file_name: str):
+    return file_name.split('.')[0]
+
 # cwd = os.getcwd()
 # for _, path in dir_map.items():
 #     dir = cwd + '/' + path
