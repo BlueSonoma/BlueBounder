@@ -10,7 +10,7 @@ function CleanUpView({ children, ...rest }) {
   const [Area, setArea] = useState(0);
   const [upperThreshold, setUpperThreshold] = useState(0);
   const [lowerThreshold, setLowerThreshold] = useState(0);
-
+  const [windowSize, setWindowSize] = useState(0);
   const [quantize, setQuantize] = useState(0);
   const [disableThreshold, setDisableThreshold] = useState(false);
   const [disableQuantize, setDisableQuantize] = useState(false);
@@ -46,6 +46,10 @@ function CleanUpView({ children, ...rest }) {
 
   const HandleAreaChange = (event) => {
     setArea(event.target.value);
+  };
+
+  const HandleWindowChange = (event) => {
+    setWindowSize(event.target.value);
   };
 
   const HandleUpperThresholdChange = (event) => {
@@ -187,25 +191,241 @@ function CleanUpView({ children, ...rest }) {
     });
   };
 
+  const handleBinary = () => {
+    async function handleImageEditAndGetData(node) {
+      async function fetchAndGetFilepath(fileName, imageType) {
+        let url;
+        if (imageType === 'Euler') {
+          url = `${API.Sessions}/ToBinary?sessionName=${sessionName}&imageName=${fileName}&area=${Area}&quant=${Quantization}`;
+        } else if (imageType === 'Chemical') {
+          url = `${API.Sessions}/ToBinary?sessionName=${sessionName}&imageName=${fileName}&area=${Area}&Uppthresh=${upperThreshold}&Lowthresh=${lowerThreshold}`;
+        } else if (imageType === 'Band') {//image selected is Band execute corresponding code
+        } else {
+          throw new Error(`Error: Unknown image type "${imageType}"`);
+        }
+
+        return await fetch(url, {
+          method: 'GET',
+        })
+          .then(response => response.json())
+          .then(data => data[0])
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+
+      let filename = node.data.file.name;
+      const imageType = node.data.image.type;
+      return await fetchAndGetFilepath(filename, imageType);
+    }
+
+    startLoadRequest();
+    setDisableAll(true);
+
+    const node = nodesManager.selectedNodes[0];
+    handleImageEditAndGetData(node).then(async (data) => {
+      console.log(data);
+      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
+      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
+
+      newNode.data.viewport = node.data.viewport;
+      if (!newNode.data.viewport) {
+        const viewport = viewportManager.createAndAddViewport({
+          label: newNode.data.label, options: { setActive: true },
+        });
+        newNode.data.viewport = viewport.id;
+      }
+      newNode.data.image.cached = true;
+      newNode.selected = true;
+      nodesManager.setNodes((prev) => [...prev.map((nd) => {
+        if (nd.id === node.id) {
+          return {
+            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
+          };
+        }
+        return nd;
+      }), newNode]);
+
+      endLoadRequest();
+      setDisableAll(false);
+    }).catch((e) => {
+      console.log(e);
+      endLoadRequest();
+      setDisableAll(false);
+    });
+  };
+
+  const handleSubmissionArea = () => { 
+    async function handleImageEditAndGetData(node) {
+      async function fetchAndGetFilepath(fileName, imageType) {
+        let url;
+        if (imageType === 'Euler') {
+          
+        } else if (imageType === 'Chemical') {
+          url = `${API.Sessions}/ReduceArea?sessionName=${sessionName}&imageName=${fileName}&area=${Area}`;
+        } else if (imageType === 'Band') {//image selected is Band execute corresponding code
+        } else {
+          throw new Error(`Error: Unknown image type "${imageType}"`);
+        }
+
+        return await fetch(url, {
+          method: 'GET',
+        })
+          .then(response => response.json())
+          .then(data => data[0])
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+
+      let filename = node.data.file.name;
+      const imageType = node.data.image.type;
+      return await fetchAndGetFilepath(filename, imageType);
+    }
+
+    startLoadRequest();
+    setDisableAll(true);
+
+    const node = nodesManager.selectedNodes[0];
+    handleImageEditAndGetData(node).then(async (data) => {
+      console.log(data);
+      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
+      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
+
+      newNode.data.viewport = node.data.viewport;
+      if (!newNode.data.viewport) {
+        const viewport = viewportManager.createAndAddViewport({
+          label: newNode.data.label, options: { setActive: true },
+        });
+        newNode.data.viewport = viewport.id;
+      }
+      newNode.data.image.cached = true;
+      newNode.selected = true;
+      nodesManager.setNodes((prev) => [...prev.map((nd) => {
+        if (nd.id === node.id) {
+          return {
+            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
+          };
+        }
+        return nd;
+      }), newNode]);
+
+      endLoadRequest();
+      setDisableAll(false);
+    }).catch((e) => {
+      console.log(e);
+      endLoadRequest();
+      setDisableAll(false);
+    });
+  };
+
+  const HandleSubmissionNeighbor= () => { 
+    async function handleImageEditAndGetData(node) {
+      async function fetchAndGetFilepath(fileName, imageType) {
+        let url;
+        if (imageType === 'Euler') {
+          
+        } else if (imageType === 'Chemical') {
+          url = `${API.Sessions}/Neighbor_Chem?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
+        } else if (imageType === 'Band') {//image selected is Band execute corresponding code
+        } else {
+          throw new Error(`Error: Unknown image type "${imageType}"`);
+        }
+
+        return await fetch(url, {
+          method: 'GET',
+        })
+          .then(response => response.json())
+          .then(data => data[0])
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+
+      let filename = node.data.file.name;
+      const imageType = node.data.image.type;
+      return await fetchAndGetFilepath(filename, imageType);
+    }
+
+    startLoadRequest();
+    setDisableAll(true);
+
+    const node = nodesManager.selectedNodes[0];
+    handleImageEditAndGetData(node).then(async (data) => {
+      console.log(data);
+      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
+      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
+
+      newNode.data.viewport = node.data.viewport;
+      if (!newNode.data.viewport) {
+        const viewport = viewportManager.createAndAddViewport({
+          label: newNode.data.label, options: { setActive: true },
+        });
+        newNode.data.viewport = viewport.id;
+      }
+      newNode.data.image.cached = true;
+      newNode.selected = true;
+      nodesManager.setNodes((prev) => [...prev.map((nd) => {
+        if (nd.id === node.id) {
+          return {
+            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
+          };
+        }
+        return nd;
+      }), newNode]);
+
+      endLoadRequest();
+      setDisableAll(false);
+    }).catch((e) => {
+      console.log(e);
+      endLoadRequest();
+      setDisableAll(false);
+    });
+  };
+
 
   return (<Frame label={'Clean Up View'}>
     <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <p> The following could either be done in steps iteratively or all in one go. Chemistery images should be 
+    Thresholded then applied a max neighbor. Then converted to Binary. Euler images should be quanatized then max neighbored.</p>
+      <p style={{fontWeight: 'bold'}}><br /> Chemistery Images </p>
+
       <input type='range' min='0' max='255' step='1' value={upperThreshold} onChange={HandleUpperThresholdChange}
              disabled={disableThreshold || disableAll} />
       <p style={{ paddingBottom: '20px' }}>Upper Threshold: {upperThreshold}</p>
+
       <input type='range' min='0' max='255' step='1' value={lowerThreshold} onChange={HandleLowerThresholdChange}
              disabled={disableThreshold || disableAll} />
       <p style={{ paddingBottom: '20px' }}>Lower Threshold: {lowerThreshold}</p>
+      <button disabled={disableAll || disableThreshold} onClick={handleSubmission_OnlyThresh}>Only Thresh</button>
+      <br />
+      <input type='range' min='0' max='25'  disabled={disableAll|| disableThreshold} value={windowSize}  onChange={HandleWindowChange}/>
+      <p>WindowSize: {windowSize}X{windowSize}</p>
+      <button disabled={disableAll|| disableThreshold} onClick={HandleSubmissionNeighbor}>Apply Max Neighbor</button>
+      <br />
+      <input type='range' min='0' max='300' value={Area} disabled={disableAll|| disableThreshold} onChange={HandleAreaChange} />
+      <p>Reduce Area Under: {Area}</p>
+      <button disabled={disableAll} onClick={handleSubmissionArea}>Reduce Areas</button>
+      <br />
+      <button style={{paddingTop:'5px'}}disabled={disableAll} onClick={handleBinary}>Change Chem To binary</button>
+
+      <p style={{fontWeight: 'bold'}}><br /> Euler Images </p>
       <input type='range' min='0' max='8' value={quantize} onChange={HandleQuantizeChange}
              disabled={disableQuantize || disableAll} />
-      <p style={{ paddingBottom: '20px' }}>Quantization 2^input: {Quantization}</p>
-      <input type='range' min='0' max='300' value={Area} disabled={disableAll} onChange={HandleAreaChange} />
+      <p style={{ paddingBottom: '20px' }}>Quantization = 2^input: {Quantization}</p>
+      <button disabled={disableAll|| disableQuantize} >Quanatize</button>
+      <input type='range' min='0' max='300' value={Area} disabled={disableAll|| disableQuantize} onChange={HandleAreaChange} />
       <p>Reduce Area Under: {Area}</p>
+      <button disabled={disableAll|| disableQuantize} onClick={handleSubmissionArea}>Reduce Areas</button>
 
       <button disabled={disableAll} onClick={handleSubmission}>Apply All</button>
-      <button disabled={disableAll} onClick={handleSubmission_OnlyThresh}>Only Thresh</button>
       <button disabled={disableAll}>Only Quant</button>
-      <button disabled={disableAll}>Only Area</button>
+      
+     
+
+    
+      
+     
 
     </div>
   </Frame>);
