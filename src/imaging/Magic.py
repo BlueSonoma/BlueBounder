@@ -285,12 +285,13 @@ def Chem_regTObinary(image):
     image[image > 0] = 1
     return image
 
-def Thresh_CHem(image, Threshold_range=[255, 255]):
+def Thresh_CHem(image, UpperThresh = 0,LowerThresh=255):
     Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
     image = getImage_withPath(image)
-    Threshold = int(Threshold)
-    image[image < Threshold[1]] = 0
-    image[image > Threshold[2]] = 0
+    LowerThresh = int(LowerThresh)
+    UpperThresh = int(UpperThresh)
+    image[image < LowerThresh] = 0
+    image[image > UpperThresh] = 0
    
     # image = im.fromarray((max_image * 255).astype(np.uint8), mode="L")
 
@@ -596,7 +597,7 @@ def add_to_ChemCache(image, Cache_path):
     image_path = os.path.join(Cache_path, image_name)
     imageio.imsave(image_path, image)
 
-    return image_path
+    return image_name,image_path
 
 
 def add_to_EulerCache(image, Cache_path):

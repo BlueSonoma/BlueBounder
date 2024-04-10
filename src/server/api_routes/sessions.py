@@ -189,7 +189,9 @@ def api__cleanChemImg():
     image = os.path.join(session_dir, 'Chemical_Images', image_name)
 
     area = flask.request.args.get('area')
-    thresh = flask.request.args.get('thresh')
+    UpperThresh = flask.request.args.get('Uppthresh')
+    LowerThresh = flask.request.args.get('Lowthresh')
+
 
     try:
         newImage = clean_chemistry(image=image, red_area=area, Threshold=thresh)
@@ -203,3 +205,39 @@ def api__cleanChemImg():
             200)
     except Exception as e:
         return jsonify(e, 500)
+
+
+@api.route('/clean_Chemical_img_OnlyThresh', methods=['GET'])
+def api__cleanChemImg_OnlyThresh():
+    session_name = flask.request.args.get('sessionName')
+    session_dir = os.path.join(get_dir_path('sessions'), session_name)
+    session_Cache = os.path.join(session_dir, 'Cache')
+    create_directory(session_Cache)
+    Session_ChemCache = os.path.join(session_Cache, 'Chemical_Images')
+    create_directory(Session_ChemCache)
+    image_name = flask.request.args.get('imageName')
+
+    image_Cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
+    create_directory(image_Cache)
+
+    image = os.path.join(session_dir, 'Chemical_Images', image_name)
+
+    area = flask.request.args.get('area')
+    UpperThresh = flask.request.args.get('Uppthresh')
+    LowerThresh = flask.request.args.get('Lowthresh')
+
+
+    try:
+        newImage = Thresh_CHem(image=image,UpperThresh=UpperThresh, LowerThresh=LowerThresh)
+        image_name, image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
+        return jsonify({
+            "name": image_name,
+            "path": image_path,
+            "dir": remove_file_ext(image_name),
+            "type": "Chemical",
+            "cached": True},
+            200)
+    except Exception as e:
+        return jsonify(e, 500)
+
+
