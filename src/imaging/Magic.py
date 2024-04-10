@@ -222,6 +222,7 @@ def quantization(img, L):
 def my_max_neighbor_fast(image, channel):
     half_window = 1
     footprint = np.ones((2 * half_window + 1, 2 * half_window + 1))
+    print(footprint)
     result = maximum_filter(image[:, :, channel], footprint=footprint)
     return result
 
@@ -297,11 +298,13 @@ def Thresh_CHem(image, UpperThresh = 0,LowerThresh=255):
 
     return image
   
-def modal_chem(image,windowSize=3):
-    image = my_modal_filter(image,windowSize)
+def modal_chem(image,window=3):
+    image = getImage_withPath(image)
+    image = my_modal_filter(image,window)
     return image
 
 def Area_Chem(image, red_area=100):
+    image = getImage_withPath(image)
     image= reduce_area(image, red_area)
     return image
 
@@ -350,19 +353,12 @@ def clean_chemistry(image, Threshold=0.5, red_area=100):
     return image
 
 
-def make_binary(img):
-    # any pixel that is not black make 1
-    # any pixel that is black make 0
-    # then return the binary image
-    binary_img = np.zeros((img.shape[0], img.shape[1]))
-    for x in range(img.shape[0]):
-        for y in range(img.shape[1]):
-            if img[x, y].all() != 0:
-                binary_img[x, y] = 1
-            else:
-                binary_img[x, y] = 0
-    return binary_img
+def make_binary(image):
 
+    image = getImage_withPath(image)    
+    image[image > 0] = 255
+    
+    return image
 
 def create_XOR_default(Chem_dir):
 
@@ -608,7 +604,7 @@ def add_to_EulerCache(image, Cache_path):
 
     imageio.imsave(image_path, image.astype('uint8'))
 
-    return image_path
+    return image_name,image_path
 
 
 def extract_DIR(DirPath):
