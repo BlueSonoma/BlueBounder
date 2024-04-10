@@ -13,8 +13,12 @@ from skimage.morphology import square
 import json
 import math
 from datetime import datetime
-
+import shutil
+import matplotlib.pyplot as plt
 from src.shared.python.utils import create_directory, get_dir_path
+from PIL import Image
+
+
 
 
 def get_band_con(file, bandsPath):
@@ -233,17 +237,17 @@ def reduce_area(image, area):
     return labeled
 
 
-def my_modal_filter(image):
-    half_window = 1
-    size = 2 * half_window + 1
-    result = modal(image, square(size))
+def my_modal_filter(image,windowSize=3):
+    # half_window = 1
+    # size = 2 * half_window + 1
+    result = modal(image, square(windowSize))
     return result
 
 
 def clean_Euler(image, quant=16, red_area=100):
     Cleaned_Euler_directory = os.path.join('Euler_images', 'cleaned')
     # Create the directory if it does not exist
-    create_directory(Cleaned_Euler_directory)
+    # create_directory(Cleaned_Euler_directory)
     print(image)
     euler_img = getImage_withPath(image)
 
@@ -276,6 +280,54 @@ def getImage_withPath(imagePath):
     image = io.imread(imagePath)
     return image
 
+def Chem_regTObinary(image):
+    image = getImage_withPath(image)
+    image[image > 0] = 1
+    return image
+
+def Thresh_CHem(image, Threshold_range=[255, 255]):
+    Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
+    image = getImage_withPath(image)
+    Threshold = int(Threshold)
+    image[image < Threshold[1]] = 0
+    image[image > Threshold[2]] = 0
+   
+    # image = im.fromarray((max_image * 255).astype(np.uint8), mode="L")
+
+    return image
+  
+def modal_chem(image,windowSize=3):
+    image = my_modal_filter(image,windowSize)
+    return image
+
+def Area_Chem(image, red_area=100):
+    image= reduce_area(image, red_area)
+    return image
+
+
+#This is still a work in progress fs
+def send_Histogram(image, Current_Session):
+
+
+    image_arr = np.array(image)
+
+    # Calculate histogram using numpy
+    hist, bins = np.histogram(image_arr.flatten(), bins=256, range=[0,256])
+
+    # Plot histogram
+    plt.figure(figsize=(12, 6))
+    plt.bar(bins[:-1], hist, width=1, color='black')
+    plt.title('')
+    plt.xlabel('Pixel Intensity')
+    plt.ylabel('Frequency')
+
+    # Save histogram as a PNG
+    plt.savefig('histogram.png')
+
+    return 'histogram.png'
+
+    
+    
 
 def clean_chemistry(image, Threshold=0.5, red_area=100):
     Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
@@ -312,6 +364,7 @@ def make_binary(img):
 
 
 def create_XOR_default(Chem_dir):
+
     create_directory(os.path.join(Chem_dir, 'masks'))
     AL = os.path.join(Chem_dir, 'AL_fromFile.png')
     CA = os.path.join(Chem_dir, 'CA_fromFile.png')
@@ -320,18 +373,18 @@ def create_XOR_default(Chem_dir):
     SI = os.path.join(Chem_dir, 'SI_fromFile.png')
     K = os.path.join(Chem_dir, 'K_fromFile.png')
 
-    AL = clean_chemistry(image=AL, Threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_AL.png'), AL)  # save image
-    CA = clean_chemistry(image=CA, Threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_CA.png'), CA)  # save image
-    NA = clean_chemistry(image=NA, Threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_NA.png'), NA)  # save image
-    FE = clean_chemistry(image=FE, Threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_FE.png'), FE)  # save image
-    SI = clean_chemistry(image=SI)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_SI.png'), SI)  # save image
-    K = clean_chemistry(image=K, Threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_K.png'), K)  # save image
+    AL = clean_chemistry(image = AL, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_AL.png'), AL)  # save image
+    CA = clean_chemistry(image =CA, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_CA.png'), CA)  # save image
+    NA = clean_chemistry(image =NA, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_NA.png'), NA)  # save image
+    FE = clean_chemistry(image =FE, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_FE.png'), FE)  # save image
+    SI = clean_chemistry(image =SI)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_SI.png'), SI)  # save image
+    K = clean_chemistry(image =K, Threshold=0.2)
+    #imageio.imsave(os.path.join(Chem_dir, 'Reduced_K.png'), K)  # save image
 
     # turn images to binary images
     AL = np.array(AL)
@@ -347,6 +400,8 @@ def create_XOR_default(Chem_dir):
     FE = FE > 0
     SI = SI > 0
     K = K > 0
+
+
 
     # now the final image will be the result of XOR'ing all the binary images together
 
@@ -365,12 +420,12 @@ def create_XOR_default(Chem_dir):
     xor_SI = xor_image_with_SI(xor_SI, K)
 
     # now save he xor_SI image
-
-    imageio.imsave(os.path.join(Chem_dir, 'masks', 'xor_SI.png'), xor_SI.astype('uint8') * 255)  # save image
+    
+    imageio.imsave(os.path.join(Chem_dir,'masks', 'xor_SI.png'), xor_SI.astype('uint8') * 255)  # save image
 
 
 def create_AND_default(Euler_directory, Chem_directory):
-    create_directory(os.path.join('Euler_Image', 'binary'))
+    # create_directory(os.path.join('Euler_Image', 'binary'))
 
     max_16_reduced = clean_Euler(image=os.path.join(Euler_directory, 'euler_phase.png'))
     for x in range(max_16_reduced.shape[0]):
@@ -380,7 +435,7 @@ def create_AND_default(Euler_directory, Chem_directory):
 
     xor_SI = io.imread(os.path.join(Chem_directory, 'masks', 'xor_SI.png'))
     binary_SI = make_binary(xor_SI)
-    imageio.imsave(os.path.join(Chem_directory, 'binary_SI.png'),
+    imageio.imsave(os.path.join(Chem_directory,'masks', 'binary_SI.png'),
                    binary_SI.astype('uint8') * 255)  # save image
 
     # save the binary image in a folder called Euler_Images/binary
@@ -414,6 +469,13 @@ def create_AND_default(Euler_directory, Chem_directory):
 
     imageio.imsave(os.path.join(Euler_directory, 'AND_Euler.png'),
                    AND_Euler.astype('uint8') * 255)  # save image
+
+
+def create_XA():
+    print("Creating the masks...")
+    create_X()
+    create_A()
+    print("Done with creating the masks!")
 
 
 # def createBandContrast():
@@ -534,7 +596,7 @@ def add_to_ChemCache(image, Cache_path):
     image_path = os.path.join(Cache_path, image_name)
     imageio.imsave(image_path, image)
 
-    return image_name, image_path
+    return image_path
 
 
 def add_to_EulerCache(image, Cache_path):
@@ -545,7 +607,7 @@ def add_to_EulerCache(image, Cache_path):
 
     imageio.imsave(image_path, image.astype('uint8'))
 
-    return image_name, image_path
+    return image_path
 
 
 def extract_DIR(DirPath):
@@ -560,3 +622,5 @@ def extract_DIR(DirPath):
         DirName = DirPath[match.start() + 1:]
 
     return DirName
+
+
