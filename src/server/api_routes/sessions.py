@@ -173,7 +173,7 @@ def api__cleanEuler():
         return jsonify(e, 500)
 
 
-@api.route('/clean_Chemical_img', methods=['GET'])
+@api.route('/Clean_Chem_All', methods=['GET'])
 def api__cleanChemImg():
     session_name = flask.request.args.get('sessionName')
     session_dir = os.path.join(get_dir_path('sessions'), session_name)
@@ -191,10 +191,16 @@ def api__cleanChemImg():
     area = flask.request.args.get('area')
     UpperThresh = flask.request.args.get('Uppthresh')
     LowerThresh = flask.request.args.get('Lowthresh')
+    window = flask.request.args.get('window')
+
+    area = int(area)
+    UpperThresh = int(UpperThresh)
+    LowerThresh = int(LowerThresh)
+    window = int(window)
 
 
     try:
-        newImage = clean_chemistry(image=image, red_area=area, Threshold=thresh)
+        newImage = clean_chemistry(image=image, red_area=area, upperThresh=UpperThresh, lowerThresh=LowerThresh,window=window)
         image_name, image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
         return jsonify({
             "name": image_name,
