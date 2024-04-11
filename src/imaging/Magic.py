@@ -344,7 +344,7 @@ def clean_chemistry(image, red_area=100, lowerThresh=0, upperThresh=255,window=3
     image = my_modal_filter(image,window)
     image[image > 0] = 255
     image= reduce_area(image, red_area)
-    
+    image = im.fromarray((image * 255).astype(np.uint8), mode="L")
     
     
 
