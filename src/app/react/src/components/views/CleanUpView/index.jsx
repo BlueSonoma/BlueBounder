@@ -132,9 +132,9 @@ function CleanUpView({ children, ...rest }) {
       async function fetchAndGetFilepath(fileName, imageType) {
         let url;
         if (imageType === 'Euler') {
-          url = `${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${fileName}&area=${Area}&quant=${Quantization}`;
+          
         } else if (imageType === 'Chemical') {
-          url = `${API.Sessions}/clean_Chemical_img_OnlyThresh?sessionName=${sessionName}&imageName=${fileName}&area=${Area}&Uppthresh=${upperThreshold}&Lowthresh=${lowerThreshold}`;
+          url = `${API.Sessions}/clean_Chemical_img_OnlyThresh?sessionName=${sessionName}&imageName=${fileName}&Uppthresh=${upperThreshold}&Lowthresh=${lowerThreshold}`;
         } else if (imageType === 'Band') {//image selected is Band execute corresponding code
         } else {
           throw new Error(`Error: Unknown image type "${imageType}"`);
@@ -196,9 +196,9 @@ function CleanUpView({ children, ...rest }) {
       async function fetchAndGetFilepath(fileName, imageType) {
         let url;
         if (imageType === 'Euler') {
-          url = `${API.Sessions}/ToBinary?sessionName=${sessionName}&imageName=${fileName}&area=${Area}&quant=${Quantization}`;
+          
         } else if (imageType === 'Chemical') {
-          url = `${API.Sessions}/ToBinary?sessionName=${sessionName}&imageName=${fileName}&area=${Area}&Uppthresh=${upperThreshold}&Lowthresh=${lowerThreshold}`;
+          url = `${API.Sessions}/ToBinary?sessionName=${sessionName}&imageName=${fileName}`;
         } else if (imageType === 'Band') {//image selected is Band execute corresponding code
         } else {
           throw new Error(`Error: Unknown image type "${imageType}"`);
@@ -383,6 +383,69 @@ function CleanUpView({ children, ...rest }) {
     });
   };
 
+  const HandleSubmitAllChem = () => {
+    async function handleImageEditAndGetData(node) {
+      async function fetchAndGetFilepath(fileName, imageType) {
+        let url;
+        if (imageType === 'Euler') {
+          
+        } else if (imageType === 'Chemical') {
+          url = `${API.Sessions}/Clean_Chem_All?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}&window=${windowSize}&area=${Area}&Uppthresh=${upperThreshold}&Lowthresh=${lowerThreshold}`;
+        } else if (imageType === 'Band') {//image selected is Band execute corresponding code
+        } else {
+          throw new Error(`Error: Unknown image type "${imageType}"`);
+        }
+
+        return await fetch(url, {
+          method: 'GET',
+        })
+          .then(response => response.json())
+          .then(data => data[0])
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+
+      let filename = node.data.file.name;
+      const imageType = node.data.image.type;
+      return await fetchAndGetFilepath(filename, imageType);
+    }
+
+    startLoadRequest();
+    setDisableAll(true);
+
+    const node = nodesManager.selectedNodes[0];
+    handleImageEditAndGetData(node).then(async (data) => {
+      console.log(data);
+      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
+      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
+
+      newNode.data.viewport = node.data.viewport;
+      if (!newNode.data.viewport) {
+        const viewport = viewportManager.createAndAddViewport({
+          label: newNode.data.label, options: { setActive: true },
+        });
+        newNode.data.viewport = viewport.id;
+      }
+      newNode.data.image.cached = true;
+      newNode.selected = true;
+      nodesManager.setNodes((prev) => [...prev.map((nd) => {
+        if (nd.id === node.id) {
+          return {
+            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
+          };
+        }
+        return nd;
+      }), newNode]);
+
+      endLoadRequest();
+      setDisableAll(false);
+    }).catch((e) => {
+      console.log(e);
+      endLoadRequest();
+      setDisableAll(false);
+    });
+  };
 
   return (<Frame label={'Clean Up View'}>
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -408,6 +471,10 @@ function CleanUpView({ children, ...rest }) {
       <button disabled={disableAll} onClick={handleSubmissionArea}>Reduce Areas</button>
       <br />
       <button style={{paddingTop:'5px'}}disabled={disableAll} onClick={handleBinary}>Change Chem To binary</button>
+      <button disabled={disableAll} onClick={HandleSubmitAllChem}>Apply All</button>
+
+
+
 
       <p style={{fontWeight: 'bold'}}><br /> Euler Images </p>
       <input type='range' min='0' max='8' value={quantize} onChange={HandleQuantizeChange}
@@ -418,12 +485,8 @@ function CleanUpView({ children, ...rest }) {
       <p>Reduce Area Under: {Area}</p>
       <button disabled={disableAll|| disableQuantize} onClick={handleSubmissionArea}>Reduce Areas</button>
 
-      <button disabled={disableAll} onClick={handleSubmission}>Apply All</button>
-      <button disabled={disableAll}>Only Quant</button>
       
-     
-
-    
+      <button disabled={disableAll}>Only Quant</button>
       
      
 

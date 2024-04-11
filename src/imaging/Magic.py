@@ -333,22 +333,20 @@ def send_Histogram(image, Current_Session):
     
     
 
-def clean_chemistry(image, Threshold=0.5, red_area=100):
+def clean_chemistry(image, red_area=100, lowerThresh=0, upperThresh=255,window=3):
     Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
     # Create the directory if it does not exist
     create_directory(Chemistry_directory_reduced)
-    Threshold = float(Threshold)
-    print('Threshold:', Threshold)
-    print('Red Area:', red_area)
-    red_area = int(red_area)
     image = getImage_withPath(image)
-    image = image / 255
-    image[image < Threshold] = 0
-    image[image > Threshold] = 1
 
-    max_image = my_modal_filter(image)
-    max_image = reduce_area(max_image, red_area)
-    image = im.fromarray((max_image * 255).astype(np.uint8), mode="L")
+    image[image < lowerThresh] = 0
+    image[image > upperThresh] = 0
+    image = my_modal_filter(image,window)
+    image[image > 0] = 255
+    image= reduce_area(image, red_area)
+    
+    
+    
 
     return image
 
