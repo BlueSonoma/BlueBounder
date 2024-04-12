@@ -8,9 +8,9 @@ import useViewportsManager from '../../../hooks/useViewportsManager';
 
 function CleanUpView({ children, ...rest }) {
   const [Area, setArea] = useState(0);
-  const [upperThreshold, setUpperThreshold] = useState(0);
+  const [upperThreshold, setUpperThreshold] = useState(255);
   const [lowerThreshold, setLowerThreshold] = useState(0);
-  const [windowSize, setWindowSize] = useState(0);
+  const [windowSize, setWindowSize] = useState(1);
   const [quantize, setQuantize] = useState(0);
   const [disableThreshold, setDisableThreshold] = useState(false);
   const [disableQuantize, setDisableQuantize] = useState(false);
@@ -460,17 +460,38 @@ function CleanUpView({ children, ...rest }) {
       <input type='range' min='0' max='255' step='1' value={lowerThreshold} onChange={HandleLowerThresholdChange}
              disabled={disableThreshold || disableAll} />
       <p style={{ paddingBottom: '20px' }}>Lower Threshold: {lowerThreshold}</p>
-      <button disabled={disableAll || disableThreshold} onClick={handleSubmission_OnlyThresh}>Only Thresh</button>
+
+      <div style ={{display: 'flex', flexDirection: 'row'}}>
+      <button style ={{paddingRight:'5px'}} disabled={disableAll || disableThreshold} onClick={handleSubmission_OnlyThresh}>Preview Thresh</button>
+      <button disabled={disableAll || disableThreshold} >Apply Threshold</button>
+      </div>
+
       <br />
       <input type='range' min='0' max='25'  disabled={disableAll|| disableThreshold} value={windowSize}  onChange={HandleWindowChange}/>
       <p>WindowSize: {windowSize}X{windowSize}</p>
-      <button disabled={disableAll|| disableThreshold} onClick={HandleSubmissionNeighbor}>Apply Max Neighbor</button>
+
+      <div style ={{display: 'flex', flexDirection: 'row'}}>
+      <button style ={{paddingRight:'5px'}} disabled={disableAll|| disableThreshold} onClick={HandleSubmissionNeighbor}>Preview Max Neighbor</button>
+      <button disabled={disableAll|| disableThreshold} >Apply Max Neighbor</button>
+      </div>
+
       <br />
       <input type='range' min='0' max='300' value={Area} disabled={disableAll|| disableThreshold} onChange={HandleAreaChange} />
       <p>Reduce Area Under: {Area}</p>
-      <button disabled={disableAll} onClick={handleSubmissionArea}>Reduce Areas</button>
+
+      <div style ={{display: 'flex', flexDirection: 'row'}}>
+      <button disabled={disableAll} onClick={handleSubmissionArea}>Preview Reduce Areas</button>
+      <button disabled={disableAll} >Apply Reduce Areas</button>
+      </div>
+
+
       <br />
-      <button style={{paddingTop:'5px'}}disabled={disableAll} onClick={handleBinary}>Change Chem To binary</button>
+
+      <div style ={{display: 'flex', flexDirection: 'row'}}>
+      <button style={{paddingTop:'5px'}}disabled={disableAll} onClick={handleBinary}> To binary</button>
+      <button style={{paddingTop:'5px'}}disabled={disableAll} onClick={handleBinary}> Apply binary</button>
+      </div>
+      
       <button disabled={disableAll} onClick={HandleSubmitAllChem}>Apply All</button>
 
 
@@ -483,6 +504,7 @@ function CleanUpView({ children, ...rest }) {
       <button disabled={disableAll|| disableQuantize} >Quanatize</button>
       <input type='range' min='0' max='300' value={Area} disabled={disableAll|| disableQuantize} onChange={HandleAreaChange} />
       <p>Reduce Area Under: {Area}</p>
+      
       <button disabled={disableAll|| disableQuantize} onClick={handleSubmissionArea}>Reduce Areas</button>
 
       
