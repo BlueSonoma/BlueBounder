@@ -151,15 +151,15 @@ def api__cleanEuler():
     image_name = flask.request.args.get('imageName')
 
     image = os.path.join(session_dir, 'Euler_Images', image_name)
-    image_Cache = os.path.join(session_EulerCache, remove_file_ext(image_name))
+    image_cache = os.path.join(session_EulerCache, remove_file_ext(image_name))
 
-    create_directory(image_Cache)
+    create_directory(image_cache)
 
     area = flask.request.args.get('area')
     quant = flask.request.args.get('quant')
     try:
-        newImage = clean_Euler(image=image, red_area=area, quant=quant)
-        image_name, image_path = add_to_EulerCache(image=newImage, Cache_path=image_Cache)
+        new_image = clean_Euler(image=image, red_area=area, quant=quant)
+        image_name, image_path = add_to_EulerCache(image=new_image, cache_path=image_cache)
         print(image_path)
         return jsonify({
             "name": image_name,
@@ -183,25 +183,25 @@ def api__cleanChemImg():
     create_directory(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
-    image_Cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
-    create_directory(image_Cache)
+    image_cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
+    create_directory(image_cache)
 
     image = os.path.join(session_dir, 'Chemical_Images', image_name)
 
     area = flask.request.args.get('area')
-    UpperThresh = flask.request.args.get('Uppthresh')
-    LowerThresh = flask.request.args.get('Lowthresh')
+    upper_thresh = flask.request.args.get('upper_thresh')
+    lower_thresh = flask.request.args.get('lower_thresh')
     window = flask.request.args.get('window')
 
     area = int(area)
-    UpperThresh = int(UpperThresh)
-    LowerThresh = int(LowerThresh)
+    upper_thresh = int(upper_thresh)
+    lower_thresh = int(lower_thresh)
     window = int(window)
 
-
     try:
-        newImage = clean_chemistry(image=image, red_area=area, upperThresh=UpperThresh, lowerThresh=LowerThresh,window=window)
-        image_name, image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
+        new_image = clean_chemistry(image=image, red_area=area, upper_thresh=upper_thresh, lower_thresh=lower_thresh,
+                                    window=window)
+        image_name, image_path = add_to_ChemCache(image=new_image, cache_path=image_cache)
         return jsonify({
             "name": image_name,
             "path": image_path,
@@ -223,17 +223,16 @@ def api__cleanChemImg_OnlyThresh():
     create_directory(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
-    image_Cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
-    create_directory(image_Cache)
+    image_cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
+    create_directory(image_cache)
 
     image = os.path.join(session_dir, 'Chemical_Images', image_name)
-    UpperThresh = flask.request.args.get('Uppthresh')
-    LowerThresh = flask.request.args.get('Lowthresh')
-
+    upper_thresh = flask.request.args.get('upperThresh')
+    lower_thresh = flask.request.args.get('lowerThresh')
 
     try:
-        newImage = Thresh_CHem(image=image,UpperThresh=UpperThresh, LowerThresh=LowerThresh)
-        image_name, image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
+        new_image = Thresh_CHem(image=image, upper_thresh=upper_thresh, lower_thresh=lower_thresh)
+        image_name, image_path = add_to_ChemCache(image=new_image, cache_path=image_cache)
         return jsonify({
             "name": image_name,
             "path": image_path,
@@ -245,28 +244,29 @@ def api__cleanChemImg_OnlyThresh():
         return jsonify(e, 500)
 
 
-
 @api.route('/ReduceArea', methods=['GET'])
 def api__ReduceArea():
     session_name = flask.request.args.get('sessionName')
+    image_type = flask.request.args.get('type')
     session_dir = os.path.join(get_dir_path('sessions'), session_name)
     session_Cache = os.path.join(session_dir, 'Cache')
     create_directory(session_Cache)
-    Session_ChemCache = os.path.join(session_Cache, 'Chemical_Images')
+    dir_name = 'Euler_Images' if image_type == 'Euler' else 'Chemical_Images'
+    Session_ChemCache = os.path.join(session_Cache, dir_name)
     create_directory(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
-    image_Cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
-    create_directory(image_Cache)
+    image_cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
+    create_directory(image_cache)
 
-    image = os.path.join(session_dir, 'Chemical_Images', image_name)
-    
+    image = os.path.join(session_dir, dir_name, image_name)
+
     area = flask.request.args.get('area')
     area = int(area)
 
     try:
-        newImage = Area_Chem(image=image, red_area=area)
-        image_name, image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
+        new_image = Area_Chem(image=image, red_area=area)
+        image_name, image_path = add_to_ChemCache(image=new_image, cache_path=image_cache)
         return jsonify({
             "name": image_name,
             "path": image_path,
@@ -288,16 +288,14 @@ def api__ToBinary():
     create_directory(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
-    image_Cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
-    create_directory(image_Cache)
+    image_cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
+    create_directory(image_cache)
 
     image = os.path.join(session_dir, 'Chemical_Images', image_name)
-    
-
 
     try:
-        newImage = make_binary(image=image)
-        image_name, image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
+        new_image = make_binary(image=image)
+        image_name, image_path = add_to_ChemCache(image=new_image, cache_path=image_cache)
         return jsonify({
             "name": image_name,
             "path": image_path,
@@ -319,15 +317,15 @@ def api__Neighbor_chem():
     create_directory(Session_ChemCache)
     image_name = flask.request.args.get('imageName')
 
-    image_Cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
-    create_directory(image_Cache)
+    image_cache = os.path.join(Session_ChemCache, remove_file_ext(image_name))
+    create_directory(image_cache)
 
     image = os.path.join(session_dir, 'Chemical_Images', image_name)
     window = flask.request.args.get('window')
     window = int(window)
     try:
-        newImage = modal_chem(image=image, window=window)
-        image_name, image_path = add_to_ChemCache(image=newImage, Cache_path=image_Cache)
+        new_image = modal_chem(image=image, window=window)
+        image_name, image_path = add_to_ChemCache(image=new_image, cache_path=image_cache)
         return jsonify({
             "name": image_name,
             "path": image_path,
@@ -337,4 +335,3 @@ def api__Neighbor_chem():
             200)
     except Exception as e:
         return jsonify(e, 500)
-
