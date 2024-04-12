@@ -63,6 +63,7 @@ function SessionInitializer() {
   return (<div className={'init-session'}>
     <WindowTitleBar text={'Loading Session'} />
     <h1>Loading{ellipses}</h1>
+    <h1>This may take several minutes.</h1>
   </div>);
 }
 
