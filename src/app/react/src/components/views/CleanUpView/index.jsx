@@ -7,6 +7,7 @@ import useAppState from '../../../hooks/useAppState';
 import useViewportsManager from '../../../hooks/useViewportsManager';
 import Slider from '../../../additional-components/Slider';
 import Button from '../../../additional-components/buttons/Button';
+import { getData } from '../utils';
 
 function CleanUpView({ children, ...rest }) {
   const [area, setArea] = useState(0);
@@ -77,55 +78,36 @@ function CleanUpView({ children, ...rest }) {
     setQuantize(event.target.value);
   };
 
-  const handleSubmissionQuantize = () => {
-    async function handleImageEditAndGetData(node) {
-      async function fetchAndGetFilepath(fileName, imageType) {
+  async function createChildImageNodeWithData(parentNode, data) {
+    const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: parentNode.data.file.prefix });
+    nodesManager.addFilepathToNode(newNode, { path: parentNode.data.file.path, dir: parentNode.data.file.prefix });
 
-        const url = `${API.Sessions}/Quant_Euler?sessionName=${sessionName}&imageName=${fileName}&quant=${quantization}`;
-
-
-        return await fetch(url, {
-          method: 'GET',
-        })
-          .then(response => response.json())
-          .then(data => data[0])
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-      let filename = node.data.file.name;
-      const imageType = node.data.image.type;
-      return await fetchAndGetFilepath(filename, imageType);
+    newNode.data.viewport = parentNode.data.viewport;
+    if (!newNode.data.viewport) {
+      const viewport = viewportManager.createAndAddViewport({
+        label: newNode.data.label, options: { setActive: true },
+      });
+      newNode.data.viewport = viewport.id;
     }
+    newNode.data.image.cached = true;
+    newNode.selected = true;
+    nodesManager.setNodes((prev) => [...prev.map((nd) => {
+      if (nd.id === parentNode.id) {
+        return {
+          ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
+        };
+      }
+      return nd;
+    }), newNode]);
+  }
 
+  function submit(node, url) {
     startLoadRequest();
     setDisableAll(true);
 
-    const node = nodesManager.selectedNodes[0];
-    handleImageEditAndGetData(node).then(async (data) => {
+    getData(url).then(async (data) => {
       console.log(data);
-      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
-      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
-
-      newNode.data.viewport = node.data.viewport;
-      if (!newNode.data.viewport) {
-        const viewport = viewportManager.createAndAddViewport({
-          label: newNode.data.label, options: { setActive: true },
-        });
-        newNode.data.viewport = viewport.id;
-      }
-      newNode.data.image.cached = true;
-      newNode.selected = true;
-      nodesManager.setNodes((prev) => [...prev.map((nd) => {
-        if (nd.id === node.id) {
-          return {
-            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
-          };
-        }
-        return nd;
-      }), newNode]);
-
+      await createChildImageNodeWithData(node, data);
       endLoadRequest();
       setDisableAll(false);
     }).catch((e) => {
@@ -133,420 +115,65 @@ function CleanUpView({ children, ...rest }) {
       endLoadRequest();
       setDisableAll(false);
     });
+  }
+
+  const handleSubmissionQuantize = () => {
+    const node = nodesManager.selectedNodes[0];
+    const url = `${API.Sessions}/Quant_Euler?sessionName=${sessionName}&imageName=${node.data.file.name}&quant=${quantization}`;
+    submit(node, url);
   };
 
   const handleSubmissionEulerAll = () => {
-    async function handleImageEditAndGetData(node) {
-      async function fetchAndGetFilepath(fileName, imageType) {
-        const url = `${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${fileName}&area=${area}&quant=${quantization}`;
-
-        return await fetch(url, {
-          method: 'GET',
-        })
-          .then(response => response.json())
-          .then(data => data[0])
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-      let filename = node.data.file.name;
-      const imageType = node.data.image.type;
-      return await fetchAndGetFilepath(filename, imageType);
-    }
-
-    startLoadRequest();
-    setDisableAll(true);
-
     const node = nodesManager.selectedNodes[0];
-    handleImageEditAndGetData(node).then(async (data) => {
-      console.log(data);
-      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
-      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
-
-      newNode.data.viewport = node.data.viewport;
-      if (!newNode.data.viewport) {
-        const viewport = viewportManager.createAndAddViewport({
-          label: newNode.data.label, options: { setActive: true },
-        });
-        newNode.data.viewport = viewport.id;
-      }
-      newNode.data.image.cached = true;
-      newNode.selected = true;
-      nodesManager.setNodes((prev) => [...prev.map((nd) => {
-        if (nd.id === node.id) {
-          return {
-            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
-          };
-        }
-        return nd;
-      }), newNode]);
-
-      endLoadRequest();
-      setDisableAll(false);
-    }).catch((e) => {
-      console.log(e);
-      endLoadRequest();
-      setDisableAll(false);
-    });
+    const url = `${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${node.data.file.name}&area=${area}&quant=${quantization}`;
+    submit(node, url);
   };
 
-  // const handleSubmission = () => {
-  //   async function handleImageEditAndGetData(node) {
-  //     async function fetchAndGetFilepath(fileName, imageType) {
-  //       let url;
-  //       if (imageType === 'Euler') {
-  //         url = `${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${fileName}&area=${area}&quant=${quantization}`;
-  //       } else if (imageType === 'Chemical') {
-  //         url = `${API.Sessions}/clean_Chemical_img?sessionName=${sessionName}&imageName=${fileName}&area=${area}&upperThresh=${upperThreshold}&lowerThresh=${lowerThreshold}`;
-  //       } else if (imageType === 'Band') {//image selected is Band execute corresponding code
-  //       } else {
-  //         throw new Error(`Error: Unknown image type "${imageType}"`);
-  //       }
-  //
-  //       return await fetch(url, {
-  //         method: 'GET',
-  //       })
-  //         .then(response => response.json())
-  //         .then(data => data[0])
-  //         .catch((error) => {
-  //           console.error('Error:', error);
-  //         });
-  //     }
-  //
-  //     let filename = node.data.file.name;
-  //     const imageType = node.data.image.type;
-  //     return await fetchAndGetFilepath(filename, imageType);
-  //   }
-  //
-  //   startLoadRequest();
-  //   setDisableAll(true);
-  //
-  //   const node = nodesManager.selectedNodes[0];
-  //   handleImageEditAndGetData(node).then(async (data) => {
-  //     console.log(data);
-  //     const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
-  //     nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
-  //
-  //     newNode.data.viewport = node.data.viewport;
-  //     if (!newNode.data.viewport) {
-  //       const viewport = viewportManager.createAndAddViewport({
-  //         label: newNode.data.label, options: { setActive: true },
-  //       });
-  //       newNode.data.viewport = viewport.id;
-  //     }
-  //     newNode.data.image.cached = true;
-  //     newNode.selected = true;
-  //     nodesManager.setNodes((prev) => [...prev.map((nd) => {
-  //       if (nd.id === node.id) {
-  //         return {
-  //           ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
-  //         };
-  //       }
-  //       return nd;
-  //     }), newNode]);
-  //
-  //     endLoadRequest();
-  //     setDisableAll(false);
-  //   }).catch((e) => {
-  //     console.log(e);
-  //     endLoadRequest();
-  //     setDisableAll(false);
-  //   });
-  // };
-
   const handleSubmission_OnlyThresh = () => {
-    async function handleImageEditAndGetData(node) {
-      async function fetchAndGetFilepath(fileName, imageType) {
-        const url = `${API.Sessions}/clean_Chemical_img_OnlyThresh?sessionName=${sessionName}&imageName=${fileName}&upperThresh=${upperThreshold}&lowerThresh=${lowerThreshold}`;
-
-        return await fetch(url, {
-          method: 'GET',
-        })
-          .then(response => response.json())
-          .then(data => data[0])
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-      let filename = node.data.file.name;
-      const imageType = node.data.image.type;
-      return await fetchAndGetFilepath(filename, imageType);
-    }
-
-    startLoadRequest();
-    setDisableAll(true);
-
     const node = nodesManager.selectedNodes[0];
-    handleImageEditAndGetData(node).then(async (data) => {
-      console.log(data);
-      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
-      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
-
-      newNode.data.viewport = node.data.viewport;
-      if (!newNode.data.viewport) {
-        const viewport = viewportManager.createAndAddViewport({
-          label: newNode.data.label, options: { setActive: true },
-        });
-        newNode.data.viewport = viewport.id;
-      }
-      newNode.data.image.cached = true;
-      newNode.selected = true;
-      nodesManager.setNodes((prev) => [...prev.map((nd) => {
-        if (nd.id === node.id) {
-          return {
-            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
-          };
-        }
-        return nd;
-      }), newNode]);
-
-      endLoadRequest();
-      setDisableAll(false);
-    }).catch((e) => {
-      console.log(e);
-      endLoadRequest();
-      setDisableAll(false);
-    });
+    const url = `${API.Sessions}/clean_Chemical_img_OnlyThresh?sessionName=${sessionName}&imageName=${node.data.file.name}&upperThresh=${upperThreshold}&lowerThresh=${lowerThreshold}`;
+    submit(node, url);
   };
 
   const handleBinary = () => {
-    async function handleImageEditAndGetData(node) {
-      async function fetchAndGetFilepath(fileName, imageType) {
-        const url = `${API.Sessions}/ToBinary?sessionName=${sessionName}&imageName=${fileName}`;
-
-        return await fetch(url, {
-          method: 'GET',
-        })
-          .then(response => response.json())
-          .then(data => data[0])
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-      let filename = node.data.file.name;
-      const imageType = node.data.image.type;
-      return await fetchAndGetFilepath(filename, imageType);
-    }
-
-    startLoadRequest();
-    setDisableAll(true);
-
     const node = nodesManager.selectedNodes[0];
-    handleImageEditAndGetData(node).then(async (data) => {
-      console.log(data);
-      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
-      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
-
-      newNode.data.viewport = node.data.viewport;
-      if (!newNode.data.viewport) {
-        const viewport = viewportManager.createAndAddViewport({
-          label: newNode.data.label, options: { setActive: true },
-        });
-        newNode.data.viewport = viewport.id;
-      }
-      newNode.data.image.cached = true;
-      newNode.selected = true;
-      nodesManager.setNodes((prev) => [...prev.map((nd) => {
-        if (nd.id === node.id) {
-          return {
-            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
-          };
-        }
-        return nd;
-      }), newNode]);
-
-      endLoadRequest();
-      setDisableAll(false);
-    }).catch((e) => {
-      console.log(e);
-      endLoadRequest();
-      setDisableAll(false);
-    });
+    const url = `${API.Sessions}/ToBinary?sessionName=${sessionName}&imageName=${node.data.file.name}`;
+    submit(node, url);
   };
 
   const handleSubmissionArea = () => {
-    async function handleImageEditAndGetData(node) {
-      async function fetchAndGetFilepath(fileName, imageType) {
-
-        let url;
-        if (imageType === 'Euler') {
-            url = `${API.Sessions}/Reduce_Euler?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
-        }
-        if (imageType === 'Chemical') {
-            url = `${API.Sessions}/ReduceArea?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
-        }
-
-        return await fetch(url, {
-          method: 'GET',
-        })
-          .then(response => response.json())
-          .then(data => data[0])
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-      let filename = node.data.file.name;
-      const imageType = node.data.image.type;
-      return await fetchAndGetFilepath(filename, imageType);
-    }
-
-    startLoadRequest();
-    setDisableAll(true);
-
     const node = nodesManager.selectedNodes[0];
-    handleImageEditAndGetData(node).then(async (data) => {
-      console.log(data);
-      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
-      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
-
-      newNode.data.viewport = node.data.viewport;
-      if (!newNode.data.viewport) {
-        const viewport = viewportManager.createAndAddViewport({
-          label: newNode.data.label, options: { setActive: true },
-        });
-        newNode.data.viewport = viewport.id;
-      }
-      newNode.data.image.cached = true;
-      newNode.selected = true;
-      nodesManager.setNodes((prev) => [...prev.map((nd) => {
-        if (nd.id === node.id) {
-          return {
-            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
-          };
-        }
-        return nd;
-      }), newNode]);
-
-      endLoadRequest();
-      setDisableAll(false);
-    }).catch((e) => {
-      console.log(e);
-      endLoadRequest();
-      setDisableAll(false);
-    });
+    const fileName = node.data.file.name;
+    const imageType = node.data.image.type;
+    let url;
+    if (imageType === 'Euler') {
+      url = `${API.Sessions}/Reduce_Euler?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
+    }
+    if (imageType === 'Chemical') {
+      url = `${API.Sessions}/ReduceArea?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
+    }
+    submit(node, url);
   };
 
   const HandleSubmissionNeighbor = () => {
-    async function handleImageEditAndGetData(node) {
-      async function fetchAndGetFilepath(fileName, imageType) {
-
-        let url;
-        if(imageType === 'Euler'){
-          url = `${API.Sessions}/neighbor_Euler?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
-        }
-        if(imageType === 'Chemical'){
-          url = `${API.Sessions}/Neighbor_Chem?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
-        }
-
-        return await fetch(url, {
-          method: 'GET',
-        })
-          .then(response => response.json())
-          .then(data => data[0])
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-      let filename = node.data.file.name;
-      const imageType = node.data.image.type;
-      return await fetchAndGetFilepath(filename, imageType);
-    }
-
-    startLoadRequest();
-    setDisableAll(true);
-
     const node = nodesManager.selectedNodes[0];
-    handleImageEditAndGetData(node).then(async (data) => {
-      console.log(data);
-      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
-      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
-
-      newNode.data.viewport = node.data.viewport;
-      if (!newNode.data.viewport) {
-        const viewport = viewportManager.createAndAddViewport({
-          label: newNode.data.label, options: { setActive: true },
-        });
-        newNode.data.viewport = viewport.id;
-      }
-      newNode.data.image.cached = true;
-      newNode.selected = true;
-      nodesManager.setNodes((prev) => [...prev.map((nd) => {
-        if (nd.id === node.id) {
-          return {
-            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
-          };
-        }
-        return nd;
-      }), newNode]);
-
-      endLoadRequest();
-      setDisableAll(false);
-    }).catch((e) => {
-      console.log(e);
-      endLoadRequest();
-      setDisableAll(false);
-    });
+    const fileName = node.data.file.name;
+    const imageType = node.data.image.type;
+    let url;
+    if (imageType === 'Euler') {
+      url = `${API.Sessions}/neighbor_Euler?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
+    }
+    if (imageType === 'Chemical') {
+      url = `${API.Sessions}/Neighbor_Chem?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
+    }
+    submit(node, url);
   };
 
   const HandleSubmitAllChem = () => {
-    async function handleImageEditAndGetData(node) {
-      async function fetchAndGetFilepath(fileName, imageType) {
-        const url = `${API.Sessions}/Clean_Chem_All?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}&area=${area}&upperThresh=${upperThreshold}&lowerThresh=${lowerThreshold}`;
-
-        return await fetch(url, {
-          method: 'GET',
-        })
-          .then(response => response.json())
-          .then(data => data[0])
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-      let filename = node.data.file.name;
-      const imageType = node.data.image.type;
-      return await fetchAndGetFilepath(filename, imageType);
-    }
-
-    startLoadRequest();
-    setDisableAll(true);
-
     const node = nodesManager.selectedNodes[0];
-    handleImageEditAndGetData(node).then(async (data) => {
-      console.log(data);
-      const newNode = await nodesManager.createDefaultImageNode({ ...data, parent: node.data.file.prefix });
-      nodesManager.addFilepathToNode(newNode, { path: node.data.file.path, dir: node.data.file.prefix });
+    const url = `${API.Sessions}/Clean_Chem_All?sessionName=${sessionName}&imageName=${node.data.file.name}&window=${windowSize}&area=${area}&upperThresh=${upperThreshold}&lowerThresh=${lowerThreshold}`;
 
-      newNode.data.viewport = node.data.viewport;
-      if (!newNode.data.viewport) {
-        const viewport = viewportManager.createAndAddViewport({
-          label: newNode.data.label, options: { setActive: true },
-        });
-        newNode.data.viewport = viewport.id;
-      }
-      newNode.data.image.cached = true;
-      newNode.selected = true;
-      nodesManager.setNodes((prev) => [...prev.map((nd) => {
-        if (nd.id === node.id) {
-          return {
-            ...nd, selected: false, data: { ...nd.data, image: { ...nd.data.image, cached: false }, viewport: null },
-          };
-        }
-        return nd;
-      }), newNode]);
-
-      endLoadRequest();
-      setDisableAll(false);
-    }).catch((e) => {
-      console.log(e);
-      endLoadRequest();
-      setDisableAll(false);
-    });
+    submit(node, url);
   };
 
   return (<Frame label={'Clean Up View'} bodyProps={{ style: { paddingBottom: '1px' } }}>
@@ -598,7 +225,7 @@ function CleanUpView({ children, ...rest }) {
 
       <Frame label={'Max Neighbor'}>
         <Slider
-          min={0}
+          min={1}
           max={25}
           disabled={disableAll || disableChem}
           onChange={HandleWindowChange}
@@ -703,29 +330,29 @@ function CleanUpView({ children, ...rest }) {
         </div>
 
         <Frame label={'Max Neighbor'}>
-        <Slider
-          min={0}
-          max={25}
-          disabled={disableAll || disableEuler}
-          onChange={HandleWindowChange}
-          label={'Window Size'}
-          value={windowSize}
-          customValue={`${windowSize}x${windowSize}`}
-          valueStyle={{ width: '40px' }}
-          labelStyle={{ textWrap: 'nowrap' }}
-        />
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
-          <Button
+          <Slider
+            min={1}
+            max={25}
             disabled={disableAll || disableEuler}
-            onClick={HandleSubmissionNeighbor}
-            label={'Preview'}
+            onChange={HandleWindowChange}
+            label={'Window Size'}
+            value={windowSize}
+            customValue={`${windowSize}x${windowSize}`}
+            valueStyle={{ width: '40px' }}
+            labelStyle={{ textWrap: 'nowrap' }}
           />
-          <Button
-            disabled={disableAll || disableEuler}
-            label={'Apply'}
-          />
-        </div>
-      </Frame>
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Button
+              disabled={disableAll || disableEuler}
+              onClick={HandleSubmissionNeighbor}
+              label={'Preview'}
+            />
+            <Button
+              disabled={disableAll || disableEuler}
+              label={'Apply'}
+            />
+          </div>
+        </Frame>
 
         <Frame label={'Area Reduction'}>
           <Slider
@@ -743,10 +370,8 @@ function CleanUpView({ children, ...rest }) {
             />
             <Button
               disabled={disableQuantize || disableAll || disableEuler}
+              onClick={handleSubmissionQuantize}
               label={'Apply'}
-
-              // onChange={handleSubmissionQuantize}
-
             />
           </div>
         </Frame>
