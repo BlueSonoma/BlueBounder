@@ -128,6 +128,8 @@
     border: 2px inset lightgray;
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
+    padding-bottom: 8px;
+    padding-right: 3px
 }
 
 .bounder__frame .body .content {

@@ -80,7 +80,9 @@ function CleanUpView({ children, ...rest }) {
   const handleSubmissionQuantize = () => {
     async function handleImageEditAndGetData(node) {
       async function fetchAndGetFilepath(fileName, imageType) {
+
         const url = `${API.Sessions}/Quant_Euler?sessionName=${sessionName}&imageName=${fileName}&quant=${quantization}`;
+
 
         return await fetch(url, {
           method: 'GET',
@@ -368,6 +370,7 @@ function CleanUpView({ children, ...rest }) {
   const handleSubmissionArea = () => {
     async function handleImageEditAndGetData(node) {
       async function fetchAndGetFilepath(fileName, imageType) {
+
         let url;
         if (imageType === 'Euler') {
             url = `${API.Sessions}/Reduce_Euler?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
@@ -375,6 +378,7 @@ function CleanUpView({ children, ...rest }) {
         if (imageType === 'Chemical') {
             url = `${API.Sessions}/ReduceArea?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
         }
+
         return await fetch(url, {
           method: 'GET',
         })
@@ -429,6 +433,7 @@ function CleanUpView({ children, ...rest }) {
   const HandleSubmissionNeighbor = () => {
     async function handleImageEditAndGetData(node) {
       async function fetchAndGetFilepath(fileName, imageType) {
+
         let url;
         if(imageType === 'Euler'){
           url = `${API.Sessions}/neighbor_Euler?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
@@ -436,6 +441,7 @@ function CleanUpView({ children, ...rest }) {
         if(imageType === 'Chemical'){
           url = `${API.Sessions}/Neighbor_Chem?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
         }
+
         return await fetch(url, {
           method: 'GET',
         })
@@ -685,7 +691,9 @@ function CleanUpView({ children, ...rest }) {
             style={{ paddingTop: '5px' }}
             disabled={disableQuantize || disableAll || disableEuler}
             label={'Preview'}
+
             onClick={handleSubmissionQuantize}
+
           />
           <Button
             style={{ paddingTop: '5px' }}
@@ -736,7 +744,9 @@ function CleanUpView({ children, ...rest }) {
             <Button
               disabled={disableQuantize || disableAll || disableEuler}
               label={'Apply'}
+
               // onChange={handleSubmissionQuantize}
+
             />
           </div>
         </Frame>

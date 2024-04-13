@@ -328,12 +328,14 @@ def Chem_regTObinary(image):
     return image
 
 
+
 def Thresh_CHem(image, upper_thresh=255, lower_thresh=0):
+
     Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
     image = getImage_withPath(image)
     lower_thresh = int(lower_thresh)
     upper_thresh = int(upper_thresh)
-
+    
     image[image < lower_thresh] = 0
     image[image > upper_thresh] = 0
 
@@ -345,7 +347,7 @@ def Thresh_CHem(image, upper_thresh=255, lower_thresh=0):
 def modal_chem(image, window=3):
     if type(image) == str:
         image = getImage_withPath(image)
-    
+
     image = my_modal_filter(image, window)
     return image
 
