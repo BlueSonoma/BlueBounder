@@ -125,7 +125,7 @@ function CleanUpView({ children, ...rest }) {
 
   const handleSubmissionEulerAll = () => {
     const node = nodesManager.selectedNodes[0];
-    const url = `${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${node.data.file.name}&area=${area}&quant=${quantization}`;
+    const url = `${API.Sessions}/clean_Euler?sessionName=${sessionName}&imageName=${node.data.file.name}&area=${area}&quant=${quantization}`;
     submit(node, url);
   };
 
@@ -377,8 +377,8 @@ function CleanUpView({ children, ...rest }) {
         </Frame>
         <Button
           disabled={disableQuantize || disableAll || disableEuler}
+          onClick={handleSubmissionEulerAll}
           label={'Apply All'}
-          onChange={handleSubmissionEulerAll}
         />
       </Frame>
     </Frame>
