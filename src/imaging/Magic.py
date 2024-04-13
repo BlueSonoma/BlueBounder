@@ -217,10 +217,9 @@ def quantization(img, L):
     return img2 * factor
 
 
-def my_max_neighbor_fast(image, channel):
-    half_window = 1
-    footprint = np.ones((2 * half_window + 1, 2 * half_window + 1))
-    print(footprint)
+def my_max_neighbor_fast(image, channel,window=3):
+  
+    footprint = np.ones((window,window))
     result = maximum_filter(image[:, :, channel], footprint=footprint)
     return result
 
@@ -240,6 +239,44 @@ def my_modal_filter(image, windowSize=3):
     # size = 2 * half_window + 1
     result = modal(image, square(windowSize))
     return result
+
+
+def Quant_Euler(image, quant=16):
+    euler_img = getImage_withPath(image)
+    if euler_img.shape[2] == 4:
+        euler_img = euler_img[:, :, :3]
+    quant = int(quant)
+    euler_img = quantization(img=euler_img, L=quant)
+
+    return euler_img
+
+def neighbor_max_Euler(image,windowsize=3):
+
+    window = int(windowsize)    
+    euler_img = getImage_withPath(image)
+    red_channel = my_max_neighbor_fast(euler_img, channel=0,window=window)
+    green_channel = my_max_neighbor_fast(euler_img, channel=1,window=window)
+    blue_channel = my_max_neighbor_fast(euler_img, channel=2,window=window)
+    euler_img = np.stack((red_channel, green_channel, blue_channel), axis=-1)
+
+    return euler_img
+
+def euler_reduce_area(image, red_area=100):
+    euler_img = getImage_withPath(image)
+    if euler_img.shape[2] == 4:
+        euler_img = euler_img[:, :, :3]
+    
+    grayscale = color.rgb2gray(euler_img)
+    binary = grayscale > 0
+    reduced_Binary = reduce_area(binary, red_area)
+
+    for i in range(len(reduced_Binary)):
+        for j in range(len(reduced_Binary[0])):
+            if reduced_Binary[i][j] == 0:
+                euler_img[i][j] = 0
+
+    # imageio.imsave('Euler_Images/clean_Euler_fast.png', euler_img.astype('uint8'))
+    return euler_img
 
 
 def clean_Euler(image, quant=16, red_area=100):
@@ -291,11 +328,14 @@ def Chem_regTObinary(image):
     return image
 
 
-def Thresh_CHem(image, upper_thresh=0, lower_thresh=255):
+
+def Thresh_CHem(image, upper_thresh=255, lower_thresh=0):
+
     Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
     image = getImage_withPath(image)
     lower_thresh = int(lower_thresh)
     upper_thresh = int(upper_thresh)
+    
     image[image < lower_thresh] = 0
     image[image > upper_thresh] = 0
 
@@ -307,7 +347,7 @@ def Thresh_CHem(image, upper_thresh=0, lower_thresh=255):
 def modal_chem(image, window=3):
     if type(image) == str:
         image = getImage_withPath(image)
-    image = getImage_withPath(image)
+
     image = my_modal_filter(image, window)
     return image
 

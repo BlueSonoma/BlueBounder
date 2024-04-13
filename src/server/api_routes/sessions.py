@@ -78,6 +78,73 @@ def api__getSessionJSON():
     except Exception as e:
         return str(e), 500
 
+@api.route('/neighbor_Euler', methods=['GET'])
+def api__NeighborEuler():
+    print("Cleaning Euler image...")
+    session_name = flask.request.args.get('sessionName')
+    session_dir = os.path.join(get_dir_path('sessions'), session_name)
+    session_Cache = os.path.join(session_dir, 'Cache')
+    create_directory(session_Cache)
+    session_EulerCache = os.path.join(session_Cache, 'Euler_Images')
+    create_directory(session_EulerCache)
+    image_name = flask.request.args.get('imageName')
+
+    image = os.path.join(session_dir, 'Euler_Images', image_name)
+    image_cache = os.path.join(session_EulerCache, remove_file_ext(image_name))
+
+    create_directory(image_cache)
+
+    window = flask.request.args.get('window')
+    try:
+        new_image = neighbor_max_Euler(image=image, windowsize=window)
+        image_name, image_path = add_to_EulerCache(image=new_image, cache_path=image_cache)
+        print(image_path)
+        return jsonify({
+            "name": image_name,
+            "path": image_path,
+            "dir": remove_file_ext(image_name),
+            "type": "Euler",
+            "cached": True},
+            200)
+
+    except Exception as e:
+        return jsonify(e, 500)
+
+
+@api.route('/Reduce_Euler', methods=['GET'])
+def api__ReduceEuler():
+    print("Cleaning Euler image...")
+    session_name = flask.request.args.get('sessionName')
+    session_dir = os.path.join(get_dir_path('sessions'), session_name)
+    session_Cache = os.path.join(session_dir, 'Cache')
+    create_directory(session_Cache)
+    session_EulerCache = os.path.join(session_Cache, 'Euler_Images')
+    create_directory(session_EulerCache)
+    image_name = flask.request.args.get('imageName')
+
+    image = os.path.join(session_dir, 'Euler_Images', image_name)
+    image_cache = os.path.join(session_EulerCache, remove_file_ext(image_name))
+
+    create_directory(image_cache)
+
+    area = flask.request.args.get('area')
+    area = int(area)
+    try:
+        new_image = euler_reduce_area(image, red_area=area)
+        image_name, image_path = add_to_EulerCache(image=new_image, cache_path=image_cache)
+        print(image_path)
+        return jsonify({
+            "name": image_name,
+            "path": image_path,
+            "dir": remove_file_ext(image_name),
+            "type": "Euler",
+            "cached": True},
+            200)
+
+    except Exception as e:
+        return jsonify(e, 500)
+
+
 
 @api.route('/get_session_Folder', methods=['GET'])
 def api__getSessionFolderJSON():
@@ -139,8 +206,9 @@ def api__getSessionImages():
         return str(e), 500
 
 
-@api.route('/clean_Euler_img', methods=['GET'])
+@api.route('/clean_Euler', methods=['GET'])
 def api__cleanEuler():
+
     print("Cleaning Euler image...")
     session_name = flask.request.args.get('sessionName')
     session_dir = os.path.join(get_dir_path('sessions'), session_name)
@@ -171,6 +239,40 @@ def api__cleanEuler():
 
     except Exception as e:
         return jsonify(e, 500)
+    
+
+@api.route('/Quant_Euler', methods=['GET'])
+def api__QuanEuler():
+    print("Cleaning Euler image...")
+    session_name = flask.request.args.get('sessionName')
+    session_dir = os.path.join(get_dir_path('sessions'), session_name)
+    session_Cache = os.path.join(session_dir, 'Cache')
+    create_directory(session_Cache)
+    session_EulerCache = os.path.join(session_Cache, 'Euler_Images')
+    create_directory(session_EulerCache)
+    image_name = flask.request.args.get('imageName')
+
+    image = os.path.join(session_dir, 'Euler_Images', image_name)
+    image_cache = os.path.join(session_EulerCache, remove_file_ext(image_name))
+
+    create_directory(image_cache)
+
+    quant = flask.request.args.get('quant')
+    try:
+        new_image = Quant_Euler(image=image, quant=quant)
+        image_name, image_path = add_to_EulerCache(image=new_image, cache_path=image_cache)
+        print(image_path)
+        return jsonify({
+            "name": image_name,
+            "path": image_path,
+            "dir": remove_file_ext(image_name),
+            "type": "Euler",
+            "cached": True},
+            200)
+
+    except Exception as e:
+        return jsonify(e, 500)
+
 
 
 @api.route('/Clean_Chem_All', methods=['GET'])
@@ -199,9 +301,11 @@ def api__cleanChemImg():
     window = int(window)
 
     try:
+
         new_image = clean_chemistry(image=image, red_area=area, upper_thresh=upper_thresh, lower_thresh=lower_thresh,
                                     window=window)
         image_name, image_path = add_to_ChemCache(image=new_image, cache_path=image_cache)
+
         return jsonify({
             "name": image_name,
             "path": image_path,
@@ -227,12 +331,14 @@ def api__cleanChemImg_OnlyThresh():
     create_directory(image_cache)
 
     image = os.path.join(session_dir, 'Chemical_Images', image_name)
+
     upper_thresh = flask.request.args.get('upperThresh')
     lower_thresh = flask.request.args.get('lowerThresh')
 
     try:
         new_image = Thresh_CHem(image=image, upper_thresh=upper_thresh, lower_thresh=lower_thresh)
         image_name, image_path = add_to_ChemCache(image=new_image, cache_path=image_cache)
+
         return jsonify({
             "name": image_name,
             "path": image_path,
@@ -324,8 +430,10 @@ def api__Neighbor_chem():
     window = flask.request.args.get('window')
     window = int(window)
     try:
+
         new_image = modal_chem(image=image, window=window)
         image_name, image_path = add_to_ChemCache(image=new_image, cache_path=image_cache)
+
         return jsonify({
             "name": image_name,
             "path": image_path,

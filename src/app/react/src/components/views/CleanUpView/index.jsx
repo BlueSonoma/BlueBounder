@@ -80,7 +80,9 @@ function CleanUpView({ children, ...rest }) {
   const handleSubmissionQuantize = () => {
     async function handleImageEditAndGetData(node) {
       async function fetchAndGetFilepath(fileName, imageType) {
-        const url = `${API.Sessions}/clean_Euler_img?sessionName=${sessionName}&imageName=${fileName}&quant=${quantization}`;
+
+        const url = `${API.Sessions}/Quant_Euler?sessionName=${sessionName}&imageName=${fileName}&quant=${quantization}`;
+
 
         return await fetch(url, {
           method: 'GET',
@@ -368,7 +370,14 @@ function CleanUpView({ children, ...rest }) {
   const handleSubmissionArea = () => {
     async function handleImageEditAndGetData(node) {
       async function fetchAndGetFilepath(fileName, imageType) {
-        const url = `${API.Sessions}/ReduceArea?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
+
+        let url;
+        if (imageType === 'Euler') {
+            url = `${API.Sessions}/Reduce_Euler?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
+        }
+        if (imageType === 'Chemical') {
+            url = `${API.Sessions}/ReduceArea?sessionName=${sessionName}&imageName=${fileName}&area=${area}&type=${imageType}`;
+        }
 
         return await fetch(url, {
           method: 'GET',
@@ -424,7 +433,14 @@ function CleanUpView({ children, ...rest }) {
   const HandleSubmissionNeighbor = () => {
     async function handleImageEditAndGetData(node) {
       async function fetchAndGetFilepath(fileName, imageType) {
-        const url = `${API.Sessions}/Neighbor_Chem?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
+
+        let url;
+        if(imageType === 'Euler'){
+          url = `${API.Sessions}/neighbor_Euler?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
+        }
+        if(imageType === 'Chemical'){
+          url = `${API.Sessions}/Neighbor_Chem?sessionName=${sessionName}&imageName=${fileName}&window=${windowSize}`;
+        }
 
         return await fetch(url, {
           method: 'GET',
@@ -675,6 +691,9 @@ function CleanUpView({ children, ...rest }) {
             style={{ paddingTop: '5px' }}
             disabled={disableQuantize || disableAll || disableEuler}
             label={'Preview'}
+
+            onClick={handleSubmissionQuantize}
+
           />
           <Button
             style={{ paddingTop: '5px' }}
@@ -682,6 +701,32 @@ function CleanUpView({ children, ...rest }) {
             label={'Apply'}
           />
         </div>
+
+        <Frame label={'Max Neighbor'}>
+        <Slider
+          min={0}
+          max={25}
+          disabled={disableAll || disableEuler}
+          onChange={HandleWindowChange}
+          label={'Window Size'}
+          value={windowSize}
+          customValue={`${windowSize}x${windowSize}`}
+          valueStyle={{ width: '40px' }}
+          labelStyle={{ textWrap: 'nowrap' }}
+        />
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
+          <Button
+            disabled={disableAll || disableEuler}
+            onClick={HandleSubmissionNeighbor}
+            label={'Preview'}
+          />
+          <Button
+            disabled={disableAll || disableEuler}
+            label={'Apply'}
+          />
+        </div>
+      </Frame>
+
         <Frame label={'Area Reduction'}>
           <Slider
             min={0}
@@ -699,7 +744,9 @@ function CleanUpView({ children, ...rest }) {
             <Button
               disabled={disableQuantize || disableAll || disableEuler}
               label={'Apply'}
-              onChange={handleSubmissionQuantize}
+
+              // onChange={handleSubmissionQuantize}
+
             />
           </div>
         </Frame>
