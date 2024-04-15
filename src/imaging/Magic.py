@@ -396,7 +396,7 @@ def clean_chemistry(image, red_area=100, lower_thresh=0, upper_thresh=255, windo
     image = my_modal_filter(image, window)
     image[image > 0] = 255
     image = reduce_area(image, red_area)
-    image = im.fromarray((image * 255).astype(np.uint8), mode="L")
+    image = (image * 255).astype(np.uint8)
 
     return image
 
@@ -630,7 +630,8 @@ def add_to_ChemCache(image, cache_path):
     # image_extension = os.path.splitext(image)[1]
     image_name = f'{timestamp}.png'
     image_path = os.path.join(cache_path, image_name)
-    imageio.imsave(image_path, image.astype(np.uint8))
+    imageio.imsave(image_path, image.astype('uint8'))
+    # imageio.imsave(image_path, image)
 
     return image_name, image_path
 

@@ -27,7 +27,7 @@ const createWindow = () => {
     },
   });
   mainWindow.loadFile(reactAppPath).then(() => console.log('File loaded'));
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 app.whenReady().then(() => {

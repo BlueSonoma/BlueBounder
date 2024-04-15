@@ -291,8 +291,8 @@ def api__cleanChemImg():
     image = os.path.join(session_dir, 'Chemical_Images', image_name)
 
     area = flask.request.args.get('area')
-    upper_thresh = flask.request.args.get('upper_thresh')
-    lower_thresh = flask.request.args.get('lower_thresh')
+    upper_thresh = flask.request.args.get('upperThresh')
+    lower_thresh = flask.request.args.get('lowerThresh')
     window = flask.request.args.get('window')
 
     area = int(area)
