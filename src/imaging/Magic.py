@@ -172,6 +172,7 @@ def get_chem(file, Chem_dir, max_chemicals, chemical):
     return
 
 
+
 def find_max_of_chem(file):
     with open(file, 'r') as file:
         file.seek(0)
@@ -388,16 +389,17 @@ def clean_chemistry(image, red_area=100, lower_thresh=0, upper_thresh=255, windo
 
     Chemistry_directory_reduced = os.path.join('Chemical_images', 'reduced')
     # Create the directory if it does not exist
-    create_directory(Chemistry_directory_reduced)
+    #create_directory(Chemistry_directory_reduced)
     image = getImage_withPath(image)
 
     image[image < lower_thresh] = 0
     image[image > upper_thresh] = 0
-    image = my_modal_filter(image, window)
-    image[image > 0] = 255
-    image = reduce_area(image, red_area)
-    image = (image * 255).astype(np.uint8)
 
+    image = my_modal_filter(image, window)
+   
+    #image = reduce_area(image, red_area)
+    image = (image * 255).astype(np.uint8)
+    
     return image
 
 
@@ -418,40 +420,39 @@ def create_XOR_default(Chem_dir):
     SI = os.path.join(Chem_dir, 'SI_fromFile.png')
     K = os.path.join(Chem_dir, 'K_fromFile.png')
 
-    AL = clean_chemistry(image=AL, threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_AL.png'), AL)  # save image
-    CA = clean_chemistry(image=CA, threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_CA.png'), CA)  # save image
-    NA = clean_chemistry(image=NA, threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_NA.png'), NA)  # save image
-    FE = clean_chemistry(image=FE, threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_FE.png'), FE)  # save image
-    SI = clean_chemistry(image=SI)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_SI.png'), SI)  # save image
-    K = clean_chemistry(image=K, threshold=0.2)
-    # imageio.imsave(os.path.join(Chem_dir, 'Reduced_K.png'), K)  # save image
+    AL = clean_chemistry(image=AL, red_area=0, upper_thresh=255, lower_thresh=70, window=3)
+    imageio.imsave(os.path.join(Chem_dir, 'Reduced_AL.png'), AL)  # save image
+    CA = clean_chemistry(image=CA, red_area=0, upper_thresh=255, lower_thresh=70, window=3)
+    imageio.imsave(os.path.join(Chem_dir, 'Reduced_CA.png'), CA)  # save image
+    NA = clean_chemistry(image=NA, red_area=0, upper_thresh=255, lower_thresh=70, window=3)
+    imageio.imsave(os.path.join(Chem_dir, 'Reduced_NA.png'), NA)  # save image
+    FE = clean_chemistry(image=FE, red_area=0, upper_thresh=255, lower_thresh=70, window=3)
+    imageio.imsave(os.path.join(Chem_dir, 'Reduced_FE.png'), FE)  # save image
+    SI = clean_chemistry(image=SI,red_area=0, upper_thresh=255, lower_thresh=100, window=3)
+    imageio.imsave(os.path.join(Chem_dir, 'Reduced_SI.png'), SI)  # save image
+    K = clean_chemistry(image=K,red_area=0, upper_thresh=255, lower_thresh=60, window=3)
+    imageio.imsave(os.path.join(Chem_dir, 'Reduced_K.png'), K)  # save image
 
     # turn images to binary images
-    AL = np.array(AL)
-    CA = np.array(CA)
-    NA = np.array(NA)
-    FE = np.array(FE)
-    SI = np.array(SI)
-    K = np.array(K)
+    AL = make_binary(AL)
+    #imageio.imsave(os.path.join(Chem_dir, 'BIN_AL.png'), AL)
+    CA = make_binary(CA)
+    #imageio.imsave(os.path.join(Chem_dir, 'BIN_CA.png'), CA)
+    NA = make_binary(NA)
+    #imageio.imsave(os.path.join(Chem_dir, 'BIN_NA.png'), NA)
+    FE = make_binary(FE)
+    #imageio.imsave(os.path.join(Chem_dir, 'BIN_FE.png'), FE)
+    SI = make_binary(SI)
+    #imageio.imsave(os.path.join(Chem_dir, 'BIN_SI.png'), SI)
+    K = make_binary(K)
+    #imageio.imsave(os.path.join(Chem_dir, 'BIN_K.png'), K)
 
-    AL = AL > 0
-    CA = CA > 0
-    NA = NA > 0
-    FE = FE > 0
-    SI = SI > 0
-    K = K > 0
 
     # now the final image will be the result of XOR'ing all the binary images together
-
     def xor_image_with_SI(SI, img):
         for x in range(img.shape[0]):
             for y in range(img.shape[1]):
-                if (SI[x, y] == 1) and (img[x, y] == 1):
+                if (SI[x, y] == 255) and (img[x, y] == 255):
                     SI[x, y] = 0
 
         return SI
@@ -463,8 +464,7 @@ def create_XOR_default(Chem_dir):
     xor_SI = xor_image_with_SI(xor_SI, K)
 
     # now save he xor_SI image
-
-    imageio.imsave(os.path.join(Chem_dir, 'masks', 'xor_SI.png'), xor_SI.astype('uint8') * 255)  # save image
+    imageio.imsave(os.path.join(Chem_dir, 'masks', 'xor_SI.png'), xor_SI.astype('uint8') )  # save image
 
 
 def create_AND_default(Euler_directory, Chem_directory):
@@ -476,10 +476,9 @@ def create_AND_default(Euler_directory, Chem_directory):
             if max_16_reduced[x, y].all() == 240:
                 max_16_reduced[x, y] = 0
 
-    xor_SI = io.imread(os.path.join(Chem_directory, 'masks', 'xor_SI.png'))
-    binary_SI = make_binary(xor_SI)
-    imageio.imsave(os.path.join(Chem_directory, 'masks', 'binary_SI.png'),
-                   binary_SI.astype('uint8') * 255)  # save image
+    xor_SI = getImage_withPath(os.path.join(Chem_directory, 'masks', 'xor_SI.png'))
+    #imageio.imsave(os.path.join(Euler_directory,'binary_SI.png'),
+                  # xor_SI.astype('uint8'))  # save image
 
     # save the binary image in a folder called Euler_Images/binary
 
@@ -494,24 +493,24 @@ def create_AND_default(Euler_directory, Chem_directory):
     thresh = skimage.filters.threshold_otsu(gray)
     binary = gray < thresh
 
-    imageio.imsave(os.path.join(Euler_directory, 'binary_euler.png'),
-                   binary.astype('uint8') * 255)  # Save image
-
+    #imageio.imsave(os.path.join(Euler_directory, 'binary_euler.png'),
+                   #binary.astype('uint8') * 255)  # Save image
+    binary = binary * 255
     def AND_Euler_wth_SI(SI, img):
         for x in range(img.shape[0]):
             for y in range(img.shape[1]):
-                if (SI[x, y] == 1) and (img[x, y] == 1):
-                    img[x, y] = 1
+                if (SI[x, y] >0) and (img[x, y] >0):
+                    img[x, y] = 255
                 else:
                     img[x, y] = 0
 
         return img
 
-    AND_Euler = AND_Euler_wth_SI(binary_SI, binary)
+    AND_Euler = AND_Euler_wth_SI(xor_SI, binary)
     # create a folder called Euler_Images/binary
 
     imageio.imsave(os.path.join(Euler_directory, 'AND_Euler.png'),
-                   AND_Euler.astype('uint8') * 255)  # save image
+                   AND_Euler.astype('uint8') )  # save image
 
 
 # def createBandContrast():
@@ -659,3 +658,4 @@ def extract_DIR(DirPath):
         DirName = DirPath[match.start() + 1:]
 
     return DirName
+
